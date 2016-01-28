@@ -1,0 +1,15 @@
+{
+  "name": "tichu-tournament",
+  "version": "0.0.1",
+  "description": "Tichu scorer and tournament scoreboard.",
+  "bugs": "https://github.com/Aragos/tichu-tournament/issues",
+  "license": "MIT",
+  "repository": "Aragos/tichu-tournament",
+  "private": true,
+  "devDependencies": {
+    "bower": "^1.7.7"
+  },
+  "scripts": {
+    "update-frontend-dependencies": "bower install"
+  }
+}

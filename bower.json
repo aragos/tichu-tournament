@@ -1,0 +1,10 @@
+{
+  "name": "tichu-tournament",
+  "version": "0.0.1",
+  "homepage": "https://github.com/Aragos/tichu-tournament",
+  "description": "Tichu scorer and tournament scoreboard.",
+  "license": "MIT",
+  "private": true,
+  "dependencies": {
+  }
+}
