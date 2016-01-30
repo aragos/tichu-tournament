@@ -172,4 +172,7 @@ crashlytics-build.properties
 # Created by .ignore support plugin (hsz.mobi)
 
 ### NPM
-/node_modules
+/node_modules/
+
+### Karma coverage
+/web/coverage/
