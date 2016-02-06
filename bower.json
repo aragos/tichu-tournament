@@ -11,6 +11,7 @@
     "angular-aria": "^1.4.9",
     "angular-messages": "^1.4.9",
     "angular-material": "^1.0.4",
-    "angular-mocks": "^1.4.9"
+    "angular-mocks": "^1.4.9",
+    "angular-route": "^1.4.9"
   }
 }
