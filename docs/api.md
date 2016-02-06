@@ -75,7 +75,7 @@ Creates a new tournament owned by the currently logged in director.
 
 * `id`: String. An opaque, unique ID used to access the details about the newly created tournament.
 
-### Read tournament (GET /api/tournaments/:id:)
+### Read tournament (GET /api/tournaments/:id)
 
 **Requires authentication and ownership of the given tournament.** 
 Retrieves the details about a tournament owned by the currently logged in director.
@@ -221,17 +221,17 @@ Or, **if the user is authenticated and owns this tournament**, updates an alread
   inclusive, and different from `ns_pair`.
 
 
-     {
-         "calls": {
-             "north": "T",
-             "east": "GT",
-             "west": "",
-             "south": ""
-         },
-         "ns_score": 150,
-         "ew_score": -150,
-         "notes": "hahahahahaha what a fool"
-     }
+    {
+        "calls": {
+            "north": "T",
+            "east": "GT",
+            "west": "",
+            "south": ""
+        },
+        "ns_score": 150,
+        "ew_score": -150,
+        "notes": "hahahahahaha what a fool"
+    }
 
 
 * `calls`: Object. Calls made by players. May have entries for `north`, `east`, `west`, `south`.
