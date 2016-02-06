@@ -135,7 +135,7 @@ Retrieves the details about a tournament owned by the currently logged in direct
       penalties. May also be the string "AVG+" or "AVG-".
     * `notes`: String. Any additional notes about the hand added by the scorer or the director.
 
-### Update tournament (PUT /api/tournaments/:id:)
+### Update tournament (PUT /api/tournaments/:id)
 
 **Requires authentication and ownership of the given tournament.**
 Updates the details about a tournament owned by the currently logged in director.
@@ -150,6 +150,7 @@ Updates the details about a tournament owned by the currently logged in director
         "no_pairs": 8,
         "no_boards": 10
     }
+
 
 * `name`: String. A user-specified and user-readable name suitable for display in a tournament list.
   Required.
@@ -166,7 +167,7 @@ Updates the details about a tournament owned by the currently logged in director
 * **404**: No tournament with the given ID exists.
 * **500**: Server failed to locate or update the tournament for any other reason.
 
-### Delete tournament (DELETE /api/tournaments/:id:)
+### Delete tournament (DELETE /api/tournaments/:id)
 
 **Requires authentication and ownership of the given tournament.**
 Deletes a tournament owned by the currently logged in director.
@@ -183,7 +184,7 @@ Deletes a tournament owned by the currently logged in director.
 * **404**: No tournament with the given ID exists.
 * **500**: Server failed to locate or delete the tournament for any other reason.
 
-### Check if hand has been scored (HEAD /api/tournaments/:id:/hands/:board_no:/:ns_pair:/:ew_pair:)
+### Check if hand has been scored (HEAD /api/tournaments/:id/hands/:board_no/:ns_pair/:ew_pair)
 
 Checks if the given hand was already scored.
 
@@ -204,7 +205,7 @@ Checks if the given hand was already scored.
 * **404**: The tournament with the given ID does not exist, or the board/pair numbers are invalid.
 * **500**: Server failed to determine the hand's/tournament's existence (or lack thereof).
 
-### Submit score for hand (PUT /api/tournaments/:id:/hands/:board_no:/:ns_pair:/:ew_pair:)
+### Submit score for hand (PUT /api/tournaments/:id/hands/:board_no/:ns_pair/:ew_pair)
 
 Submits a score for the given hand.
 Or, **if the user is authenticated and owns this tournament**, updates an already submitted score.
@@ -232,6 +233,7 @@ Or, **if the user is authenticated and owns this tournament**, updates an alread
          "notes": "hahahahahaha what a fool"
      }
 
+
 * `calls`: Object. Calls made by players. May have entries for `north`, `east`, `west`, `south`.
   Each entry may be `"T"`, indicating a call of Tichu, `"GT"`, indicating a call of Grand Tichu,
   or `""`, indicating no call. If an entry is absent, it is assumed to mean no call. Required.
@@ -251,7 +253,7 @@ Or, **if the user is authenticated and owns this tournament**, updates an alread
 * **404**: The tournament with the given ID does not exist, or the board/pair numbers are invalid.
 * **500**: Server failed to score the hand for any other reason.
 
-### Delete score for hand (DELETE /api/tournaments/:id:/hands/:board_no:/:ns_pair:/:ew_pair:)
+### Delete score for hand (DELETE /api/tournaments/:id/hands/:board_no/:ns_pair/:ew_pair)
 
 **Requires authentication and ownership of the given tournament.**
 Deletes the score for the given hand from the server, allowing it to be scored again.
@@ -274,7 +276,7 @@ Deletes the score for the given hand from the server, allowing it to be scored a
 * **404**: The tournament with the given ID does not exist, or the board/pair numbers are invalid.
 * **500**: Server failed to delete the hand for any other reason.
 
-### Generate final score (GET /api/tournaments/:id:/results)
+### Generate final score (GET /api/tournaments/:id/results)
 
 **Requires authentication and ownership of the given tournament.**
 Calculates and returns the final detailed results of the tournament.
