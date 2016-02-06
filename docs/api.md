@@ -115,8 +115,8 @@ Retrieves the details about a tournament owned by the currently logged in direct
     }
 
 * `name`: String. A user-specified and user-readable name suitable for display in a tournament list.
-* `no_pairs`: Integer. The number of pairs (teams) to play in this tournament. Must be greater than
-  0. 
+* `no_pairs`: Integer. The number of pairs (teams) to play in this tournament. Must be greater
+  than 0. 
 * `no_boards`: Integer. The number of boards (hands) to be played. Must be greater than 0.
 * `hands`: List of objects. The records of all hands played so far in this tournament. There will be
   at most one per combination of `board_no`, `ns_pair`, and `ew_pair`.
@@ -144,13 +144,13 @@ Updates the details about a tournament owned by the currently logged in director
 
 * `id`: String. An opaque, unique ID returned from `GET /tournaments` or `POST /tournaments`.
 
+<!-- time 4 code -->
 
     {
         "name": "Tournament Name",
         "no_pairs": 8,
         "no_boards": 10
     }
-
 
 * `name`: String. A user-specified and user-readable name suitable for display in a tournament list.
   Required.
@@ -220,6 +220,7 @@ Or, **if the user is authenticated and owns this tournament**, updates an alread
 * `ew_pair`: Integer. The number of the east-west pair. Must be between 1 and `no_pairs`,
   inclusive, and different from `ns_pair`.
 
+<!-- time 4 code -->
 
     {
         "calls": {
