@@ -4,15 +4,20 @@ import math
 
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import LETTER
+from svglib.svglib import svg2rlg
 
 
 class Color:
-  def __init__(self, name, symbol, value, hexcolor, offset):
+  def __init__(self, name, symbol, value, rgbcolor, offset):
     self.name = name
-    self.symbol = symbol
     self.value = value
-    self.hexcolor = hexcolor
+    self.rgbcolor = rgbcolor
     self.offset = offset
+    if symbol:
+      self.symbol = svg2rlg("icons/%s.svg" % symbol)
+      self.symbol.scale(.18, .18)
+    else:
+      self.symbol = None
 
 
 class Card:
@@ -38,7 +43,7 @@ TOP_MARGIN = 0
 IMG_WIDTH = 40
 IMG_HEIGHT = 60
 IMG_MARGIN = 2
-COLOR_ID_WIDTH = 18
+COLOR_ID_WIDTH = 14
 CARD_ID_HEIGHT = 11
 
 
@@ -100,12 +105,12 @@ WEST = Position(
   (CENTER_X + CENTER_LABEL_MARGIN, CENTER_Y + CENTER_HEIGHT / 2)
 )
 POSITIONS = [NORTH, EAST, SOUTH, WEST]
-SPECIAL_COLOR = Color("special", "Sp", -1, (0,0,0), (0, 5*CARD_ID_HEIGHT))
+SPECIAL_COLOR = Color("special", None, -1, (0,0,0), (0, 5*CARD_ID_HEIGHT))
 COLORS = [
-  Color("blau", "P", 0, (0,.4,1), (0, CARD_ID_HEIGHT)),
-  Color("gruen", "J", 1, (0,.6,0), (0, 2*CARD_ID_HEIGHT)),
-  Color("schw", "F", 2, (0,0,0), (0, 3*CARD_ID_HEIGHT)),
-  Color("rot", "S", 3, (.8,.2,.2), (0, 4*CARD_ID_HEIGHT)),
+  Color("blau", "pagoda", 0, (37,143,209), (0, CARD_ID_HEIGHT)),
+  Color("gruen", "jade", 1, (45,117,56), (0, 2*CARD_ID_HEIGHT)),
+  Color("schw", "falchion", 2, (0,0,0), (0, 3*CARD_ID_HEIGHT)),
+  Color("rot", "star", 3, (237,69,59), (0, 4*CARD_ID_HEIGHT)),
 ]
 
 def CreateCards():
@@ -168,16 +173,21 @@ class HandRenderer:
         position.firstEightOffset,
         (0, FIRST_LABEL_HEIGHT + FIRST_LABEL_MARGIN),
         ((i%4)*IMG_WIDTH+IMG_MARGIN, math.floor(i/4)*(IMG_HEIGHT+IMG_MARGIN)))
-      self.canvas.drawImage("3/kl" + cards[i].id + ".gif", offset[0], offset[1], 40, -60)
+      self.canvas.drawImage(
+          "3/kl%s.gif" % cards[i].id, offset[0], offset[1], IMG_WIDTH, -IMG_HEIGHT)
 
   def _RenderFull(self, position):
     cards = self.hand.GetFull(position)
 
     for color in COLORS + [SPECIAL_COLOR]:
-      self.canvas.setFillColorRGB(color.hexcolor[0], color.hexcolor[1], color.hexcolor[2])
-      self.canvas.setFont('Helvetica-Bold', 10)
-      offset = Offsets(position.fullOffset, color.offset)
-      self.canvas.drawString(offset[0], offset[1], color.symbol + ":")
+      self.canvas.setFillColorRGB(
+          float(color.rgbcolor[0])/256,
+          float(color.rgbcolor[1])/256,
+          float(color.rgbcolor[2])/256)
+
+      if color.symbol:
+        offset = Offsets(position.fullOffset, color.offset, (0, 1))
+        color.symbol.drawOn(self.canvas, offset[0], offset[1])
 
       cardNames = []
       for i in range(14):
@@ -196,8 +206,8 @@ class HandRenderer:
 
     self.canvas.setFillColorRGB(0, 0, 0)
 
-
-    offset = Offsets((CENTER_X, CENTER_Y), (CENTER_WIDTH/2, CENTER_HEIGHT/2), (0, 13))
+    # TODO: Calculate line height instead of eyeballing half of it for offset.
+    offset = Offsets((CENTER_X, CENTER_Y), (CENTER_WIDTH/2, CENTER_HEIGHT/2), (0, 14))
     self.canvas.setFont('Helvetica-Bold', 40)
     self.canvas.drawCentredString(offset[0], offset[1], str(self.hand.id))
 
