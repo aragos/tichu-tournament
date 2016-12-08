@@ -1,10 +1,9 @@
+import math
 import random
 
-import math
-
-from reportlab.pdfgen import canvas
-from reportlab.lib.pagesizes import LETTER
 from svglib.svglib import svg2rlg
+from reportlab.lib.pagesizes import LETTER
+from reportlab.pdfgen import canvas
 
 
 class Color:
