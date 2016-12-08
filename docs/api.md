@@ -327,7 +327,7 @@ Calculates and returns the final detailed results of the tournament.
     * `pair_no`: Integer. The number of the pair this summary is for.
     * `mps`: Integer. The total number of match points scored by this pair in the tournament.
     * `rps`: Integer. The total number of RPs scored by this pair in the tournament.
-* `boards`: List of objects. The final records of all hands played in this tournament. There will be
+* `hands`: List of objects. The final records of all hands played in this tournament. There will be
   at most one per combination of `board_no`, `ns_pair`, and `ew_pair`.
     * `board_no`: Integer. The board number for this hand. Must be between 1 and `no_boards`,
       inclusive.
