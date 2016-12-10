@@ -1,4 +1,5 @@
 import itertools
+import json
 import math
 
 class InvalidCallError(Exception):
@@ -10,7 +11,7 @@ class InvalidCallError(Exception):
 class InvalidScoreError(Exception):
     def __init__(self, board_no, ns_pair_no, ew_pair_no):
          self.value = "Invalid score: for board no: " + str(board_no) +\
-             ", pairs: " + str(ns_pair_no) + ", and " + str(ew_pair_no)
+             ", pairs: " + str(ns_pair_no) + " and " + str(ew_pair_no)
     def __str__(self):
         return repr(self.value)
 
@@ -57,6 +58,15 @@ class Calls:
             GT, or an empty string is passed. """
         if call != "" and call != "T" and call != "GT":
           raise InvalidCallError(call, side)
+    
+    @classmethod
+    def FromJson(cls, call_json):
+        """ Loads from json object. Raises an exception if any of the
+            calls are invalid. 
+        """
+        json_dict = json.loads(call_json)
+        return Calls(json_dict["north"], json_dict["south"], 
+                     json_dict["east"], json_dict["west"])
 
 class HandResult:
     """ Contains all information about a single hand between two teams. """
@@ -114,7 +124,7 @@ class HandResult:
             if self._IsScoreValid(permutation):
                 return
         raise InvalidScoreError(self._board_no, self._ns_pair_no,
-                                self.ew_pair_no)
+                                self._ew_pair_no)
 
     def _TeamBounds(self, team1, team2, first_two):
         if (first_two == team1 or first_two == tuple(reversed(team1))):
@@ -162,7 +172,7 @@ class BoardScoreLine:
         
     def __str__(self):
         if ((self.ns_mps + self.ew_mps + self.ns_rps + self.ew_rps)):
-            return ("{0:4d} {1:9d}     {2:s} {3:10d} {4:10d}      {5:.1f}"\
+            return ("{0:4s} {1:9s}     {2:s} {3:10d} {4:10d}      {5:.1f}"\
                     "      {6:.1f}     {7:.2f}    {8:.2f}\n")\
                 .format(self._hr.ns_pair_no(), self._hr.ew_pair_no(), 
                         str(self._hr.calls()), self._hr.ns_score(),
@@ -170,6 +180,45 @@ class BoardScoreLine:
                         self.ns_rps, self.ew_rps)
         else:
             return "Scores have not been calculated for hand."
+            
+    def csv_str(self):
+        if ((self.ns_mps + self.ew_mps + self.ns_rps + self.ew_rps)):
+            return ("{0}, {1}, {2} , {3}, {4}, {5:.1f},"\
+                    " {6:.1f}, {7:.2f}, {8:.2f}\n")\
+                .format(self._hr.ns_pair_no(), self._hr.ew_pair_no(), 
+                        str(self._hr.calls()), self._hr.ns_score(),
+                        self._hr.ew_score(), self.ns_mps, self.ew_mps,
+                        self.ns_rps, self.ew_rps)
+        else:
+            return "Scores have not been calculated for hand."
+    
+    def csv_row(self):
+      ns = "NS Team"
+      ew = "EW Team"
+      calls = "Calls"
+      ns_score = "NS Score"
+      ew_score = "EW Score"
+      ns_mps = "NS MPs"
+      ew_mps = "EW MPs"
+      ns_rps = "NS RPs"
+      ew_rps = "EW RPs"
+      ns_aps = "NS APs"
+      ew_aps = "EW APs"
+      if ((self.ns_mps + self.ew_mps + self.ns_rps + self.ew_rps)):
+        return {ns: self._hr.ns_pair_no(),
+                ew: self._hr.ew_pair_no(),
+                calls: str(self._hr.calls()),
+                ns_score: self._hr.ns_score(),
+                ew_score: self._hr.ew_score(),
+                ns_mps: "{0:.1f}".format(self.ns_mps),
+                ew_mps: "{0:.1f}".format(self.ew_mps),
+                ns_rps: "{0:.2f}".format(self.ns_rps),
+                ew_rps: "{0:.2f}".format(self.ew_rps),
+                ns_aps: "{0}".format(self.ns_aps),
+                ew_aps: "{0}".format(self.ew_aps),}
+      else:
+          return "Scores have not been calculated for hand."
+      
 
 class Board:
     def __init__ (self, board_no, hand_results):
@@ -198,7 +247,15 @@ class Board:
         if current == other:
             return 0.5
         return 1
-        
+    
+    def _called_t(self, hand_result, position, call_to_check):
+      calls = hand_result.calls()
+      call_fetcher = {"ns": (calls.n_call(), calls.s_call()), "ew": (calls.e_call(), calls.w_call())}
+      calls_made = call_fetcher[position]
+      if calls_made[0] == call_to_check or calls_made[1] == call_to_check:
+        return 1
+      return 0
+    
     def ScoreBoard(self): 
         self._board_score = []
         self._hand_results.sort(key=lambda hr: hr.diff(), reverse=True)
@@ -206,6 +263,10 @@ class Board:
         # This is n^2. You can do it in O(n) but will be uglier. Since
         # we will have 4/5 entries each time, this is OK.
         iter = self._hand_results
+        gt_calls_ns = sum([self._called_t(x, "ns", "GT") for x in self._hand_results])
+        t_calls_ns = sum([self._called_t(x, "ns", "T") for x in self._hand_results])
+        gt_calls_ew = sum([self._called_t(x, "ew", "GT") for x in self._hand_results])
+        t_calls_ew = sum([self._called_t(x, "ew", "T") for x in self._hand_results])
         for hr in iter:
             bs = BoardScoreLine(hr)
             bs.ns_mps, bs.ew_mps, bs.ns_rps, bs.ew_rps = 0, 0, 0, 0;
@@ -217,6 +278,19 @@ class Board:
                     for x in self._hand_results]) - 0.5
             bs.ns_rps = self._log_rps(hr.diff() - avg_score)
             bs.ew_rps = self._log_rps(avg_score - hr.diff())
+            # Now to calculate aggressiveness
+            if self._called_t(hr, "ns", "GT"):
+              bs.ns_aps = (len(self._hand_results) - gt_calls_ns) * 2 + t_calls_ns
+            elif self._called_t(hr, "ns", "T"):
+              bs.ns_aps = (len(self._hand_results) - gt_calls_ns - t_calls_ns)
+            else:
+              bs.ns_aps = 0
+            if self._called_t(hr, "ew", "GT"):
+              bs.ew_aps = (len(self._hand_results) - gt_calls_ew) * 2 + t_calls_ew
+            elif self._called_t(hr, "ew", "T"):
+              bs.ew_aps = (len(self._hand_results) - gt_calls_ew - t_calls_ew)
+            else:
+              bs.ew_aps = 0
             self._board_score.append(bs)
         return self._board_score
 
@@ -232,35 +306,88 @@ class Board:
         else:
             return "Score has not been calculated for board " + \
                    str(self._board_no) + " or no hands are involved"
+                   
+    def csv_str(self):
+      if (self._board_score):
+            ret = ("Board no {0}\n""").format(self._board_no)
+            for bs in self._board_score:
+                ret += bs.csv_str()
+            return ret
+      else:
+            return "Score has not been calculated for board " + \
+                   str(self._board_no) + " or no hands are involved"
+                   
+    def csv_rows(self):
+      board_no = "Board No"
+      if (self._board_score):
+          ret = []
+          ret.append({board_no: ("Board {0}""").format(self._board_no), })
+          for bs in self._board_score:
+            ret.append(bs.csv_row())
+          return ret
+      else:
+            return "Score has not been calculated for board " + \
+                   str(self._board_no) + " or no hands are involved"
 
 class TeamSummary:
     def __init__(self, team_no):
         self.mps = 0
         self.rps = 0
+        self.aps = 0
         self.team_no = team_no
         self.board_mps = {}
         self.board_rps = {}
-        self.rank = ""
-        
-    def __str__(self):
-        ret = ("""Team {0} Rank {1} MPs {2} RPs {3} \nBoard no MPs RPs\n""") \
-                .format(self.team_no, self.rank, self.mps, self.rps)
+        self.board_aps = {}
+        self.mp_rank = 0
+        self.agg_rank = 0
+        self.rp_rank = 0
+
+    def UpdateSitOutBonuses(self, num_rounds):
+        if len(self.board_mps) < num_rounds:
+          self.mps = self.mps * float(num_rounds) / len(self.board_mps)
+          self.aps = self.aps * float(num_rounds) / len(self.board_mps)
+          self.rps = self.rps * float(num_rounds) / len(self.board_mps)
+          
+      
+    def csv_rows(self, num_rounds):
+        board_no = "Board No"
+        mps = "MPs"
+        rps = "RPs"
+        ret = []
+        ret.append({board_no:
+            """Place {1}. Team {0}: MPs {2:.1f} RPs {3:.2f}""".format(self.team_no, self.mp_rank, self.mps, self.rps)})
         keys = sorted(self.board_mps.keys())
         for key in keys:
-          ret += "{0} {1} {2}\n".format(key, self.board_mps[key], 
-                                        self.board_rps[key])
+          ret.append({board_no : key, mps: self.board_mps[key], rps : self.board_rps[key]})
+        if len(self.board_mps) < num_rounds:
+          ret.append({board_no : "Sit-out Bonus",
+                      mps: self.mps - self.mps * len(self.board_mps) / num_rounds,
+                      rps: self.rps - self.rps * len(self.board_mps) / num_rounds})
         return ret
+        
 
-def UpdateTeamSummary(team_summaries, board_no, pair_no, mps, rps): 
+def UpdateTeamSummary(team_summaries, board_no, pair_no, position,
+                      board_score_line):
     ts = team_summaries.setdefault(pair_no, TeamSummary(pair_no))
-    ts.mps += mps
-    ts.rps += rps
     assert(board_no not in ts.board_mps)
     assert(board_no not in ts.board_rps)
+    assert(board_no not in ts.board_aps)
+    if position is "ns": 
+      mps = board_score_line.ns_mps
+      rps = board_score_line.ns_rps
+      aps = board_score_line.ns_aps
+    elif position is "ew":
+      mps = board_score_line.ew_mps
+      rps = board_score_line.ew_rps
+      aps = board_score_line.ew_aps
+    ts.mps += mps
+    ts.rps += rps
+    ts.aps += aps
     ts.board_mps[board_no] = mps
     ts.board_rps[board_no] = rps
+    ts.board_aps[board_no] = aps
 
-def Calculate(boards, rank_by = "MP"):
+def Calculate(boards, num_rounds, rank_by = "MP"):
     """ Boards is a list of Boards """
 
     team_summaries = {}
@@ -268,17 +395,56 @@ def Calculate(boards, rank_by = "MP"):
         for bsl in bs.ScoreBoard():
             hr = bsl.hr()
             UpdateTeamSummary(team_summaries, hr._board_no, hr.ns_pair_no(),
-                              bsl.ns_mps, bsl.ns_rps)
+                              "ns", bsl)
             UpdateTeamSummary(team_summaries, hr._board_no, hr.ew_pair_no(),
-                              bsl.ew_mps, bsl.ew_rps)
-    
+                              "ew", bsl)
+    for ts in team_summaries.values():
+      ts.UpdateSitOutBonuses(num_rounds)
+      
     ret = team_summaries.values()
-    if rank_by == "MP" :
-        # Secondary sort by rps.
-        ret.sort(key=lambda ts : ts.rps, reverse = True) 
-        ret.sort(key=lambda ts : ts.mps, reverse = True)
-    elif rank_by == "RP":
-        # Secondary sort by mps.
-        ret.sort(key=lambda ts : ts.mps, reverse = True)
-        ret.sort(key=lambda ts : ts.rps, reverse = True) 
+    
+    # Calculate Ranks.
+    # MP:
+    OrderBy(ret, "MP")
+    for i in range(len(ret)):
+      ret[i].mp_rank = i + 1 
+    
+    # RP:
+    OrderBy(ret, "RP")
+    for i in range(len(ret)):
+      ret[i].rp_rank = i + 1 
+    
+    # AP:
+    OrderBy(ret, "AP")
+    for i in range(len(ret)):
+      ret[i].ap_rank = i + 1 
+
     return ret
+
+def OrderBy(boards, rank_by = "MP"):
+  if rank_by == "MP":
+    # Secondary sort by rps.
+    boards.sort(key=lambda ts : ts.rps, reverse = True) 
+    boards.sort(key=lambda ts : ts.mps, reverse = True)
+  elif rank_by == "RP":
+    # Secondary sort by mps.
+    boards.sort(key=lambda ts : ts.mps, reverse = True)
+    boards.sort(key=lambda ts : ts.rps, reverse = True) 
+  elif rank_by == "AP":
+    # Secondary sort by mps.
+    boards.sort(key=lambda ts : ts.mps, reverse = True)
+    boards.sort(key=lambda ts : ts.aps, reverse = True) 
+  else:
+    raise KeyError("Bad error %s" % rank_by)
+    
+def GetMaxRounds(board_list):
+  """ Gets the maximum number of rounds any team has played in the tournament. """
+  board_counts = {}
+  for bs in board_list:
+    for bsl in bs.ScoreBoard():
+      hr = bsl.hr()
+      board_counts[hr.ns_pair_no()] = 1 + board_counts.get(hr.ns_pair_no(), 0)
+      board_counts[hr.ew_pair_no()] = 1 + board_counts.get(hr.ew_pair_no(), 0)
+  return max(board_counts.values())
+
+
