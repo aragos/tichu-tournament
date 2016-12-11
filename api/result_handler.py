@@ -77,11 +77,11 @@ class XlxsResultHandler(webapp2.RequestHandler):
     mp_summaries = summaries
     ap_summaries = summaries
     boards.sort(key=lambda bs : bs._board_no, reverse = False)
-    wb = WriteResultsToXlsx(max_rounds, mp_summaries, ap_summaries, boards,
-                            None)
+    wb = WriteResultsToXlsx(max_rounds, mp_summaries, ap_summaries, boards)
     self.response.out.write(OutputWorkbookAsBytesIO(wb).getvalue())
     self.response.headers['Content-Type'] = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-    self.response.headers['Content-disposition'] = str('attachment; filename=' + json.loads(tourney.metadata)["name"] + 'TournamentResults.xlsx')
+    self.response.headers['Content-disposition'] = str('attachment; filename=' + 
+        json.loads(tourney.metadata)["name"] + 'TournamentResults.xlsx')
     self.response.headers['Content-Transfer-Encoding'] = 'Binary'
     self.response.set_status(200)
 

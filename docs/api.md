@@ -50,7 +50,12 @@ Creates a new tournament owned by the currently logged in director.
     {
         "name": "Tournament Name",
         "no_pairs": 8,
-        "no_boards": 10
+        "no_boards": 10,
+        "players": [{
+            "pair_no": 1,
+            "name": "Michael the Magnificent",
+            "email": "michael@michael.com"
+        }]
     }
 
 * `name`: String. A user-specified and user-readable name suitable for display in a tournament list.
@@ -59,6 +64,12 @@ Creates a new tournament owned by the currently logged in director.
   than 0. Required.
 * `no_boards`: Integer. The number of boards (hands) to be played. Must be greater than 0.
   Required.
+* `players`: List of objects. More information about the players. There should be at most
+  two players for the same `pair_no`. Optional.
+    * `pair_no`: Integer. The pair this player belongs to. Must be between 0 and `no_pairs`. Required.
+    * `name`: String. User-readable name for the player. Optional.
+    * `email`: String. Email for the player that can be used to identify user posting hand
+      results. Optional.
 
 #### Status codes
 
@@ -98,6 +109,11 @@ Retrieves the details about a tournament owned by the currently logged in direct
         "name": "Tournament Name",
         "no_pairs": 8,
         "no_boards": 10,
+        "players": [{
+            "pair_no": 1,
+            "name": "Michael the Magnificent",
+            "email": "michael@michael.com"
+        }],
         "hands": [{
             "board_no": 3,
             "ns_pair": 4,
@@ -149,7 +165,12 @@ Updates the details about a tournament owned by the currently logged in director
     {
         "name": "Tournament Name",
         "no_pairs": 8,
-        "no_boards": 10
+        "no_boards": 10,
+        "players": [{
+            "pair_no": 1,
+            "name": "Michael the Magnificent",
+            "email": "michael@michael.com"
+        }]
     }
 
 * `name`: String. A user-specified and user-readable name suitable for display in a tournament list.

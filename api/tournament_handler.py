@@ -57,14 +57,16 @@ class TourneyHandler(webapp2.RequestHandler):
     if not CheckUserLoggedInAndMaybeReturnStatus(self.response, user):
       return
       
-    if not self._CheckValidReuestInfoAndMaybeSetStatus():
+    if not self._CheckValidRequestInfoAndMaybeSetStatus():
       return
 
     name = self.request.get("name")
     no_pairs = int(self.request.get('no_pairs'))
     no_boards = int(self.request.get('no_boards'))
+    player_list = json.loads(self.request.get('players'))
     if not self._CheckValidTournamentInfoAndMaybeSetStatus(name, no_pairs,
-                                                           no_boards):
+                                                           no_boards,
+                                                           player_list):
       return
 
     tourney = GetTourneyWithIdAndMaybeReturnStatus(self.response, id)
@@ -79,7 +81,7 @@ class TourneyHandler(webapp2.RequestHandler):
     self.response.set_status(204)
     # Need to update documentation, this leaves available hand scores alone.
     metadata_dict = {"name": name, "no_pairs": no_pairs,
-                     "no_boards": no_boards}
+                     "no_boards": no_boards, "players": player_list}
     tourney.metadata = json.dumps(metadata_dict)
     tourney.put()  
 
@@ -102,29 +104,40 @@ class TourneyHandler(webapp2.RequestHandler):
     tourney.key.delete()  
 
 
-  def _CheckValidReuestInfoAndMaybeSetStatus(self):
+  def _CheckValidRequestInfoAndMaybeSetStatus(self):
     ''' Checks if the number of boards and number of pairs are valid numbers.
         If not sets the response with the appropriate status and error message.
     '''
     if not is_int(self.request.get('no_pairs')):
-      SetErrorStatus(self.response, 400, "Invalid input",
+      SetErrorStatus(self.response, 400, "Invalid Input",
                      "no_pairs must be an integer")
       return False
     elif not is_int(self.request.get('no_boards')):
-      SetErrorStatus(self.response, 400, "Invalid input",
+      SetErrorStatus(self.response, 400, "Invalid Input",
                      "no_boards must be an integer")
       return False
+    elif self.request.get('players'):
+      player_list = json.loads(self.request.get('players'))
+      for player in player_list:
+        if not player['pair_no']:
+          SetErrorStatus(self.response, 400, "Invalid Input",
+                         "Player must have corresponding pair number if present.")
+          return False
+        if not is_int(player['pair_no']):
+          SetErrorStatus(self.response, 400, "Invalid Input",
+                         "Player pair number must be an integer, was {}".format(
+                             player['pair_no']))
+          return False
     return True
 
 
   def _CheckValidTournamentInfoAndMaybeSetStatus(self, name, no_pairs,
-                                                 no_boards):
+                                                 no_boards, players=None):
     ''' Checks if the input is valid and sane. 
         If not sets the response with the appropriate status and error message.
         Assumes no_pairs and no_boards are integers.
     '''
-    error_message = {"error": "Invalid input"}
-    # Should enforce uniqueness of names?
+    # TODO: Should enforce uniqueness of names?
     if name == "":
       SetErrorStatus(self.response, 400, "Invalid input",
                      "Tournament name must be nonempty")
@@ -137,5 +150,11 @@ class TourneyHandler(webapp2.RequestHandler):
       SetErrorStatus(self.response, 400, "Invalid input",
                      "Number of boards must be > 0, was {}".format(no_boards))
       return False
+    elif players:
+      for player in players:
+        if player['pair_no'] < 1 or player['pair_no'] > no_pairs:
+          SetErrorStatus(self.response, 400, "Invalid Input",
+                         "Player pair must be between 1 and no_pairs, was {}.".format(
+                             player['pair_no']))
+          return False
     return True
-
