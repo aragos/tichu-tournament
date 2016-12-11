@@ -54,6 +54,10 @@ def main(sdk_path, test_path, test_pattern):
   except ImportError:
     print('Note: unable to import appengine_config.')
 
+  # Make sure we can import modules relative to app.yaml.
+  sys.path.append(
+    os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir, os.path.pardir)))
+
   # Discover and run tests.
   suite = unittest.loader.TestLoader().discover(test_path, test_pattern)
   return unittest.TextTestRunner(verbosity=2).run(suite)
