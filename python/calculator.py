@@ -65,8 +65,8 @@ class Calls:
             calls are invalid. 
         """
         json_dict = json.loads(call_json)
-        return Calls(json_dict["north"], json_dict["south"], 
-                     json_dict["east"], json_dict["west"])
+        return Calls(json_dict.get("north", ""), json_dict.get("south", ""), 
+                     json_dict.get("east", ""), json_dict.get("west", ""))
 
 class HandResult:
     """ Contains all information about a single hand between two teams. """
