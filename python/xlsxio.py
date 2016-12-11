@@ -460,7 +460,7 @@ def CopySheet(from_sheet, to_sheet):
 
 
 def WriteResultsToXlsx(max_rounds, mp_scores, ap_scores, board_list,
-                       input_wb):
+                       input_wb=None):
   """ Creates an Xlx workbook with all the information about a tournament.
 
       Args: 
