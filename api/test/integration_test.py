@@ -1,7 +1,9 @@
+import json
 import unittest
 import webtest
 import os
 
+from google.appengine.api import memcache
 from google.appengine.ext import testbed
 
 
@@ -16,6 +18,7 @@ class AppTest(unittest.TestCase):
     self.testbed.activate()
 
     self.testbed.init_datastore_v3_stub()
+    self.testbed.init_memcache_stub()
 
     self.testapp = webtest.TestApp(main.app)
 
@@ -29,8 +32,21 @@ class AppTest(unittest.TestCase):
   def testListTournaments(self):
     self.loginUser()
 
+    # First fetch an empty list.
     response = self.testapp.get("/api/tournaments")
     self.assertEqual(response.status_int, 200)
+    tourneys = json.loads(response.body)
+    self.assertIsNotNone(tourneys["tournaments"])
+    self.assertEqual(0, len(tourneys["tournaments"]))
+    
+    #Now let's add a list.
+    params = {'name': 'name', 'no_pairs': 8, 'no_boards': 24}
+    self.testapp.post("/api/tournaments", params)
+    response = self.testapp.get("/api/tournaments")
+    self.assertEqual(response.status_int, 200)
+    tourneys = json.loads(response.body)
+    self.assertIsNotNone(tourneys["tournaments"])
+    self.assertEqual(1, len(tourneys["tournaments"]))
 
   def loginUser(self, email='user@example.com', id='123', is_admin=False):
     self.testbed.setup_env(

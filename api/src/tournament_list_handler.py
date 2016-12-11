@@ -37,7 +37,7 @@ class TourneyListHandler(webapp2.RequestHandler):
     name = self.request.get("name")
     no_pairs = int(self.request.get('no_pairs', default_value=0))
     no_boards = int(self.request.get('no_boards', default_value=0))
-    player_list = json.loads(self.request.get('players'))
+    player_list = json.loads(self.request.get('players')) if self.request.get('players') else None
     if not self._CheckValidTournamentInfoAndMaybeSetStatus(name, no_pairs,
                                                            no_boards,
                                                            player_list):
