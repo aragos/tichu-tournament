@@ -134,6 +134,12 @@ Retrieves the details about a tournament owned by the currently logged in direct
 * `no_pairs`: Integer. The number of pairs (teams) to play in this tournament. Must be greater
   than 0. 
 * `no_boards`: Integer. The number of boards (hands) to be played. Must be greater than 0.
+* `players`: List of objects. More information about the players. There should be at most
+  two players for the same `pair_no`. Optional.
+    * `pair_no`: Integer. The pair this player belongs to. Must be between 0 and `no_pairs`. Required.
+    * `name`: String. User-readable name for the player. Optional.
+    * `email`: String. Email for the player that can be used to identify user posting hand
+      results. Optional.
 * `hands`: List of objects. The records of all hands played so far in this tournament. There will be
   at most one per combination of `board_no`, `ns_pair`, and `ew_pair`.
     * `board_no`: Integer. The board number for this hand. Must be between 1 and `no_boards`,
@@ -179,6 +185,12 @@ Updates the details about a tournament owned by the currently logged in director
   than 0. Required.
 * `no_boards`: Integer. The number of boards (hands) to be played. Must be greater than 0.
   Required.
+* `players`: List of objects. More information about the players. There should be at most
+  two players for the same `pair_no`. Optional.
+    * `pair_no`: Integer. The pair this player belongs to. Must be between 0 and `no_pairs`. Required.
+    * `name`: String. User-readable name for the player. Optional.
+    * `email`: String. Email for the player that can be used to identify user posting hand
+      results. Optional.
 
 #### Status codes
 
