@@ -45,9 +45,9 @@ class AppTest(unittest.TestCase):
   def testGetTournament(self):
     self.loginUser()
     id1 = self.AddBasicTournament()
-    players_json = '[{ "pair_no": 1, "name": "my name" }]'
-    params = {'name': 'name2', 'no_pairs': 9, 'no_boards': 27, 'players' : players_json}
-    response = self.testapp.post("/api/tournaments", params)
+    params = {'name': 'name2', 'no_pairs': 9, 'no_boards': 27, 
+              'players' : [{ "pair_no": 1, "name": "my name" }]}
+    response = self.testapp.post_json("/api/tournaments", params)
     self.assertNotEqual(response.body, '')
     response_dict = json.loads(response.body)
     id2 = response_dict['id']
@@ -58,7 +58,7 @@ class AppTest(unittest.TestCase):
     self.assertEqual('name', response_dict['name'])
     self.assertEqual(8, response_dict['no_pairs'])
     self.assertEqual(24, response_dict['no_boards'])
-    self.assertIsNone(response_dict['players'])
+    self.assertFalse('players' in response_dict)
 
     response = self.testapp.get("/api/tournaments/{}".format(id2))
     self.assertEqual(response.status_int, 200)
@@ -66,9 +66,8 @@ class AppTest(unittest.TestCase):
     self.assertEqual('name2', response_dict['name'])
     self.assertEqual(9, response_dict['no_pairs'])
     self.assertEqual(27, response_dict['no_boards'])
-    players_dict = json.loads(players_json)
-    self.assertEqual(1, players_dict[0]["pair_no"])
-    self.assertEqual("my name", players_dict[0]["name"])
+    self.assertEqual(1, response_dict['players'][0]["pair_no"])
+    self.assertEqual("my name", response_dict['players'][0]["name"])
 
   def loginUser(self, email='user@example.com', id='123', is_admin=False):
     self.testbed.setup_env(
@@ -86,7 +85,7 @@ class AppTest(unittest.TestCase):
       
   def AddBasicTournament(self):
     params = {'name': 'name', 'no_pairs': 8, 'no_boards': 24}
-    response = self.testapp.post("/api/tournaments", params)
+    response = self.testapp.post_json("/api/tournaments", params)
     self.assertNotEqual(response.body, '')
     response_dict = json.loads(response.body)
     id = response_dict['id']

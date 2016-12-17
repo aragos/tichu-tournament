@@ -57,31 +57,34 @@ class TourneyHandler(webapp2.RequestHandler):
     if not CheckUserLoggedInAndMaybeReturnStatus(self.response, user):
       return
       
-    if not self._CheckValidRequestInfoAndMaybeSetStatus():
-      return
-
-    name = self.request.get("name")
-    no_pairs = int(self.request.get('no_pairs'))
-    no_boards = int(self.request.get('no_boards'))
-    player_list = json.loads(self.request.get('players'))
-    if not self._CheckValidTournamentInfoAndMaybeSetStatus(name, no_pairs,
-                                                           no_boards,
-                                                           player_list):
-      return
-
     tourney = GetTourneyWithIdAndMaybeReturnStatus(self.response, id)
     if not tourney:
       return
-    
+
     if not CheckUserOwnsTournamentAndMaybeReturnStatus(self.response,
                                                        user.user_id(),
                                                        tourney, id):
       return
 
+    request_dict = self._ParseRequestInfoAndMaybeSetStatus()
+    if not request_dict:
+      return
+
+    name = request_dict["name"]
+    no_pairs = request_dict['no_pairs']
+    no_boards = request_dict['no_boards']
+    player_list = request_dict.get('players')
+    if not self._CheckValidTournamentInfoAndMaybeSetStatus(name, no_pairs,
+                                                           no_boards,
+                                                           player_list):
+      return
+
     self.response.set_status(204)
     # Need to update documentation, this leaves available hand scores alone.
     metadata_dict = {"name": name, "no_pairs": no_pairs,
-                     "no_boards": no_boards, "players": player_list}
+                     "no_boards": no_boards}
+    if player_list:
+      metadata_dict["players"] = player_list
     tourney.metadata = json.dumps(metadata_dict)
     tourney.put()  
 
@@ -104,31 +107,39 @@ class TourneyHandler(webapp2.RequestHandler):
     tourney.key.delete()  
 
 
-  def _CheckValidRequestInfoAndMaybeSetStatus(self):
-    ''' Checks if the number of boards and number of pairs are valid numbers.
-        If not sets the response with the appropriate status and error message.
+  def _ParseRequestInfoAndMaybeSetStatus(self):
+    ''' Parses the body of the request. Checks if the body is valid JSON with
+        all the proper fields set. Checks if the number of boards and number of 
+        pairs are valid numbers. If not sets the response with the appropriate
+        status and error message.
     '''
-    if not is_int(self.request.get('no_pairs')):
+    try:
+      request_dict = json.loads(self.request.body)
+    except ValueError:
+      SetErrorStatus(self.response, 500, "Invalid Input",
+                     "Unable to parse request body as JSON object")
+      return None
+    if not isinstance(request_dict.get('no_pairs'), int):
       SetErrorStatus(self.response, 400, "Invalid Input",
                      "no_pairs must be an integer")
-      return False
-    elif not is_int(self.request.get('no_boards')):
+      return None
+    elif not isinstance(request_dict.get('no_boards'), int):
       SetErrorStatus(self.response, 400, "Invalid Input",
                      "no_boards must be an integer")
-      return False
-    elif self.request.get('players'):
-      player_list = json.loads(self.request.get('players'))
+      return None
+    elif request_dict.get('players'):
+      player_list = request_dict.get('players')
       for player in player_list:
         if not player['pair_no']:
           SetErrorStatus(self.response, 400, "Invalid Input",
                          "Player must have corresponding pair number if present.")
-          return False
-        if not is_int(player['pair_no']):
+          return None
+        if not isinstance(player['pair_no'], int):
           SetErrorStatus(self.response, 400, "Invalid Input",
                          "Player pair number must be an integer, was {}".format(
                              player['pair_no']))
-          return False
-    return True
+          return None
+    return request_dict
 
 
   def _CheckValidTournamentInfoAndMaybeSetStatus(self, name, no_pairs,
@@ -137,8 +148,7 @@ class TourneyHandler(webapp2.RequestHandler):
         If not sets the response with the appropriate status and error message.
         Assumes no_pairs and no_boards are integers.
     '''
-    # TODO: Should enforce uniqueness of names?
-    if name == "":
+    if not name or name == "":
       SetErrorStatus(self.response, 400, "Invalid input",
                      "Tournament name must be nonempty")
       return False

@@ -55,20 +55,23 @@ class HandHandler(webapp2.RequestHandler):
         ns_pair, ew_pair):
       return
 
-    calls_json = self.request.get("calls")
-    ns_score = self.request.get("ns_score")
-    ew_score = self.request.get("ew_score")
-    notes = self.request.get("notes")
+    request_dict = self._ParseRequestInfoAndMaybeSetStatus()
+    if not request_dict:
+      return
+    calls = request_dict.get("calls")
+    ns_score = request_dict.get("ns_score")
+    ew_score = request_dict.get("ew_score")
+    notes = request_dict.get("notes")
 
     if not self._ValidateHandResultMaybeSetStatus(int(board_no), int(ns_pair),
                                                   int(ew_pair), ns_score,
-                                                  ew_score, calls_json):
+                                                  ew_score, calls):
       return
 
     hr_dict = {"board_no": int(board_no),
                "ns_pair": int(ns_pair),
                "ew_pair": int(ew_pair),
-               "calls": json.loads(calls_json),
+               "calls": calls,
                "ns_score": int(ns_score),
                "ew_score": int(ew_score),
                "notes": notes}
@@ -148,7 +151,7 @@ class HandHandler(webapp2.RequestHandler):
 
 
   def _ValidateHandResultMaybeSetStatus(self, board_no, ns_pair, ew_pair,
-                                        ns_score, ew_score, calls_json):
+                                        ns_score, ew_score, calls):
     error =  "Invalid Score"
     if (not is_int(ns_score)):
       SetErrorStatus(self.response, 400, error,
@@ -161,7 +164,7 @@ class HandHandler(webapp2.RequestHandler):
     else: 
       try:
         HandResult(board_no, ns_pair, ew_pair, int(ns_score),
-                   int(ew_score), Calls.FromJson(calls_json))
+                   int(ew_score), Calls.FromDict(calls))
       except InvalidScoreError as err:
         SetErrorStatus(self.response, 400, error,
                      "These scores are not a valid Tichu score")
@@ -190,6 +193,32 @@ class HandHandler(webapp2.RequestHandler):
   def _is_hand_present(self, hand_list, board_no, ns_pair, ew_pair):
     return any(self._is_hand_equal(board_no, ns_pair, ew_pair, hand) 
                for hand in hand_list)
+
+
+  def _ParseRequestInfoAndMaybeSetStatus(self):
+    ''' Parses the body of the request. Checks if the body is valid JSON with
+        all the proper fields set. If not sets the response with the appropriate
+        status and error message.
+    '''
+    try:
+      request_dict = json.loads(self.request.body)
+    except ValueError:
+      SetErrorStatus(self.response, 500, "Invalid Input",
+                     "Unable to parse request body as JSON object")
+      return None
+    if not isinstance(request_dict.get('ns_score'), int):
+      SetErrorStatus(self.response, 400, "Invalid Input",
+                     "ns_pairs must be an integer")
+      return None
+    elif not isinstance(request_dict.get('ew_score'), int):
+      SetErrorStatus(self.response, 400, "Invalid Input",
+                     "ew_boards must be an integer")
+      return None
+    elif not request_dict.get('calls'):
+      SetErrorStatus(self.response, 400, "Invalid Input",
+                     "Calls must be set.")
+      return None
+    return request_dict
 
 
   def _is_hand_equal(self, board_no, ns_pair, ew_pair, hand):
