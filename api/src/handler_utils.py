@@ -37,10 +37,14 @@ def DoesNotOwnTournamentStatus(response, id, debug=True):
 
 
 def GetTourneyWithIdAndMaybeReturnStatus(response, id):
+  if not is_int(id):
+    TourneyDoesNotExistStatus(response, id)
+    return
   tourney_key = ndb.Key("Tournament", int(id))
   tourney = tourney_key.get()
   if not tourney:
     TourneyDoesNotExistStatus(response, id)
+    return
   return tourney
 
 
