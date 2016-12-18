@@ -171,7 +171,7 @@ class HandHandler(webapp2.RequestHandler):
         return False
       except InvalidCallError as err:
         SetErrorStatus(self.response, 400, error,
-                      "{} are not valid Tichu calls".format(calls_json))
+                      "{} are not valid Tichu calls".format(calls))
         return False
     return True
 
@@ -214,7 +214,7 @@ class HandHandler(webapp2.RequestHandler):
       SetErrorStatus(self.response, 400, "Invalid Input",
                      "ew_boards must be an integer")
       return None
-    elif not request_dict.get('calls'):
+    elif request_dict.get('calls') is None:
       SetErrorStatus(self.response, 400, "Invalid Input",
                      "Calls must be set.")
       return None
