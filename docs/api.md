@@ -295,7 +295,7 @@ Fetches the team identifiers for the pair number `pair_no`.
 
 ### Gets the schedule of boards a team must play. (GET /api/tournaments/:id/movement/:pair_no)
 
-Fetches the movements (schedule) for the team in question for this tournament.
+Fetches the movement (schedule) for the team in question for this tournament.
 
 #### Request
 
