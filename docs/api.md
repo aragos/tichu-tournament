@@ -220,23 +220,6 @@ Deletes a tournament owned by the currently logged in director.
 * **404**: No tournament with the given ID exists.
 * **500**: Server failed to locate or delete the tournament for any other reason.
 
-### Delete tournament (DELETE /api/tournaments/:id)
-
-**Requires authentication and ownership of the given tournament.**
-Deletes a tournament owned by the currently logged in director.
-
-#### Request
-
-* `id`: String. An opaque, unique ID returned from `GET /tournaments` or `POST /tournaments`.
-
-#### Status codes
-
-* **204**: The tournament was successfully deleted.
-* **401**: User is not logged in.
-* **403**: User is logged in, but does not own the given tournament.
-* **404**: No tournament with the given ID exists.
-* **500**: Server failed to locate or delete the tournament for any other reason.
-
 ### Fetch the pair identifiers (GET /api/tournaments/:id/pairids)
 
 **Requires authentication and ownership of the given tournament.**
