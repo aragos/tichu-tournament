@@ -183,6 +183,9 @@ Updates the details about a tournament owned by the currently logged in director
   Required.
 * `no_pairs`: Integer. The number of pairs (teams) to play in this tournament. Must be greater
   than 0. Required.
+  If `no_pairs` is different from the current setting of the tournament, the `pair_ids`
+  associated with individual pairs are invalidated and new ones are recomputed. Otherwise
+  the `pair_ids` stay the same even if `no_boards` or `name` is changed.
 * `no_boards`: Integer. The number of boards (hands) to be played. Must be greater than 0.
   Required.
 * `players`: List of objects. More information about the players. There should be at most
@@ -216,6 +219,123 @@ Deletes a tournament owned by the currently logged in director.
 * **403**: User is logged in, but does not own the given tournament.
 * **404**: No tournament with the given ID exists.
 * **500**: Server failed to locate or delete the tournament for any other reason.
+
+### Delete tournament (DELETE /api/tournaments/:id)
+
+**Requires authentication and ownership of the given tournament.**
+Deletes a tournament owned by the currently logged in director.
+
+#### Request
+
+* `id`: String. An opaque, unique ID returned from `GET /tournaments` or `POST /tournaments`.
+
+#### Status codes
+
+* **204**: The tournament was successfully deleted.
+* **401**: User is not logged in.
+* **403**: User is logged in, but does not own the given tournament.
+* **404**: No tournament with the given ID exists.
+* **500**: Server failed to locate or delete the tournament for any other reason.
+
+### Fetch the pair identifiers (GET /api/tournaments/:id/pairs)
+
+**Requires authentication and ownership of the given tournament.**
+Fetches the team unique identifiers for all pairs involved in the tournament.
+
+#### Request
+
+* `id`: String. An opaque, unique ID returned from `GET /tournaments` or `POST /tournaments`.
+
+#### Status codes
+
+* **200**: The pair ids were successfully retrieved.
+* **401**: User is not logged in.
+* **403**: User is logged in, but does not own the given tournament.
+* **404**: No tournament with the given ID exists.
+* **500**: Server failed to locate the ids for any other reason.
+
+#### Response
+
+    {
+        "pair_ids": [ "ACJB", "DFKF", "ALRY", "DFRJ", "ADTR", "LKRN" ]
+    }
+
+* `pair_ids`: List of strings. A list of unique ID codes associated with a team for
+   this specific tournament. Length of the list must equal `no_pairs` in the
+   request. Stable as long as `num_pairs` does not change.
+
+### Fetch a specific pair identifier (GET /api/tournaments/:id/pairs/:pair_no)
+
+**Requires authentication and ownership of the given tournament.**
+Fetches the team identifiers for the pair number `pair_no`.
+
+#### Request
+
+* `id`: String. An opaque, unique ID returned from `GET /tournaments` or `POST /tournaments`.
+* `pair_no`: Integer. The pair number.
+
+#### Status codes
+
+* **200**: The pair id was successfully retrieved.
+* **401**: User is not logged in.
+* **403**: User is logged in, but does not own the given tournament.
+* **404**: No tournament with the given ID exists or the pair number is not a valid pair
+  for this tournament.
+* **500**: Server failed to locate the ids for any other reason.
+
+#### Response
+
+    {
+        "pair_id": "ACJB"
+    }
+
+* `pair_id`: Strings. A list of unique ID code associated with this team
+   for this specific tournament. Stable as long as `num_pairs` for the does not
+   tournament change.
+
+### Gets the schedule of boards a team must play. (GET /api/tournaments/:id/movement/:pair_no)
+
+Fetches the movements (schedule) for the team in question for this tournament.
+
+#### Request
+
+* `id`: String. An opaque, unique ID returned from `GET /tournaments` or `POST /tournaments`.
+* `pair_no`: Integer. The team number for a pair in the tournament. Must be greater than
+  0 and not higher than the number of pairs in the tournament.
+
+#### Status codes
+
+* **200**: The schedule was successfully retrieved.
+* **404**: No tournament with the given ID exists or the pair number is invalid.
+* **500**: Server failed to locate the schedule for any other reason.
+
+#### Response
+
+    {
+        "movement": [{
+          "round": 1
+          "position": "3N"
+          "opponent": 2
+          "hands": [3, 4, 5]
+          "relay_table": 5
+          },
+          {
+          "round": 2
+          "position": "1E"
+          "opponent": 4
+          "hands": [7, 8, 9]
+          }]
+    }
+
+* `movement`: List of objects. The generated movement that records all hands that this team
+  plays along with associated opponents and position to be played from.
+      * `round`: Integer. The round number during which this hand is to be played.
+      * `position`: String. Position for this team. Two character string starting with the 
+         table number and ending with either 'N' for North/South or 'E' for East/West.
+      * `hands`: List of integers. Set of hand numbers to be played by this team/opponent
+         combination.
+      * `relay_table`: Integer. If set, this set of hands must be played simultaneously with
+         another table. Optional.
 
 ### Check if hand has been scored (HEAD /api/tournaments/:id/hands/:board_no/:ns_pair/:ew_pair)
 
@@ -284,7 +404,8 @@ Or, **if the user is authenticated and owns this tournament**, updates an alread
 * **400**: Validation failed for one or more of the fields in the score.
 * **403**: The score for this hand has already been submitted, and the user does not own this
   tournament or is not logged in.
-* **404**: The tournament with the given ID does not exist, or the board/pair numbers are invalid.
+* **404**: The tournament with the given ID does not exist, the board/pair numbers are invalid
+  or the pairs are not scheduled to play this board in the tournament movement scheme.
 * **500**: Server failed to score the hand for any other reason.
 
 ### Delete score for hand (DELETE /api/tournaments/:id/hands/:board_no/:ns_pair/:ew_pair)
