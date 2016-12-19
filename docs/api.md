@@ -237,7 +237,7 @@ Deletes a tournament owned by the currently logged in director.
 * **404**: No tournament with the given ID exists.
 * **500**: Server failed to locate or delete the tournament for any other reason.
 
-### Fetch the pair identifiers (GET /api/tournaments/:id/pairs)
+### Fetch the pair identifiers (GET /api/tournaments/:id/pairids)
 
 **Requires authentication and ownership of the given tournament.**
 Fetches the team unique identifiers for all pairs involved in the tournament.
@@ -264,10 +264,10 @@ Fetches the team unique identifiers for all pairs involved in the tournament.
    this specific tournament. Length of the list must equal `no_pairs` in the
    request. Stable as long as `num_pairs` does not change.
 
-### Fetch a specific pair identifier (GET /api/tournaments/:id/pairs/:pair_no)
+### Fetch a specific pair identifier (GET /api/tournaments/:id/pairids/:pair_no)
 
 **Requires authentication and ownership of the given tournament.**
-Fetches the team identifiers for the pair number `pair_no`.
+Fetches the team identifier for the pair number `pair_no`.
 
 #### Request
 
@@ -289,9 +289,33 @@ Fetches the team identifiers for the pair number `pair_no`.
         "pair_id": "ACJB"
     }
 
-* `pair_id`: Strings. A list of unique ID code associated with this team
-   for this specific tournament. Stable as long as `num_pairs` for the does not
-   tournament change.
+* `pair_id`: String. A unique ID code associated with this team for this specific tournament.
+   Stable as long as `num_pairs` for the tournament does not change.
+
+### Fetch a specific pair identifier (GET /api/tournaments/:id/pairno/:pair_id)
+
+Fetches the pair number for the pair with `pair_id` identifier.
+
+#### Request
+
+* `id`: String. An opaque, unique ID returned from `GET /tournaments` or `POST /tournaments`.
+* `pair_id`: String. The pair identifier.
+
+#### Status codes
+
+* **200**: The pair number was successfully retrieved.
+* **404**: No tournament with the given ID exists or the pair number is not a valid pair
+  for this tournament.
+* **500**: Server failed to locate the ids for any other reason.
+
+#### Response
+
+    {
+        "pair_no": 7
+    }
+
+* `pair_no`: Integer. The pair number associated with this ID in this tournament. Will be
+   between 0 and the total number of pairs in the tournament.
 
 ### Get the schedule of boards a team must play. (GET /api/tournaments/:id/movement/:pair_no)
 
@@ -312,6 +336,15 @@ Fetches the movement (schedule) for the team in question for this tournament.
 #### Response
 
     {
+        "name": "Tournament Name"
+        "players": [{
+            "name": "Michael the Magnificent",
+            "email": "michael@michael.com"
+        },
+        {
+            "name": "Anna the Amazing",
+            "email": "anna@anna.com"
+        }]
         "movement": [{
           "round": 1
           "position": "3N"
@@ -327,6 +360,12 @@ Fetches the movement (schedule) for the team in question for this tournament.
           }]
     }
 
+* `name`: String. A user-specified and user-readable name suitable for display in a tournament list.
+* `players`: List of objects. More information about the players. There should be at most
+  two players.
+    * `name`: String. User-readable name for the player. Optional.
+    * `email`: String. Email for the player that can be used to identify user posting hand
+      results. Optional.
 * `movement`: List of objects. The generated movement that records all hands that this team
   plays along with associated opponents and position to be played from.
     * `round`: Integer. The round number during which this hand is to be played.
