@@ -329,13 +329,13 @@ Fetches the movements (schedule) for the team in question for this tournament.
 
 * `movement`: List of objects. The generated movement that records all hands that this team
   plays along with associated opponents and position to be played from.
-      * `round`: Integer. The round number during which this hand is to be played.
-      * `position`: String. Position for this team. Two character string starting with the 
-         table number and ending with either 'N' for North/South or 'E' for East/West.
-      * `hands`: List of integers. Set of hand numbers to be played by this team/opponent
-         combination.
-      * `relay_table`: Integer. If set, this set of hands must be played simultaneously with
-         another table. Optional.
+    * `round`: Integer. The round number during which this hand is to be played.
+    * `position`: String. Position for this team. Two character string starting with the 
+       table number and ending with either 'N' for North/South or 'E' for East/West.
+    * `hands`: List of integers. Set of hand numbers to be played by this team/opponent
+       combination.
+    * `relay_table`: Integer. If set, this set of hands must be played simultaneously with
+       another table. Optional.
 
 ### Check if hand has been scored (HEAD /api/tournaments/:id/hands/:board_no/:ns_pair/:ew_pair)
 
