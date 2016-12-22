@@ -426,7 +426,7 @@ contain ann appropriate pair id**, updates an already submitted score.
 #### Request Header
 Optional. Necessary only for overriding hand scores for non-tournament owners.
 <!-- time 4 code -->
-    tichu-pair-code: MANQ
+    X-tichu-pair-code: MANQ
 
 * `X-tichu-pair-code`: 4 character capitalized identifier of one of the pairs
   involved in this hand. This ID is the same as returned from 
