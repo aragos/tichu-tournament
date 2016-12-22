@@ -35,9 +35,7 @@ class ResultHandler(webapp2.RequestHandler):
                                                        user.user_id(), tourney,
                                                        id):
       return
-
     hand_list = GetHandListForTourney(tourney)
-    
     boards = ReadJSONInput(hand_list)
     summaries = Calculate(boards, GetMaxRounds(boards))
     self.response.headers['Content-Type'] = 'application/json'
@@ -64,7 +62,7 @@ class XlxsResultHandler(webapp2.RequestHandler):
                                                        id):
       return
     
-    boards = ReadJSONInput(tourney.hands)
+    boards = ReadJSONInput(GetHandListForTourney(tourney))
     max_rounds = GetMaxRounds(boards)
     summaries = Calculate(boards, max_rounds)
     mp_summaries = summaries

@@ -3,14 +3,12 @@ import json
 
 from google.appengine.api import users
 from google.appengine.ext import ndb
-from handler_utils import CheckUserLoggedInAndMaybeReturnStatus
-from handler_utils import GetTourneyWithIdAndMaybeReturnStatus
 from handler_utils import is_int
+from handler_utils import GetTourneyWithIdAndMaybeReturnStatus
 from handler_utils import SetErrorStatus
-from handler_utils import UserNotLoggedInStatus
-from models import Tournament
-from models import PlayerPair
 from models import HandScore
+from models import PlayerPair
+from models import Tournament
 from movements import Movement
 from movements import NumBoardsPerRoundFromTotal
 
@@ -41,7 +39,7 @@ class MovementHandler(webapp2.RequestHandler):
       return
 
     if not self._CheckUserAllowedToSeeMovementMaybeSetStatus(
-        tourney, pair_no, player_pairs[0]):
+        tourney, player_pairs[0]):
       return
 
     movement = Movement(
@@ -50,9 +48,11 @@ class MovementHandler(webapp2.RequestHandler):
                                    tourney.no_boards)).GetMovement(int(pair_no))
     for hand in movement:
       if hand['position'][1] == "N":
-        hand_score = HandScore.CreateKey(tourney, hand['round'], int(pair_no), hand['opponent']).get()
+        hand_score = HandScore.CreateKey(tourney, hand['round'],
+                                         int(pair_no), hand['opponent']).get()
       else:
-        hand_score = HandScore.CreateKey(tourney, hand['round'], hand['opponent'], int(pair_no)).get()
+        hand_score = HandScore.CreateKey(tourney, hand['round'],
+                                         hand['opponent'], int(pair_no)).get()
       if hand_score:
         hand['calls'] = json.loads(hand_score.calls)
         hand['ns_score'] = hand_score.ns_score
@@ -77,7 +77,7 @@ class MovementHandler(webapp2.RequestHandler):
       return False
     return True
 
-  def _CheckUserAllowedToSeeMovementMaybeSetStatus(self, tourney, pair_no, player_pair):
+  def _CheckUserAllowedToSeeMovementMaybeSetStatus(self, tourney, player_pair):
     error  = "Forbidden User"
     user = users.get_current_user()
     if user and tourney.owner_id == user.user_id():
