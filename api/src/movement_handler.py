@@ -54,10 +54,12 @@ class MovementHandler(webapp2.RequestHandler):
         hand_score = HandScore.CreateKey(tourney, hand['round'],
                                          hand['opponent'], int(pair_no)).get()
       if hand_score:
-        hand['calls'] = json.loads(hand_score.calls)
-        hand['ns_score'] = hand_score.ns_score
-        hand['ew_score'] = hand_score.ew_score
-        hand['notes'] = hand_score.notes
+        hand['score'] = {
+          'calls' : json.loads(hand_score.calls),
+          'ns_score' : hand_score.ns_score,
+          'ew_score' : hand_score.ew_score,
+          'notes' : hand_score.notes,
+        }
 
     combined_dict = {
       'name' : tourney.name,

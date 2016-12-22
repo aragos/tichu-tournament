@@ -307,7 +307,19 @@ Fetches the tournament information for the pair with `pair_id` identifier.
 
 ### Get the schedule of boards a team must play. (GET /api/tournaments/:id/movement/:pair_no)
 
+**Requires one of authentication and ownership of this tournament or a request
+header with an appropriate pair id for pair_no**
 Fetches the movement (schedule) for the team in question for this tournament.
+
+#### Request Header
+Optional. Necessary only for non-tournament owners.
+<!-- time 4 code -->
+    tichu-pair-code: MANQ
+
+* `X-tichu-pair-code`: 4 character capitalized identifier of one of the pairs
+  involved in this hand. This ID is the same as returned from 
+  `GET /tournaments/:id/pairid/:pair_no`
+
 
 #### Request
 
@@ -339,7 +351,17 @@ Fetches the movement (schedule) for the team in question for this tournament.
           "opponent": 2
           "hands": [3, 4, 5]
           "relay_table": 5
-          },
+          "score" : {
+              "calls": {
+                  "north": "T",
+                  "east": "GT",
+                  "west": "",
+                  "south": ""
+              },
+              "ns_score": 150,
+              "ew_score": -150,
+              "notes": "I am a note"
+          }},
           {
           "round": 2
           "position": "1E"
@@ -363,6 +385,16 @@ Fetches the movement (schedule) for the team in question for this tournament.
        combination.
     * `relay_table`: Integer. If set, this set of hands must be played simultaneously with
        another table. Optional.
+    * `scoring`: Object. If the hand has already been scored contains relevant information
+       about the score. Optional.
+      * `calls`: Object. Calls made by players. May have entries for `north`, `east`, `west`, `south`.
+        Each entry may be `"T"`, indicating a call of Tichu, `"GT"`, indicating a call of Grand Tichu,
+        or `""`, indicating no call. If an entry is absent, it is assumed to mean no call.
+      * `ns_score`: Integer or string. The score of the north-south pair, including Tichu bonuses and
+        penalties. May also be the string "AVG+" or "AVG-".
+      * `ew_score`: Integer or string. The score of the east-west pair, including Tichu bonuses and
+        penalties. May also be the string "AVG+" or "AVG-".
+      * `notes`: String. Any additional notes about the hand added by the scorer or the director.
 
 ### Check if hand has been scored (HEAD /api/tournaments/:id/hands/:board_no/:ns_pair/:ew_pair)
 
