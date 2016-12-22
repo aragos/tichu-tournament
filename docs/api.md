@@ -314,7 +314,7 @@ Fetches the movement (schedule) for the team in question for this tournament.
 #### Request Header
 Optional. Necessary only for non-tournament owners.
 <!-- time 4 code -->
-    tichu-pair-code: MANQ
+    X-tichu-pair-code: MANQ
 
 * `X-tichu-pair-code`: 4 character capitalized identifier of one of the pairs
   involved in this hand. This ID is the same as returned from 
