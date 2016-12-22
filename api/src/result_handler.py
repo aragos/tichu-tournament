@@ -6,6 +6,7 @@ from python.calculator import GetMaxRounds
 from google.appengine.api import users
 from handler_utils import CheckUserOwnsTournamentAndMaybeReturnStatus
 from handler_utils import CheckUserLoggedInAndMaybeReturnStatus
+from handler_utils import GetHandListForTourney
 from handler_utils import GetTourneyWithIdAndMaybeReturnStatus
 from handler_utils import is_int
 from handler_utils import SetErrorStatus
@@ -30,21 +31,18 @@ class ResultHandler(webapp2.RequestHandler):
     if not tourney:
       return
 
-    if (not tourney.hands) or (not tourney.owner_id):
-      SetErrorStatus(self.response, 500, "Invalid tournament data",
-                     "Tournament data is corrupted. Sorry.")
-      return
-
     if not CheckUserOwnsTournamentAndMaybeReturnStatus(self.response,
                                                        user.user_id(), tourney,
                                                        id):
       return
 
-    boards = ReadJSONInput(tourney.hands)
+    hand_list = GetHandListForTourney(tourney)
+    
+    boards = ReadJSONInput(hand_list)
     summaries = Calculate(boards, GetMaxRounds(boards))
     self.response.headers['Content-Type'] = 'application/json'
     self.response.set_status(200)
-    self.response.out.write(OutputJSON(json.loads(tourney.hands), summaries))
+    self.response.out.write(OutputJSON(hand_list, summaries))
 
 
 class XlxsResultHandler(webapp2.RequestHandler):
@@ -60,17 +58,12 @@ class XlxsResultHandler(webapp2.RequestHandler):
     tourney = GetTourneyWithIdAndMaybeReturnStatus(self.response, id)
     if not tourney:
       return
-
-    if (not tourney.hands) or (not tourney.owner_id):
-      SetErrorStatus(self.response, 500, "Invalid tournament data",
-                     "Tournament data is corrupted. Sorry.")
-      return
-
+ 
     if not CheckUserOwnsTournamentAndMaybeReturnStatus(self.response,
                                                        user.user_id(), tourney,
                                                        id):
       return
-
+    
     boards = ReadJSONInput(tourney.hands)
     max_rounds = GetMaxRounds(boards)
     summaries = Calculate(boards, max_rounds)
@@ -81,7 +74,7 @@ class XlxsResultHandler(webapp2.RequestHandler):
     self.response.out.write(OutputWorkbookAsBytesIO(wb).getvalue())
     self.response.headers['Content-Type'] = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     self.response.headers['Content-disposition'] = str('attachment; filename=' + 
-        json.loads(tourney.metadata)["name"] + 'TournamentResults.xlsx')
+        tourney.name + 'TournamentResults.xlsx')
     self.response.headers['Content-Transfer-Encoding'] = 'Binary'
     self.response.set_status(200)
 

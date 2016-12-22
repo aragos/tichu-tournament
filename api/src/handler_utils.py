@@ -1,5 +1,8 @@
-from google.appengine.ext import ndb
 import json
+
+from google.appengine.ext import ndb
+from models import Tournament
+from models import HandScore
 
 
 def is_int(s):
@@ -40,8 +43,7 @@ def GetTourneyWithIdAndMaybeReturnStatus(response, id):
   if not is_int(id):
     TourneyDoesNotExistStatus(response, id)
     return
-  tourney_key = ndb.Key("Tournament", int(id))
-  tourney = tourney_key.get()
+  tourney = Tournament.get_by_id(int(id));
   if not tourney:
     TourneyDoesNotExistStatus(response, id)
     return
@@ -51,6 +53,21 @@ def GetTourneyWithIdAndMaybeReturnStatus(response, id):
 def TourneyDoesNotExistStatus(response, id, debug=True):
   SetErrorStatus(response, 404, "Invalid tournament ID",
                  "Tournament with id {} does not exit".format(id))
+
+
+def GetHandListForTourney(tourney):
+  hand_list = []
+  for hand_score in HandScore.query(ancestor=tourney.key).fetch():
+    split_key = hand_score.key.id().split(":")
+    hand_list.append(
+        {'calls': json.loads(hand_score.calls),
+         'board_no': int(split_key[0]),
+         'ns_pair': int(split_key[1]), 
+         'ew_pair': int(split_key[2]),
+         'ns_score': hand_score.ns_score,
+         'ew_score': hand_score.ew_score,
+         'notes': hand_score.notes})
+  return hand_list
 
 
 def SetErrorStatus(response, status, error=None, detail=None):

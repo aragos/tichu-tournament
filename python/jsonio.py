@@ -7,14 +7,12 @@ from calculator import Calculate
 from calculator import TeamSummary
 
 
-def ReadJSONInput(object):
-  """ Reads input from an json string. 
+def ReadJSONInput(hand_list):
+  """ Reads input from a list of hands. 
     
   Returns:
     
   """
-
-  hand_list = json.loads(object)
 
   board_no_to_hr_list = {}
   for hand in hand_list:

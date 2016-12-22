@@ -8,6 +8,7 @@ from handler_utils import is_int
 from handler_utils import SetErrorStatus
 from handler_utils import UserNotLoggedInStatus
 from models import Tournament
+from models import PlayerPair
 
 
 class TourneyListHandler(webapp2.RequestHandler):
@@ -18,9 +19,8 @@ class TourneyListHandler(webapp2.RequestHandler):
 
     # TODO: Implement paging if ever needed.
     tourneys = Tournament._query(ndb.GenericProperty('owner_id') == 
-        user.user_id()).fetch(100)
-    tourney_list =  [{"id": t.key.id(), "name": json.loads(t.metadata)["name"]} 
-                     for t in tourneys]
+        user.user_id()).fetch(projection=[Tournament.name])
+    tourney_list =  [{"id": t.key.id(), "name": t.name} for t in tourneys]
     self.response.set_status(200)
     self.response.headers['Content-Type'] = 'application/json'
     self.response.out.write(json.dumps({"tournaments": tourney_list}, indent=2))
@@ -35,7 +35,7 @@ class TourneyListHandler(webapp2.RequestHandler):
     if not request_dict:
       return
 
-    name = request_dict["name"]
+    name = request_dict['name']
     no_pairs = request_dict['no_pairs']
     no_boards = request_dict['no_boards']
     player_list = request_dict.get('players')
@@ -44,16 +44,15 @@ class TourneyListHandler(webapp2.RequestHandler):
                                                            player_list):
       return
 
-    metadata_dict = {"name": name, "no_pairs": no_pairs,
-                     "no_boards": no_boards}
-    if player_list:
-      metadata_dict["players"] = player_list
     tourney = Tournament(owner_id=user.user_id(),
-                         metadata=json.dumps(metadata_dict))
-    tourney.put()
+                         name = name, 
+                         no_pairs=no_pairs,
+                         no_boards=no_boards)
+    tourney_key = tourney.put()
+    tourney.PutPlayers(player_list, no_pairs)
     self.response.set_status(201)
     self.response.headers['Content-Type'] = 'application/json'
-    self.response.out.write(json.dumps({"id": tourney.key.id()}))
+    self.response.out.write(json.dumps({"id": tourney_key.id()}))
 
 
   def _ParseRequestInfoAndMaybeSetStatus(self):
@@ -97,7 +96,6 @@ class TourneyListHandler(webapp2.RequestHandler):
         If not sets the response with the appropriate status and error message.
         Assumes no_pairs and no_boards are integers.
     '''
-    # TODO: Should enforce uniqueness of names?
     if name == "":
       SetErrorStatus(self.response, 400, "Invalid input",
                      "Tournament name must be nonempty")

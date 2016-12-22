@@ -6,41 +6,32 @@ from python.calculator import Calls
 from python.calculator import InvalidCallError
 from python.calculator import InvalidScoreError
 from google.appengine.api import users
+from google.appengine.ext import ndb
 from handler_utils import CheckUserLoggedInAndMaybeReturnStatus
 from handler_utils import CheckUserOwnsTournamentAndMaybeReturnStatus
 from handler_utils import GetTourneyWithIdAndMaybeReturnStatus
 from handler_utils import is_int
 from handler_utils import SetErrorStatus
-from handler_utils import TourneyDoesNotExistStatus
+from models import HandScore
+from models import PlayerPair
 from models import Tournament
 
 
 class HandHandler(webapp2.RequestHandler):
   def head(self, id, board_no, ns_pair, ew_pair):
-    if not is_int(id):
-      TourneyDoesNotExistStatus(self.response, id)
-      return
-
     tourney = GetTourneyWithIdAndMaybeReturnStatus(self.response, id)
     if not tourney:
       return
 
-    if (not tourney.metadata) or (not tourney.owner_id):
-      self.response.set_status(500)
-      return
-
-    metadata_dict = json.loads(tourney.metadata)
-    hand_list = json.loads(tourney.hands) if tourney.hands else []
     if not self._CheckValidHandParametersMaybeSetStatus(
-        metadata_dict["no_boards"], metadata_dict["no_pairs"], board_no,
+        tourney.no_boards, tourney.no_pairs, board_no,
         ns_pair, ew_pair):
       return
 
-    if not self._is_hand_present(hand_list, int(board_no),
-                                 int(ns_pair), int(ew_pair)):
-      self.response.set_status(204)
-      return
-    self.response.set_status(200)
+    if HandScore.CreateKey(tourney, board_no, ns_pair, ew_pair).get():
+      self.response.set_status(200)
+      return 
+    self.response.set_status(204)
 
 
   def put(self, id, board_no, ns_pair, ew_pair):
@@ -48,10 +39,8 @@ class HandHandler(webapp2.RequestHandler):
     if not tourney:
       return
 
-    metadata_dict = json.loads(tourney.metadata)
-    hand_list = json.loads(tourney.hands) if tourney.hands else []
     if not self._CheckValidHandParametersMaybeSetStatus(
-        metadata_dict["no_boards"], metadata_dict["no_pairs"], board_no,
+        tourney.no_boards, tourney.no_pairs, board_no,
         ns_pair, ew_pair):
       return
 
@@ -76,20 +65,17 @@ class HandHandler(webapp2.RequestHandler):
                "ew_score": int(ew_score),
                "notes": notes}
 
-    if not self._is_hand_present(hand_list, int(board_no), int(ns_pair),
-                                 int(ew_pair)):
-      hand_list.append(hr_dict)
+    hand_score = HandScore.CreateKey(tourney, board_no, ns_pair, ew_pair).get()
+    if not hand_score:
+      tourney.PutHandScore(int(board_no), calls, int(ns_pair), int(ew_pair), notes,
+                           int(ns_score), int(ew_score))
     else:
-      if not self._CheckUserCanOverwriteMaybeSetStatus(tourney.owner_id):
+      if not self._CheckUserCanOverwriteMaybeSetStatus(tourney, int(ns_pair),
+                                                       int(ew_pair)):
         return
       else:
-        for hand in hand_list:
-          if self._is_hand_equal(int(board_no), int(ns_pair), int(ew_pair),
-                                 hand):
-            hand.update(hr_dict)
-            break
-    tourney.hands = json.dumps(hand_list)
-    tourney.put()
+        tourney.PutHandScore(int(board_no), calls, int(ns_pair), int(ew_pair),
+                             notes, int(ns_score), int(ew_score))
     self.response.set_status(204)
  
  
@@ -107,25 +93,17 @@ class HandHandler(webapp2.RequestHandler):
                                                        id):
       return
 
-    metadata_dict = json.loads(tourney.metadata)
-    hand_list = json.loads(tourney.hands) if tourney.hands else []
     if not self._CheckValidHandParametersMaybeSetStatus(
-        metadata_dict["no_boards"], metadata_dict["no_pairs"], board_no,
+        tourney.no_boards, tourney.no_pairs, board_no,
         ns_pair, ew_pair):
       return
 
-    if not self._is_hand_present(hand_list, int(board_no), int(ns_pair),
-                                 int(ew_pair)):
-      SetErrorStatus(self.response, 404, "Invalid Score",
+    hand_score = HandScore.CreateKey(tourney, board_no, ns_pair, ew_pair).get()
+    if not hand_score:
+      SetErrorStatus(self.response, 404, "Invalid Request",
                      "Hand not set in tournament")
       return
-
-    hand_list = [hand for hand 
-                 in hand_list 
-                 if not self._is_hand_equal(int(board_no), int(ns_pair),
-                                            int(ew_pair), hand)]
-    tourney.hands = json.dumps(hand_list)
-    tourney.put()
+    hand_score.key.delete()
     self.response.set_status(204) 
 
 
@@ -176,23 +154,27 @@ class HandHandler(webapp2.RequestHandler):
     return True
 
 
-  def _CheckUserCanOverwriteMaybeSetStatus(self, owner_id):
+  def _CheckUserCanOverwriteMaybeSetStatus(self, tourney, ns_pair, ew_pair):
     user = users.get_current_user()
     error = "Forbidden User"
-    if not user:
+    if user and tourney.owner_id == user.user_id():
+      return True
+    pair_id = self.request.headers.get('X-tichu-pair-code')
+    if not pair_id:
       SetErrorStatus(self.response, 403, error,
-                     "User must be logged in to overwrite existing score.")
+                     "User does not own tournament and is not authenticated with" + 
+                     "a pair code to overwrite this hand.")
       return False
-    elif user.user_id() != owner_id:
+    player_pairs = PlayerPair.query(
+          ndb.OR(PlayerPair.pair_no == int(ns_pair),
+                 PlayerPair.pair_no == int(ew_pair)),
+          ancestor=tourney.key).fetch(projection=[PlayerPair.id])
+    if (not player_pairs) or (pair_id not in [p.id for p in player_pairs]):
       SetErrorStatus(self.response, 403, error,
-                     "Score already exists and user is not director of this tournament")
+                     "User does not own tournament and is authenticated with the " + 
+                     "wrong code for involved pairs")
       return False
     return True
-
-
-  def _is_hand_present(self, hand_list, board_no, ns_pair, ew_pair):
-    return any(self._is_hand_equal(board_no, ns_pair, ew_pair, hand) 
-               for hand in hand_list)
 
 
   def _ParseRequestInfoAndMaybeSetStatus(self):
@@ -219,9 +201,3 @@ class HandHandler(webapp2.RequestHandler):
                      "Calls must be set.")
       return None
     return request_dict
-
-
-  def _is_hand_equal(self, board_no, ns_pair, ew_pair, hand):
-    return (hand["board_no"] == board_no and 
-            hand["ns_pair"] == ns_pair and 
-            hand["ew_pair"] == ew_pair)

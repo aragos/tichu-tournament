@@ -3,6 +3,7 @@ import unittest
 import webtest
 import os
 
+from google.appengine.ext import ndb
 from google.appengine.ext import testbed
 from api.src import main
 
@@ -61,7 +62,7 @@ class AppTest(unittest.TestCase):
     self.assertEqual('name', response_dict['name'])
     self.assertEqual(8, response_dict['no_pairs'])
     self.assertEqual(24, response_dict['no_boards'])
-    self.assertFalse('players' in response_dict)
+    self.assertEqual(2, len(response_dict['players']))
 
     response = self.testapp.get("/api/tournaments/{}".format(id2))
     self.assertEqual(response.status_int, 200)
@@ -154,17 +155,50 @@ class AppTest(unittest.TestCase):
     self.loginUser()
     id = self.AddBasicTournament()
     params = {'name': 'name2', 'no_pairs': 9, 'no_boards': 27, 
-              'players' : [{ "pair_no": 1, "name": "my name" }]}
-    self.testapp.put_json("/api/tournaments/{}".format(id), params, 
-                          expect_errors=True)
+              'players' : [{ "pair_no": 1, "name": "other name" }]}
+    self.testapp.put_json("/api/tournaments/{}".format(id), params)
     response = self.testapp.get("/api/tournaments/{}".format(id))
     self.assertEqual(response.status_int, 200)
     response_dict = json.loads(response.body)
     self.assertEqual('name2', response_dict['name'])
     self.assertEqual(9, response_dict['no_pairs'])
     self.assertEqual(27, response_dict['no_boards'])
+    self.assertEqual(1, len(response_dict['players']))
     self.assertEqual(1, response_dict['players'][0]["pair_no"])
-    self.assertEqual("my name", response_dict['players'][0]["name"])
+    self.assertEqual("other name", response_dict['players'][0]["name"])
+    ## TODO: test that the IDS have changed if you override the number of users
+    
+  def testPutTournament_override_num_pairs_fewer(self):
+    self.loginUser()
+    id = self.AddBasicTournament()
+    params = {'name': 'name2', 'no_pairs': 7, 'no_boards': 21, 
+              'players' : [{ "pair_no": 2, "name": "other name" }]}
+    self.testapp.put_json("/api/tournaments/{}".format(id), params)
+    response = self.testapp.get("/api/tournaments/{}".format(id))
+    self.assertEqual(response.status_int, 200)
+    response_dict = json.loads(response.body)
+    self.assertEqual('name2', response_dict['name'])
+    self.assertEqual(7, response_dict['no_pairs'])
+    self.assertEqual(21, response_dict['no_boards'])
+    self.assertEqual(1, len(response_dict['players']))
+    self.assertEqual(2, response_dict['players'][0]["pair_no"])
+    self.assertEqual("other name", response_dict['players'][0]["name"])
+    
+  def testPutTournament_override_just_names(self):
+    self.loginUser()
+    id = self.AddBasicTournament()
+    params = {'name': 'name2', 'no_pairs': 8, 'no_boards': 24, 
+              'players' : [{ "pair_no": 2, "name": "other name" }]}
+    self.testapp.put_json("/api/tournaments/{}".format(id), params)
+    response = self.testapp.get("/api/tournaments/{}".format(id))
+    self.assertEqual(response.status_int, 200)
+    response_dict = json.loads(response.body)
+    self.assertEqual('name2', response_dict['name'])
+    self.assertEqual(8, response_dict['no_pairs'])
+    self.assertEqual(24, response_dict['no_boards'])
+    self.assertEqual(1, len(response_dict['players']))
+    self.assertEqual(2, response_dict['players'][0]["pair_no"])
+    self.assertEqual("other name", response_dict['players'][0]["name"])
 
   def testDeleteTournament_not_logged_in(self):
     self.loginUser()
@@ -192,15 +226,55 @@ class AppTest(unittest.TestCase):
   def testDeleteTournament(self):
     self.loginUser()
     id = self.AddBasicTournament()
+    id2 = self.AddBasicTournament()
+    self.assertEqual(16, len(ndb.Query(kind = "PlayerPair").fetch()))
     response = self.testapp.delete("/api/tournaments/{}".format(id))
     self.assertEqual(response.status_int, 204)
     response = self.testapp.get("/api/tournaments/{}".format(id),
                                 expect_errors=True)
     self.assertEqual(response.status_int, 404)
+    self.assertEqual(8, len(ndb.Query(kind = "PlayerPair").fetch()))
     response = self.testapp.get("/api/tournaments")
     tourneys = json.loads(response.body)
     self.assertIsNotNone(tourneys["tournaments"])
-    self.assertEqual(0, len(tourneys["tournaments"]))
+    self.assertEqual(1, len(tourneys["tournaments"]))
+    self.assertEqual(id2, tourneys["tournaments"][0]["id"])
+    response = self.testapp.get("/api/tournaments/{}".format(id2),
+                                expect_errors=True)
+    self.CheckBasicTournamentMetadataUnchanged(json.loads(response.body))
+    
+  def testDeleteTournament_hands_removed(self):
+    self.loginUser()
+    id = self.AddBasicTournament()
+    id2 = self.AddBasicTournament()
+    params = {'calls': {}, 'ns_score': 25, 'ew_score': 75}
+    self.testapp.put_json("/api/tournaments/{}/hands/1/2/3".format(id), params)
+    params = {'calls': {"south" : "T"}, 'ns_score': 225, 'ew_score': -25}
+    self.testapp.put_json("/api/tournaments/{}/hands/1/2/3".format(id2), params)
+    
+    
+    self.assertEqual(2, len(ndb.Query(kind = "HandScore").fetch()))
+    response = self.testapp.delete("/api/tournaments/{}".format(id))
+    self.assertEqual(response.status_int, 204)
+    response = self.testapp.get("/api/tournaments/{}".format(id),
+                                expect_errors=True)
+    self.assertEqual(response.status_int, 404)
+    self.assertEqual(1, len(ndb.Query(kind = "HandScore").fetch()))
+    response = self.testapp.get("/api/tournaments")
+    tourneys = json.loads(response.body)
+    self.assertIsNotNone(tourneys["tournaments"])
+    self.assertEqual(1, len(tourneys["tournaments"]))
+    self.assertEqual(id2, tourneys["tournaments"][0]["id"])
+    response = self.testapp.get("/api/tournaments/{}".format(id2),
+                                expect_errors=True)
+    response_dict = json.loads(response.body)
+    self.CheckBasicTournamentMetadataUnchanged(response_dict)
+    self.assertEqual({"south" : "T"}, response_dict["hands"][0]['calls'])
+    self.assertEqual(225, response_dict["hands"][0]['ns_score'])
+    self.assertEqual(-25, response_dict["hands"][0]['ew_score'])
+    self.assertEqual(1, response_dict["hands"][0]['board_no'])
+    self.assertEqual(2, response_dict["hands"][0]['ns_pair'])
+    self.assertEqual(3, response_dict["hands"][0]['ew_pair'])
 
   def loginUser(self, email='user@example.com', id='123', is_admin=False):
     self.testbed.setup_env(
@@ -217,11 +291,21 @@ class AppTest(unittest.TestCase):
       overwrite=True)
 
   def AddBasicTournament(self):
-    params = {'name': 'name', 'no_pairs': 8, 'no_boards': 24}
+    params = {'name': 'name', 'no_pairs': 8, 'no_boards': 24,
+              'players': [{'pair_no': 2, 'name': "My name", 'email': "My email"},
+                          {'pair_no': 8}]}
     response = self.testapp.post_json("/api/tournaments", params)
     self.assertNotEqual(response.body, '')
     response_dict = json.loads(response.body)
     id = response_dict['id']
     self.assertIsNotNone(id)
     return id
+    
+  def CheckBasicTournamentMetadataUnchanged(self, response_dict):
+    self.assertEqual([{'pair_no': 2, 'name': "My name", 'email': "My email"},
+                          {'pair_no': 8}],
+                     response_dict['players'])
+    self.assertEqual('name', response_dict['name'])
+    self.assertEqual(8, response_dict['no_pairs'])
+    self.assertEqual(24, response_dict['no_boards'])
 

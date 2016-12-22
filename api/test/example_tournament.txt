@@ -1,0 +1,826 @@
+{
+    "name": "Tournament Name",
+    "no_pairs": 7,
+    "no_boards": 21,
+    "hands": [{
+        "board_no": 1,
+        "ns_pair": 7,
+        "ew_pair": 1,
+        "calls": {
+            "north": "",
+            "east": "",
+            "west": "",
+            "south": "GT"
+        },
+        "ns_score": 250,
+        "ew_score": 50,
+        "notes": "hahahahahaha what a fool"
+    },
+    {
+        "board_no": 1,
+        "ns_pair": 6,
+        "ew_pair": 5,
+        "calls": {
+            "north": "",
+            "east": "T",
+            "west": "",
+            "south": "GT"
+        },
+        "ns_score": -140,
+        "ew_score": 140
+    },
+    {
+        "board_no": 1,
+        "ns_pair": 4,
+        "ew_pair": 2,
+        "calls": {
+            "north": "",
+            "east": "T",
+            "west": "",
+            "south": ""
+        },
+        "ns_score": 200,
+        "ew_score": -100
+    },
+    {
+        "board_no": 2,
+        "ns_pair": 7,
+        "ew_pair": 1,
+        "calls": {
+            "north": "",
+            "east": "",
+            "west": "T",
+            "south": ""
+        },
+        "ns_score": 30,
+        "ew_score": 170
+    },
+    {
+        "board_no": 2,
+        "ns_pair": 6,
+        "ew_pair": 5,
+        "calls": {
+            "north": "",
+            "east": "",
+            "west": "",
+            "south": ""
+        },
+        "ns_score": 40,
+        "ew_score": 60
+    },
+    {
+        "board_no": 2,
+        "ns_pair": 4,
+        "ew_pair": 2,
+        "calls": {
+            "north": "",
+            "east": "",
+            "west": "GT",
+            "south": ""
+        },
+        "ns_score": 20,
+        "ew_score": 280
+    },
+    {
+        "board_no": 3,
+        "ns_pair": 7,
+        "ew_pair": 1,
+        "calls": {
+            "north": "",
+            "east": "",
+            "west": "",
+            "south": "T"
+        },
+        "ns_score": 185,
+        "ew_score": 15
+    },
+    {
+        "board_no": 3,
+        "ns_pair": 6,
+        "ew_pair": 5,
+        "calls": {
+            "north": "",
+            "east": "T",
+            "west": "",
+            "south": "GT"
+        },
+        "ns_score": -200,
+        "ew_score": 300
+    },
+    {
+        "board_no": 3,
+        "ns_pair": 4,
+        "ew_pair": 2,
+        "calls": {
+            "north": "",
+            "east": "",
+            "west": "",
+            "south": ""
+        },
+        "ns_score": 0,
+        "ew_score": 200
+    },
+    {
+        "board_no": 4,
+        "ns_pair": 7,
+        "ew_pair": 2,
+        "calls": {
+            "north": "GT",
+            "east": "",
+            "west": "",
+            "south": ""
+        },
+        "ns_score": -130,
+        "ew_score": 30
+    },
+    {
+        "board_no": 4,
+        "ns_pair": 5,
+        "ew_pair": 3,
+        "calls": {
+            "north": "",
+            "east": "",
+            "west": "",
+            "south": "T"
+        },
+        "ns_score": 130,
+        "ew_score": 70
+    },
+    {
+        "board_no": 4,
+        "ns_pair": 1,
+        "ew_pair": 4,
+        "calls": {
+            "north": "GT",
+            "east": "",
+            "west": "",
+            "south": ""
+        },
+        "ns_score": -200,
+        "ew_score": 200
+    },
+    {
+        "board_no": 5,
+        "ns_pair": 7,
+        "ew_pair": 2,
+        "calls": {
+            "north": "T",
+            "east": "",
+            "west": "",
+            "south": ""
+        },
+        "ns_score": 200,
+        "ew_score": 0
+    },
+    {
+        "board_no": 5,
+        "ns_pair": 5,
+        "ew_pair": 3,
+        "calls": {
+            "north": "T",
+            "east": "",
+            "west": "",
+            "south": ""
+        },
+        "ns_score": 180,
+        "ew_score": 20
+    },
+    {
+        "board_no": 5,
+        "ns_pair": 1,
+        "ew_pair": 4,
+        "calls": {
+            "north": "T",
+            "east": "",
+            "west": "",
+            "south": ""
+        },
+        "ns_score": 160,
+        "ew_score": 40
+    },
+    {
+        "board_no": 6,
+        "ns_pair": 7,
+        "ew_pair": 2,
+        "calls": {
+            "north": "",
+            "east": "",
+            "west": "T",
+            "south": "T"
+        },
+        "ns_score": 155,
+        "ew_score": -55
+    },
+    {
+        "board_no": 6,
+        "ns_pair": 5,
+        "ew_pair": 3,
+        "calls": {
+            "north": "",
+            "east": "",
+            "west": "",
+            "south": "T"
+        },
+        "ns_score": -15,
+        "ew_score": 15
+    },
+    {
+        "board_no": 6,
+        "ns_pair": 1,
+        "ew_pair": 4,
+        "calls": {
+            "north": "",
+            "east": "",
+            "west": "",
+            "south": "T"
+        },
+        "ns_score": 100,
+        "ew_score": 100
+    },
+    {
+        "board_no": 10,
+        "ns_pair": 3,
+        "ew_pair": 6,
+        "calls": {
+            "north": "",
+            "east": "",
+            "west": "T",
+            "south": ""
+        },
+        "ns_score": 80,
+        "ew_score": -80
+    },
+    {
+        "board_no": 10,
+        "ns_pair": 7,
+        "ew_pair": 4,
+        "calls": {
+            "north": "GT",
+            "east": "",
+            "west": "",
+            "south": ""
+        },
+        "ns_score": 215,
+        "ew_score": 85
+    },
+    {
+        "board_no": 10,
+        "ns_pair": 2,
+        "ew_pair": 1,
+        "calls": {
+            "north": "GT",
+            "east": "",
+            "west": "",
+            "south": ""
+        },
+        "ns_score": 300,
+        "ew_score": 0
+    },
+    {
+        "board_no": 11,
+        "ns_pair": 3,
+        "ew_pair": 6,
+        "calls": {
+            "north": "",
+            "east": "GT",
+            "west": "",
+            "south": "T"
+        },
+        "ns_score": 170,
+        "ew_score": -170
+    },
+    {
+        "board_no": 11,
+        "ns_pair": 7,
+        "ew_pair": 4,
+        "calls": {
+            "north": "",
+            "east": "GT",
+            "west": "",
+            "south": "GT"
+        },
+        "ns_score": 255,
+        "ew_score": -155
+    },
+    {
+        "board_no": 11,
+        "ns_pair": 2,
+        "ew_pair": 1,
+        "calls": {
+            "north": "",
+            "east": "",
+            "west": "",
+            "south": "GT"
+        },
+        "ns_score": -125,
+        "ew_score": 25
+    },
+    {
+        "board_no": 12,
+        "ns_pair": 3,
+        "ew_pair": 6,
+        "calls": {
+            "north": "T",
+            "east": "",
+            "west": "",
+            "south": ""
+        },
+        "ns_score": 170,
+        "ew_score": 30
+    },
+    {
+        "board_no": 12,
+        "ns_pair": 7,
+        "ew_pair": 4,
+        "calls": {
+            "north": "GT",
+            "east": "",
+            "west": "",
+            "south": ""
+        },
+        "ns_score": 280,
+        "ew_score": 20
+    },
+    {
+        "board_no": 12,
+        "ns_pair": 2,
+        "ew_pair": 1,
+        "calls": {
+            "north": "GT",
+            "east": "",
+            "west": "T",
+            "south": ""
+        },
+        "ns_score": -215,
+        "ew_score": 15
+    },
+    {
+        "board_no": 19,
+        "ns_pair": 5,
+        "ew_pair": 4,
+        "calls": {
+            "north": "",
+            "east": "GT",
+            "west": "",
+            "south": ""
+        },
+        "ns_score": 100,
+        "ew_score": -200
+    },
+    {
+        "board_no": 19,
+        "ns_pair": 3,
+        "ew_pair": 1,
+        "calls": {
+            "north": "",
+            "east": "GT",
+            "west": "",
+            "south": ""
+        },
+        "ns_score": 65,
+        "ew_score": -165
+    },
+    {
+        "board_no": 19,
+        "ns_pair": 6,
+        "ew_pair": 2,
+        "calls": {
+            "north": "",
+            "east": "GT",
+            "west": "",
+            "south": ""
+        },
+        "ns_score": 95,
+        "ew_score": -195
+    },
+    {
+        "board_no": 20,
+        "ns_pair": 5,
+        "ew_pair": 4,
+        "calls": {
+            "north": "",
+            "east": "",
+            "west": "GT",
+            "south": ""
+        },
+        "ns_score": 0,
+        "ew_score": 400
+    },
+    {
+        "board_no": 20,
+        "ns_pair": 3,
+        "ew_pair": 1,
+        "calls": {
+            "north": "",
+            "east": "",
+            "west": "GT",
+            "south": ""
+        },
+        "ns_score": 65,
+        "ew_score": 235
+    },
+    {
+        "board_no": 20,
+        "ns_pair": 6,
+        "ew_pair": 2,
+        "calls": {
+            "north": "",
+            "east": "",
+            "west": "GT",
+            "south": ""
+        },
+        "ns_score": 0,
+        "ew_score": 400
+    },
+    {
+        "board_no": 21,
+        "ns_pair": 5,
+        "ew_pair": 4,
+        "calls": {
+            "north": "",
+            "east": "",
+            "west": "",
+            "south": ""
+        },
+        "ns_score": -10,
+        "ew_score": 110
+    },
+    {
+        "board_no": 21,
+        "ns_pair": 3,
+        "ew_pair": 1,
+        "calls": {
+            "north": "",
+            "east": "",
+            "west": "",
+            "south": ""
+        },
+        "ns_score": 30,
+        "ew_score": 70
+    },
+    {
+        "board_no": 21,
+        "ns_pair": 6,
+        "ew_pair": 2,
+        "calls": {
+            "north": "",
+            "east": "",
+            "west": "",
+            "south": "GT"
+        },
+        "ns_score": 240,
+        "ew_score": 60
+    },
+    {
+        "board_no": 13,
+        "ns_pair": 7,
+        "ew_pair": 5,
+        "calls": {
+            "north": "",
+            "east": "",
+            "west": "",
+            "south": "T"
+        },
+        "ns_score": 145,
+        "ew_score": 55
+    },
+    {
+        "board_no": 13,
+        "ns_pair": 3,
+        "ew_pair": 2,
+        "calls": {
+            "north": "",
+            "east": "",
+            "west": "",
+            "south": "T"
+        },
+        "ns_score": 125,
+        "ew_score": 75
+    },
+    {
+        "board_no": 13,
+        "ns_pair": 1,
+        "ew_pair": 6,
+        "calls": {
+            "north": "",
+            "east": "",
+            "west": "",
+            "south": "T"
+        },
+        "ns_score": 300,
+        "ew_score": 0
+    },
+    {
+        "board_no": 16,
+        "ns_pair": 5,
+        "ew_pair": 1,
+        "calls": {
+            "north": "",
+            "east": "T",
+            "west": "",
+            "south": ""
+        },
+        "ns_score": 0,
+        "ew_score": 200
+    },
+    {
+        "board_no": 16,
+        "ns_pair": 7,
+        "ew_pair": 6,
+        "calls": {
+            "north": "",
+            "east": "T",
+            "west": "",
+            "south": ""
+        },
+        "ns_score": 0,
+        "ew_score": 300
+    },
+    {
+        "board_no": 16,
+        "ns_pair": 4,
+        "ew_pair": 3,
+        "calls": {
+            "north": "",
+            "east": "T",
+            "west": "",
+            "south": ""
+        },
+        "ns_score": 45,
+        "ew_score": 155
+    },
+    {
+        "board_no": 8,
+        "ns_pair": 7,
+        "ew_pair": 3,
+        "calls": {
+            "north": "T",
+            "east": "",
+            "west": "",
+            "south": ""
+        },
+        "ns_score": 300,
+        "ew_score": 0
+    },
+    {
+        "board_no": 8,
+        "ns_pair": 6,
+        "ew_pair": 4,
+        "calls": {
+            "north": "GT",
+            "east": "",
+            "west": "",
+            "south": ""
+        },
+        "ns_score": 300,
+        "ew_score": 0
+    },
+    {
+        "board_no": 8,
+        "ns_pair": 2,
+        "ew_pair": 5,
+        "calls": {
+            "north": "",
+            "east": "",
+            "west": "",
+            "south": "T"
+        },
+        "ns_score": 300,
+        "ew_score": 0
+    },
+    {
+        "board_no": 7,
+        "ns_pair": 7,
+        "ew_pair": 3,
+        "calls": {
+            "north": "GT",
+            "east": "",
+            "west": "GT",
+            "south": ""
+        },
+        "ns_score": -200,
+        "ew_score": 400
+    },
+    {
+        "board_no": 7,
+        "ns_pair": 6,
+        "ew_pair": 4,
+        "calls": {
+            "north": "",
+            "east": "",
+            "west": "GT",
+            "south": ""
+        },
+        "ns_score": 65,
+        "ew_score": 235
+    },
+    {
+        "board_no": 7,
+        "ns_pair": 2,
+        "ew_pair": 5,
+        "calls": {
+            "north": "",
+            "east": "",
+            "west": "GT",
+            "south": ""
+        },
+        "ns_score": 10,
+        "ew_score": 290
+    },
+    {
+        "board_no": 9,
+        "ns_pair": 7,
+        "ew_pair": 3,
+        "calls": {
+            "north": "",
+            "east": "",
+            "west": "",
+            "south": "T"
+        },
+        "ns_score": 165,
+        "ew_score": 35
+    },
+    {
+        "board_no": 9,
+        "ns_pair": 6,
+        "ew_pair": 4,
+        "calls": {
+            "north": "",
+            "east": "",
+            "west": "",
+            "south": "T"
+        },
+        "ns_score": -120,
+        "ew_score": 120
+    },
+    {
+        "board_no": 9,
+        "ns_pair": 2,
+        "ew_pair": 5,
+        "calls": {
+            "north": "",
+            "east": "T",
+            "west": "",
+            "south": ""
+        },
+        "ns_score": -5,
+        "ew_score": 205
+    },
+    {
+        "board_no": 14,
+        "ns_pair": 7,
+        "ew_pair": 5,
+        "calls": {
+            "north": "",
+            "east": "",
+            "west": "",
+            "south": "T"
+        },
+        "ns_score": -100,
+        "ew_score": 200
+    },
+    {
+        "board_no": 14,
+        "ns_pair": 3,
+        "ew_pair": 2,
+        "calls": {
+            "north": "",
+            "east": "",
+            "west": "",
+            "south": "T"
+        },
+        "ns_score": -100,
+        "ew_score": 200
+    },
+    {
+        "board_no": 14,
+        "ns_pair": 1,
+        "ew_pair": 6,
+        "calls": {
+            "north": "",
+            "east": "T",
+            "west": "",
+            "south": ""
+        },
+        "ns_score": 50,
+        "ew_score": 150
+    },
+    {
+        "board_no": 15,
+        "ns_pair": 7,
+        "ew_pair": 5,
+        "calls": {
+            "north": "",
+            "east": "GT",
+            "west": "",
+            "south": "T"
+        },
+        "ns_score": 105,
+        "ew_score": -105
+    },
+    {
+        "board_no": 15,
+        "ns_pair": 3,
+        "ew_pair": 2,
+        "calls": {
+            "north": "",
+            "east": "GT",
+            "west": "",
+            "south": ""
+        },
+        "ns_score": 0,
+        "ew_score": 300
+    },
+    {
+        "board_no": 15,
+        "ns_pair": 1,
+        "ew_pair": 6,
+        "calls": {
+            "north": "",
+            "east": "GT",
+            "west": "",
+            "south": ""
+        },
+        "ns_score": 0,
+        "ew_score": 400
+    },
+    {
+        "board_no": 17,
+        "ns_pair": 5,
+        "ew_pair": 1,
+        "calls": {
+            "north": "GT",
+            "east": "",
+            "west": "",
+            "south": ""
+        },
+        "ns_score": 300,
+        "ew_score": 0
+    },
+    {
+        "board_no": 17,
+        "ns_pair": 7,
+        "ew_pair": 6,
+        "calls": {
+            "north": "GT",
+            "east": "",
+            "west": "",
+            "south": ""
+        },
+        "ns_score": 275,
+        "ew_score": 25
+    },
+    {
+        "board_no": 17,
+        "ns_pair": 4,
+        "ew_pair": 3,
+        "calls": {
+            "north": "GT",
+            "east": "",
+            "west": "",
+            "south": ""
+        },
+        "ns_score": 400,
+        "ew_score": 0
+    },
+    {
+        "board_no": 18,
+        "ns_pair": 5,
+        "ew_pair": 1,
+        "calls": {
+            "north": "",
+            "east": "",
+            "west": "",
+            "south": "T"
+        },
+        "ns_score": 200,
+        "ew_score": 0
+    },
+    {
+        "board_no": 18,
+        "ns_pair": 7,
+        "ew_pair": 6,
+        "calls": {
+            "north": "T",
+            "east": "",
+            "west": "",
+            "south": ""
+        },
+        "ns_score": 300,
+        "ew_score": 0
+    },
+    {
+        "board_no": 18,
+        "ns_pair": 4,
+        "ew_pair": 3,
+        "calls": {
+            "north": "",
+            "east": "",
+            "west": "",
+            "south": ""
+        },
+        "ns_score": 90,
+        "ew_score": 10
+    }
+    ]
+}

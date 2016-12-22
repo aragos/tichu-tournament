@@ -2,17 +2,21 @@ import webapp2
 import json
 
 from google.appengine.api import users
+from google.appengine.ext import ndb
 from handler_utils import CheckUserOwnsTournamentAndMaybeReturnStatus
 from handler_utils import CheckUserLoggedInAndMaybeReturnStatus
+from handler_utils import GetHandListForTourney
 from handler_utils import GetTourneyWithIdAndMaybeReturnStatus
 from handler_utils import is_int
 from handler_utils import TourneyDoesNotExistStatus
 from handler_utils import SetErrorStatus
+from models import HandScore
 from models import Tournament
+from models import PlayerPair
 
 class TourneyHandler(webapp2.RequestHandler):
-  ''' Handles reuqests to /api/tournament/:id. Responsible all things related
-      to any one specific tournament.
+  ''' Handles reuqests to /api/tournament/:id. Responsible for all things
+      related to any one specific tournament.
   '''
 
   def get(self, id):
@@ -34,19 +38,21 @@ class TourneyHandler(webapp2.RequestHandler):
     if not tourney:
       return
     
-    if (not tourney.metadata) or (not tourney.owner_id):
-      SetErrorStatus(self.response, 500, "Invalid tournament data",
-                     "Tournament data is corrupted. Consider starting a " + 
-                         "new one.")
-      return
-
     if not CheckUserOwnsTournamentAndMaybeReturnStatus(self.response,
                                                        user.user_id(),
                                                        tourney, id):
       return
 
-    combined_dict = json.loads(tourney.metadata)
-    combined_dict["hands"] = json.loads(tourney.hands) if tourney.hands else []
+    combined_dict = {'no_pairs' : tourney.no_pairs,
+                     'no_boards' :tourney.no_boards,
+                     'name' : tourney.name,
+                     'hands' : GetHandListForTourney(tourney)}
+    for player_pair in PlayerPair.query(ancestor=tourney.key).fetch():
+      if player_pair.players:
+        for player in json.loads(player_pair.players):
+          player['pair_no'] = player_pair.pair_no
+          combined_dict.setdefault('players', []).append(player)
+
     self.response.headers['Content-Type'] = 'application/json'
     self.response.set_status(200)
     self.response.out.write(json.dumps(combined_dict, indent=2))
@@ -70,7 +76,7 @@ class TourneyHandler(webapp2.RequestHandler):
     if not request_dict:
       return
 
-    name = request_dict["name"]
+    name = request_dict['name']
     no_pairs = request_dict['no_pairs']
     no_boards = request_dict['no_boards']
     player_list = request_dict.get('players')
@@ -81,12 +87,11 @@ class TourneyHandler(webapp2.RequestHandler):
 
     self.response.set_status(204)
     # Need to update documentation, this leaves available hand scores alone.
-    metadata_dict = {"name": name, "no_pairs": no_pairs,
-                     "no_boards": no_boards}
-    if player_list:
-      metadata_dict["players"] = player_list
-    tourney.metadata = json.dumps(metadata_dict)
-    tourney.put()  
+    tourney.no_pairs = no_pairs
+    tourney.no_boards = no_boards
+    tourney.name = name
+    tourney_key = tourney.put()
+    tourney.PutPlayers(player_list, no_pairs)
 
 
   def delete(self, id):
@@ -104,7 +109,7 @@ class TourneyHandler(webapp2.RequestHandler):
       return
 
     self.response.set_status(204)
-    tourney.key.delete()  
+    ndb.delete_multi(ndb.Query(ancestor=tourney.key).iter(keys_only = True))
 
 
   def _ParseRequestInfoAndMaybeSetStatus(self):

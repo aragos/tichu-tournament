@@ -65,16 +65,16 @@ class Calls:
             calls are invalid. 
         """
         json_dict = json.loads(call_json)
-        return Calls(json_dict.get("north", ""), json_dict.get("south", ""), 
-                     json_dict.get("east", ""), json_dict.get("west", ""))
+        return cls(json_dict.get("north", ""), json_dict.get("south", ""), 
+                   json_dict.get("east", ""), json_dict.get("west", ""))
                      
     @classmethod
     def FromDict(cls, dict):
         """ Loads from a dictionary. Raises an exception if any of the
             calls are invalid. 
         """
-        return Calls(dict.get("north", ""), dict.get("south", ""), 
-                     dict.get("east", ""), dict.get("west", ""))
+        return cls(dict.get("north", ""), dict.get("south", ""), 
+                   dict.get("east", ""), dict.get("west", ""))
 
 class HandResult:
     """ Contains all information about a single hand between two teams. """
