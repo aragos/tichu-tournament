@@ -27,7 +27,7 @@
   /**
    * Sets up the Angular Material theme.
    *
-   * @param {md.$mdThemingProvider} $mdThemingProvider
+   * @param {$mdThemingProvider} $mdThemingProvider
    * @ngInject
    */
   function configureTheme($mdThemingProvider){
@@ -40,12 +40,18 @@
    * Configures the routing provider to go to /tournaments when no other page is specified.
    * (e.g., on initial load)
    *
-   * @param {angular.$routeProvider} $routeProvider
+   * @param {$locationProvider} $locationProvider
+   * @param {$routeProvider} $routeProvider
    * @ngInject
    */
-  function setDefaultRoute($routeProvider) {
+  function setDefaultRoute($locationProvider, $routeProvider) {
     $routeProvider
         .otherwise("/tournaments");
+    $locationProvider.html5Mode({
+      enabled: true,
+      requireBase: true,
+      rewriteLinks: true
+    })
   }
 
   angular.module("tichu-tournament", ["ng", "ngRoute", "ngMaterial", "tichu-tournament-list"])
