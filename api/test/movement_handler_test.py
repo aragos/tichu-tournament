@@ -57,7 +57,7 @@ class AppTest(unittest.TestCase):
   def testGetMovement_right_header(self):
     self.loginUser()
     id = self.AddBasicTournament()
-    response = self.testapp.get("/api/tournaments/{}/pairid/2".format(id))
+    response = self.testapp.get("/api/tournaments/{}/pairids/2".format(id))
     opaque_id = json.loads(response.body)['pair_id']
     self.logoutUser()
     
@@ -101,21 +101,21 @@ class AppTest(unittest.TestCase):
     response = self.testapp.put_json("/api/tournaments/{}/hands/1/1/2".format(id2),
                                      params)
     
-    response = self.testapp.get("/api/tournaments/{}/pairid/1".format(id))
+    response = self.testapp.get("/api/tournaments/{}/pairids/1".format(id))
     opaque_id_team1_tourney1 = json.loads(response.body)['pair_id']
-    response = self.testapp.get("/api/tournaments/{}/pairid/2".format(id))
+    response = self.testapp.get("/api/tournaments/{}/pairids/2".format(id))
     opaque_id_team2_tourney1 = json.loads(response.body)['pair_id']
-    response = self.testapp.get("/api/tournaments/{}/pairid/4".format(id))
+    response = self.testapp.get("/api/tournaments/{}/pairids/4".format(id))
     opaque_id_team4_tourney1 = json.loads(response.body)['pair_id']
-    response = self.testapp.get("/api/tournaments/{}/pairid/5".format(id))
+    response = self.testapp.get("/api/tournaments/{}/pairids/5".format(id))
     opaque_id_team5_tourney1 = json.loads(response.body)['pair_id']
-    response = self.testapp.get("/api/tournaments/{}/pairid/6".format(id))
+    response = self.testapp.get("/api/tournaments/{}/pairids/6".format(id))
     opaque_id_team6_tourney1 = json.loads(response.body)['pair_id']
-    response = self.testapp.get("/api/tournaments/{}/pairid/7".format(id))
+    response = self.testapp.get("/api/tournaments/{}/pairids/7".format(id))
     opaque_id_team7_tourney1 = json.loads(response.body)['pair_id']
-    response = self.testapp.get("/api/tournaments/{}/pairid/1".format(id2))
+    response = self.testapp.get("/api/tournaments/{}/pairids/1".format(id2))
     opaque_id_team1_tourney2 = json.loads(response.body)['pair_id']
-    response = self.testapp.get("/api/tournaments/{}/pairid/2".format(id2))
+    response = self.testapp.get("/api/tournaments/{}/pairids/2".format(id2))
     opaque_id_team2_tourney2 = json.loads(response.body)['pair_id']
     
     ##### Output Testing #####

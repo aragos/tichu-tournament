@@ -15,7 +15,7 @@ app = webapp2.WSGIApplication([
     ('/api/tournaments/([^/]+)/results/?', ResultHandler),
     ('/api/tournaments/([^/]+)/xlsresults/?', XlxsResultHandler),
     ('/api/tournaments/([^/]+)/hands/([^/]+)/([^/]+)/([^/]+)/?', HandHandler),
-    ('/api/tournaments/([^/]+)/pairid/([^/]+)/?', TourneyPairIdHandler),
+    ('/api/tournaments/([^/]+)/pairids/([^/]+)/?', TourneyPairIdHandler),
     ('/api/tournaments/([^/]+)/pairids/?', TourneyPairIdsHandler),
     ('/api/tournaments/pairno/([^/]+)/?', PairIdHandler),
     ('/api/tournaments/([^/]+)/movement/([^/]+)/?', MovementHandler),

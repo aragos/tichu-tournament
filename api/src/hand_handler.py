@@ -67,8 +67,8 @@ class HandHandler(webapp2.RequestHandler):
 
     hand_score = HandScore.CreateKey(tourney, board_no, ns_pair, ew_pair).get()
     if not hand_score:
-      tourney.PutHandScore(int(board_no), calls, int(ns_pair), int(ew_pair), notes,
-                           int(ns_score), int(ew_score))
+      tourney.PutHandScore(int(board_no), calls, int(ns_pair), int(ew_pair),
+                           notes, int(ns_score), int(ew_score))
     else:
       if not self._CheckUserCanOverwriteMaybeSetStatus(tourney, int(ns_pair),
                                                        int(ew_pair)):

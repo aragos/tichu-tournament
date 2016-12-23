@@ -76,7 +76,8 @@ class TourneyPairIdHandler(webapp2.RequestHandler):
         int(pair_no), ancestor=tourney.key).fetch(1, projection=[PlayerPair.id])
     if not player_pairs:
       SetErrorStatus(404, "Invalid Id",
-                     "Pair pair number {} does not exist in this tournament".format(pair_no))
+                     "Pair pair number {} does not exist in this " + 
+                         "tournament".format(pair_no))
     self.response.headers['Content-Type'] = 'application/json'
     self.response.set_status(200)
     self.response.out.write(json.dumps({'pair_id' : player_pairs[0].id}, indent=2))

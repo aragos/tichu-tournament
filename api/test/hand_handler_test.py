@@ -215,7 +215,7 @@ class AppTest(unittest.TestCase):
     
     # Override the hand again but now as a logged out user with the right
     # credentials.
-    response = self.testapp.get("/api/tournaments/{}/pairid/2".format(id))
+    response = self.testapp.get("/api/tournaments/{}/pairids/2".format(id))
     opaque_id = json.loads(response.body)['pair_id']
     self.logoutUser()
     params = {'calls': {}, 'ns_score': 25, 'ew_score': 75}
