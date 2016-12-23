@@ -16,6 +16,14 @@
     this.header = "Tichu Tournament";
 
     /**
+     * Whether the toolbar should be displayed.
+     *
+     * @export
+     * @type {boolean}
+     */
+    this.showHeader = true;
+
+    /**
      * The current page title. Appended to the header and displayed as the <title>.
      *
      * @export

@@ -8,6 +8,7 @@
    * @ngInject
    */
   function TournamentListController($scope) {
+    $scope.appController.showHeader = true;
     $scope.appController.header = "Tournaments";
 
     /**
