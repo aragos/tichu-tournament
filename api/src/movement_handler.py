@@ -47,19 +47,7 @@ class MovementHandler(webapp2.RequestHandler):
         NumBoardsPerRoundFromTotal(tourney.no_pairs,
                                    tourney.no_boards)).GetMovement(int(pair_no))
     for hand in movement:
-      if hand['position'][1] == "N":
-        hand_score = HandScore.CreateKey(tourney, hand['round'],
-                                         int(pair_no), hand['opponent']).get()
-      else:
-        hand_score = HandScore.CreateKey(tourney, hand['round'],
-                                         hand['opponent'], int(pair_no)).get()
-      if hand_score:
-        hand['score'] = {
-          'calls' : json.loads(hand_score.calls),
-          'ns_score' : hand_score.ns_score,
-          'ew_score' : hand_score.ew_score,
-          'notes' : hand_score.notes,
-        }
+      self._UpdateHandWithScore(hand, tourney, int(pair_no))
 
     combined_dict = {
       'name' : tourney.name,
@@ -70,6 +58,21 @@ class MovementHandler(webapp2.RequestHandler):
     self.response.headers['Content-Type'] = 'application/json'
     self.response.set_status(200)
     self.response.out.write(json.dumps(combined_dict, indent=2))
+
+  def _UpdateHandWithScore(self, hand, tourney, pair_no):
+    if hand['position'][1] == "N":
+      hand_score = HandScore.CreateKey(tourney, hand['round'],
+                                       pair_no, hand['opponent']).get()
+    else:
+      hand_score = HandScore.CreateKey(tourney, hand['round'],
+                                       hand['opponent'], pair_no).get()
+    if hand_score:
+      hand['score'] = {
+          'calls' : json.loads(hand_score.calls),
+          'ns_score' : hand_score.ns_score,
+          'ew_score' : hand_score.ew_score,
+          'notes' : hand_score.notes,
+      }
 
   def _CheckValidHandParametersMaybeSetStatus(self, tourney, pair_no):
     error = "Invalid Input"
@@ -93,6 +96,6 @@ class MovementHandler(webapp2.RequestHandler):
     if pair_id != player_pair.id:
       SetErrorStatus(self.response, 403, error,
                      "User does not own tournament and is authenticated with the " + 
-                     "wrong code for pair {}".format(pair_no))
+                     "wrong code for pair {}".format(player_pair.pair_no))
       return False
     return True
