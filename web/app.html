@@ -18,10 +18,10 @@
   <div flex layout="column" tabIndex="-1" role="main" class="md-whiteframe-z2">
 
     <md-toolbar ng-if="appController.showHeader && appController.header" layout="row" class="md-whiteframe-z1">
-      <h4 style="padding-left:0.5em">{{ appController.header }}</h4>
+      <h2 class="md-toolbar-tools">{{ appController.header }}</h2>
     </md-toolbar>
 
-    <md-content flex id="content" layout="row" ng-view>
+    <md-content flex id="content" layout="column" ng-view>
     </md-content>
 
   </div>
@@ -34,6 +34,7 @@
   <script src="bower_components/angular-route/angular-route.js"></script>
   <script src="src/tichu-tournament.js"></script>
   <script src="src/home/home.js"></script>
+  <script src="src/movements/movement-detail.js"></script>
   <script src="src/tournaments/tournament-list.js"></script>
 </body>
 </html>
