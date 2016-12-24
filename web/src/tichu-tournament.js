@@ -16,6 +16,14 @@
     this.header = "Tichu Tournament";
 
     /**
+     * The path the back button should go to, or null to hide the back button.
+     *
+     * @export
+     * @type {string|null}
+     */
+    this.backPath = "/home";
+
+    /**
      * Whether the toolbar should be displayed.
      *
      * @export
