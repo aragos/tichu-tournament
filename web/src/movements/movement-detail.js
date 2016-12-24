@@ -4,13 +4,16 @@
    * Main controller for the tournament list page.
    *
    * @constructor
-   * @param {angular.Scope} $scope
-   * @param {{tournamentId: string, pairNo: number, playerCode: (string|undefined), movement: !tichu.Movement}} movementData
+   * @param {!angular.Scope} $scope
+   * @param {!{tournamentId: string, pairNo: number, playerCode: ?string, movement: !tichu.Movement}} movementData
    * @ngInject
    */
   function MovementDetailController($scope, movementData) {
-    $scope.appController.showHeader = true;
-    $scope.appController.header = "Pair #" + movementData.pairNo + " - " + movementData.movement["name"];
+    $scope.appController.setPageHeader({
+      header: "Pair #" + movementData.pairNo + " - " + movementData.movement["name"],
+      backPath: movementData.playerCode ? "/home" : "/tournaments/" + movementData.tournamentId,
+      showHeader: true
+    });
 
     /**
      * The ID of the tournament this movement is from.
@@ -31,7 +34,7 @@
     /**
      * The player code which was used.
      *
-     * @type {string}
+     * @type {?string}
      * @export
      */
     this.playerCode = movementData.playerCode;
@@ -48,17 +51,17 @@
   /**
    * Asynchronously loads the movement specified by the tournament and pair.
    *
-   * @param {angular.$q} $q
+   * @param {!angular.$q} $q
    * @param {string} tournamentId
    * @param {number} pairNo
-   * @param {string|undefined} playerCode
-   * @returns {angular.$q.Promise<{tournamentId: string, pairNo: number, playerCode: (string|undefined), movement: !tichu.Movement}>}
+   * @param {?string=} playerCode
+   * @returns {angular.$q.Promise<{tournamentId: string, pairNo: number, playerCode: ?string, movement: !tichu.Movement}>}
    */
   function loadMovement($q, tournamentId, pairNo, playerCode) {
     return $q.when({
       tournamentId: tournamentId,
       pairNo: pairNo,
-      playerCode: playerCode,
+      playerCode: playerCode || null,
       movement: {
           name: "Tournament " + tournamentId,
           players: [{
@@ -96,7 +99,7 @@
   }
 
   /**
-   * Configures the routing provider to load the tournament list at /tournaments.
+   * Configures the routing provider to load the movement detail page at its path.
    *
    * @param {$routeProvider} $routeProvider
    * @ngInject
@@ -113,7 +116,7 @@
                   $q,
                   $route.current.params["tournamentId"],
                   parseInt($route.current.params["pairNo"]),
-                  $route.current.params["playerCode"]);
+                  $route.current.params["playerCode"] || null);
             }
           }
         });

@@ -15,7 +15,8 @@ tichu.TournamentSummary;
  *     name: string,
  *     noPairs: number,
  *     noBoards: number,
- *     hands: !tichu.HandScore[]
+ *     hands: !tichu.HandScore[],
+ *     players: (!tichu.Player[]|undefined)
  * }}
  */
 tichu.Tournament;

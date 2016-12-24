@@ -4,18 +4,21 @@
    * Main controller for the tournament list page.
    *
    * @constructor
-   * @param {angular.Scope} $scope
-   * @param {tichu.TournamentSummary[]} tournaments
+   * @param {!angular.Scope} $scope
+   * @param {!tichu.TournamentSummary[]} tournaments
    * @ngInject
    */
   function TournamentListController($scope, tournaments) {
-    $scope.appController.showHeader = true;
-    $scope.appController.header = "Tournaments";
+    $scope.appController.setPageHeader({
+      header: "Tournaments",
+      backPath: "/home",
+      showHeader: true
+    });
 
     /**
      * List of tournaments to be displayed to the user.
      *
-     * @type {tichu.TournamentSummary[]}
+     * @type {!tichu.TournamentSummary[]}
      * @export
      */
     this.tournaments = tournaments;
@@ -34,9 +37,9 @@
   }
 
   /**
-   * Configures the routing provider to load the tournament list at /tournaments.
+   * Configures the routing provider to load the tournament list at its path.
    *
-   * @param {$routeProvider} $routeProvider
+   * @param {!$routeProvider} $routeProvider
    * @ngInject
    */
   function mapRoute($routeProvider) {

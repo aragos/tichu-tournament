@@ -8,10 +8,10 @@
    */
   function AppController() {
     /**
-     * The current header (displayed in the toolbar).
+     * The current header (displayed in the toolbar and page title), or null to hide header text.
      *
      * @export
-     * @type {string}
+     * @type {?string}
      */
     this.header = "Tichu Tournament";
 
@@ -19,7 +19,7 @@
      * The path the back button should go to, or null to hide the back button.
      *
      * @export
-     * @type {string|null}
+     * @type {?string}
      */
     this.backPath = "/home";
 
@@ -41,9 +41,25 @@
   }
 
   /**
+   * Configures the header for this page.
+   *
+   * @param {!{header: (?string|undefined), backPath: (?string|undefined), showHeader: (?boolean|undefined)}} options
+   *     The options dictionary.
+   *     header: The page header; is cleared (no page header text) if the options header is null or unset.
+   *     backPath: The back button path; is cleared (no back button) if the options path is null or unset.
+   *     showHeader: Whether to show the toolbar; defaults to true if null or unset. Only has any effect
+   *         if the header or backPath are set.
+   */
+  AppController.prototype.setPageHeader = function setPageHeader(options) {
+    this.header = options.header || null;
+    this.backPath = options.backPath || null;
+    this.showHeader = options.showHeader !== false;
+  };
+
+  /**
    * Sets up the Angular Material theme.
    *
-   * @param {$mdThemingProvider} $mdThemingProvider
+   * @param {!$mdThemingProvider} $mdThemingProvider
    * @ngInject
    */
   function configureTheme($mdThemingProvider){
@@ -53,11 +69,11 @@
   }
 
   /**
-   * Configures the routing provider to go to /tournaments when no other page is specified.
-   * (e.g., on initial load)
+   * Configures the routing provider to go to /home when no other page is specified.
+   * (e.g., on initial load) Also configures html5mode.
    *
-   * @param {$locationProvider} $locationProvider
-   * @param {$routeProvider} $routeProvider
+   * @param {!$locationProvider} $locationProvider
+   * @param {!$routeProvider} $routeProvider
    * @ngInject
    */
   function setDefaultRoute($locationProvider, $routeProvider) {

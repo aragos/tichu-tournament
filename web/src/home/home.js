@@ -4,12 +4,13 @@
    * Main controller for the tournament list page.
    *
    * @constructor
-   * @param {angular.Scope} $scope
+   * @param {!angular.Scope} $scope
    * @ngInject
    */
   function HomeController($scope) {
-    $scope.appController.showHeader = false;
-    $scope.appController.header = "";
+    $scope.appController.setPageHeader({
+      showHeader: false
+    });
 
     /**
      * The code the user has currently entered.
@@ -33,9 +34,9 @@
   };
 
   /**
-   * Configures the routing provider to load the tournament list at /tournaments.
+   * Configures the routing provider to load the home screen at its path.
    *
-   * @param {$routeProvider} $routeProvider
+   * @param {!$routeProvider} $routeProvider
    * @ngInject
    */
   function mapRoute($routeProvider) {
