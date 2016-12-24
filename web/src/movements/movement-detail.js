@@ -5,7 +5,7 @@
    *
    * @constructor
    * @param {angular.Scope} $scope
-   * @param {{tournamentId: string, pairNo: number, pairId: (string|undefined), movement: !tichu.Movement}} movementData
+   * @param {{tournamentId: string, pairNo: number, playerCode: (string|undefined), movement: !tichu.Movement}} movementData
    * @ngInject
    */
   function MovementDetailController($scope, movementData) {
@@ -29,12 +29,12 @@
     this.pairNo = movementData.pairNo;
 
     /**
-     * Whether a pair ID was used.
+     * The player code which was used.
      *
-     * @type {boolean}
+     * @type {string}
      * @export
      */
-    this.usedPairId = !!movementData.pairId;
+    this.playerCode = movementData.playerCode;
 
     /**
      * The full movement information.
@@ -46,26 +46,26 @@
   }
 
   /**
-   * Asynchronously loads the movement.
+   * Asynchronously loads the movement specified by the tournament and pair.
    *
    * @param {angular.$q} $q
    * @param {string} tournamentId
    * @param {number} pairNo
-   * @param {string} pairId
-   * @returns {angular.$q.Promise<{tournamentId: string, pairNo: number, pairId: (string|undefined), movement: !tichu.Movement}>}
+   * @param {string|undefined} playerCode
+   * @returns {angular.$q.Promise<{tournamentId: string, pairNo: number, playerCode: (string|undefined), movement: !tichu.Movement}>}
    */
-  function loadMovement($q, tournamentId, pairNo, pairId) {
+  function loadMovement($q, tournamentId, pairNo, playerCode) {
     return $q.when({
       tournamentId: tournamentId,
       pairNo: pairNo,
-      pairId: pairId,
+      playerCode: playerCode,
       movement: {
           name: "Tournament " + tournamentId,
           players: [{
-            name: "Player " + pairNo + ".1" + pairId,
+            name: "Player " + pairNo + ".1" + playerCode,
             email: "first" + pairNo + "@email.com"
           }, {
-            name: "Player " + pairNo + ".2" + pairId,
+            name: "Player " + pairNo + ".2" + playerCode,
             email: "second" + pairNo + "@email.com"
           }],
           "movement": [{
@@ -113,7 +113,7 @@
                   $q,
                   $route.current.params["tournamentId"],
                   parseInt($route.current.params["pairNo"]),
-                  $route.current.params["pairId"]);
+                  $route.current.params["playerCode"]);
             }
           }
         });
