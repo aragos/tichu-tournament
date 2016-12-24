@@ -54,7 +54,7 @@
    */
   function setDefaultRoute($locationProvider, $routeProvider) {
     $routeProvider
-        .otherwise("/tournaments");
+        .otherwise("/home");
     $locationProvider.html5Mode({
       enabled: true,
       requireBase: true,
@@ -62,7 +62,7 @@
     })
   }
 
-  angular.module("tichu-tournament", ["ng", "ngRoute", "ngMaterial", "tichu-tournament-list"])
+  angular.module("tichu-tournament", ["ng", "ngRoute", "ngMaterial", "ngMessages", "tichu-home", "tichu-tournament-list"])
       .controller("AppController", AppController)
       .config(configureTheme)
       .config(setDefaultRoute);

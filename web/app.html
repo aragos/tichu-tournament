@@ -6,16 +6,19 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="description" content="">
   <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no" />
-  <title>{{ appController.header }} - {{ appController.title }}</title>
+  <title ng-bind="(appController.header ? appController.header + ' - ' : '') + appController.title">
+    Tichu Tournament
+  </title>
   <link rel="stylesheet" href="bower_components/angular/angular-csp.css">
   <link rel="stylesheet" href="bower_components/angular-material/angular-material.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
 </head>
 <body layout="row" ng-cloak>
 
   <div flex layout="column" tabIndex="-1" role="main" class="md-whiteframe-z2">
 
-    <md-toolbar ng-if="appController.showHeader" layout="row" class="md-whiteframe-z1">
-      <h3>{{ appController.header }}</h3>
+    <md-toolbar ng-if="appController.showHeader && appController.header" layout="row" class="md-whiteframe-z1">
+      <h4 style="padding-left:0.5em">{{ appController.header }}</h4>
     </md-toolbar>
 
     <md-content flex id="content" layout="row" ng-view>
@@ -30,6 +33,7 @@
   <script src="bower_components/angular-material/angular-material.js"></script>
   <script src="bower_components/angular-route/angular-route.js"></script>
   <script src="src/tichu-tournament.js"></script>
+  <script src="src/home/home.js"></script>
   <script src="src/tournaments/tournament-list.js"></script>
 </body>
 </html>
