@@ -49,6 +49,69 @@
   }
 
   /**
+   * Extracts the table number from the position string.
+   *
+   * @param {string} position
+   * @returns {number}
+   */
+  function getTableFromPosition(position) {
+    return parseInt(position.substring(0, position.length - 1));
+  }
+
+  /**
+   * Extracts and normalizes the side from the position string.
+   *
+   * @param {string} position
+   * @returns {string}
+   */
+  function getSideFromPosition(position) {
+    return position.substring(position.length - 1);
+  }
+
+  /**
+   * Turns the call object into a formatted list suitable for display.
+   *
+   * @param {?tichu.Calls=} calls
+   * @returns {string}
+   */
+  function formatCallsToString(calls) {
+    if (!calls) {
+      return null;
+    }
+    return ["north", "south", "east", "west"].filter(function(side) {
+      return !!calls[side];
+    }).map(function(side) {
+      return side.substring(0, 1).toUpperCase() + "(" + calls[side] + ")";
+    }).join(" / ");
+  }
+
+  /**
+   * Extracts the score matching the side in the position from the score object.
+   * @param {?tichu.HandScore} score
+   * @param {string} position
+   * @returns {(number|string|null)}
+   */
+  function getMyScore(score, position) {
+    if (!score) {
+      return null;
+    }
+    return getSideFromPosition(position) === "E" ? score.ew_score : score.ns_score;
+  }
+
+  /**
+   * Extracts the score opposite the side in the position from the score object.
+   * @param {?tichu.HandScore} score
+   * @param {string} position
+   * @returns {(number|string|null)}
+   */
+  function getOpponentsScore(score, position) {
+    if (!score) {
+      return null;
+    }
+    return getSideFromPosition(position) === "E" ? score.ns_score : score.ew_score;
+  }
+
+  /**
    * Asynchronously loads the movement specified by the tournament and pair.
    *
    * @param {!angular.$q} $q
@@ -76,7 +139,7 @@
             "position": "3N",
             "opponent": 2,
             "hands": [3, 4, 5],
-            "relay_table": 5,
+            "relay_table": true,
             "score" : {
               "calls": {
                 "north": "T",
@@ -124,5 +187,20 @@
 
   angular.module("tichu-movement-detail", ["ng", "ngRoute"])
       .controller("MovementDetailController", MovementDetailController)
-      .config(mapRoute);
+      .config(mapRoute)
+      .filter("tichuMovementGetTableFromPosition", function() {
+        return getTableFromPosition;
+      })
+      .filter("tichuMovementGetSideFromPosition", function() {
+        return getSideFromPosition;
+      })
+      .filter("tichuMovementFormatCalls", function() {
+        return formatCallsToString;
+      })
+      .filter("tichuMovementGetMyScore", function() {
+        return getMyScore;
+      })
+      .filter("tichuMovementGetOpponentsScore", function() {
+        return getOpponentsScore;
+      });
 })(angular);
