@@ -25,7 +25,7 @@ tichu.Tournament;
  *     board_no: number,
  *     ns_pair: number,
  *     ew_pair: number,
- *     calls: (!tichu.Calls|!tichu.Call[]),
+ *     calls: !tichu.Calls,
  *     ns_score: (number|string),
  *     ew_score: (number|string),
  *     notes: string
@@ -45,8 +45,38 @@ tichu.Calls;
 
 /**
  * @typedef {{
- *     side: string,
- *     call: string
+ *     pair_no: number,
+ *     name: string,
+ *     email: string
  * }}
  */
-tichu.Call;
+tichu.Player;
+
+/**
+ * @typedef {{
+ *     name: string,
+ *     email: string
+ * }}
+ */
+tichu.PairPlayer;
+
+/**
+ * @typedef {{
+ *     round: number,
+ *     position: string,
+ *     opponent: number,
+ *     hands: number[],
+ *     relay_table: number,
+ *     score: !tichu.HandScore
+ * }}
+ */
+tichu.MovementRound;
+
+/**
+ * @typedef {{
+ *     name: string,
+ *     players: !tichu.PairPlayer[],
+ *     movement: !tichu.MovementRound[]
+ * }}
+ */
+tichu.Movement;
