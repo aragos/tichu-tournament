@@ -5,9 +5,10 @@
    *
    * @constructor
    * @param {!angular.Scope} $scope
+   * @param {!angular.$location} $location
    * @ngInject
    */
-  function HomeController($scope) {
+  function HomeController($scope, $location) {
     $scope.appController.setPageHeader({
       showHeader: false
     });
@@ -27,10 +28,19 @@
      * @type {boolean}
      */
     this.loading = false;
+
+    /**
+     * The injected location service.
+     * @type {angular.$location}
+     */
+    this.$location = $location;
   }
 
   HomeController.prototype.loadCode = function loadCode() {
     this.loading = true;
+    this.$location
+        .path("/tournaments/which-generated-" + this.code + "/movement/1")
+        .search({playerCode: this.code});
   };
 
   /**
