@@ -62,7 +62,13 @@
     })
   }
 
-  angular.module("tichu-tournament", ["ng", "ngRoute", "ngMaterial", "ngMessages", "tichu-home", "tichu-tournament-list"])
+  angular.module("tichu-tournament", [
+          "ng",
+          "ngRoute",
+          "ngMaterial",
+          "ngMessages",
+          "tichu-home",
+          "tichu-tournament-list"])
       .controller("AppController", AppController)
       .config(configureTheme)
       .config(setDefaultRoute);
