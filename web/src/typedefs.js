@@ -66,7 +66,7 @@ tichu.PairPlayer;
  *     position: string,
  *     opponent: number,
  *     hands: number[],
- *     relay_table: number,
+ *     relay_table: boolean,
  *     score: !tichu.HandScore
  * }}
  */
