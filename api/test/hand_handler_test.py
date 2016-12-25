@@ -171,6 +171,16 @@ class AppTest(unittest.TestCase):
                                      expect_errors=True)
     self.assertEqual(response.status_int, 403)
 
+  def testPut_null_calls(self):
+    self.loginUser()
+    id = self.AddBasicTournament()
+    params = {'ns_score': 75,
+              'ew_score': 25,
+              'notes': 'I am a note'}
+    response = self.testapp.put_json("/api/tournaments/{}/hands/1/2/3".format(id),
+                                     params)
+    self.assertEqual(response.status_int, 204)
+
   def testPut(self):
     self.loginUser()
     id = self.AddBasicTournament()

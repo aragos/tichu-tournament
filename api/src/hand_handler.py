@@ -47,7 +47,7 @@ class HandHandler(webapp2.RequestHandler):
     request_dict = self._ParseRequestInfoAndMaybeSetStatus()
     if not request_dict:
       return
-    calls = request_dict.get("calls")
+    calls = request_dict.setdefault("calls", {})
     ns_score = request_dict.get("ns_score")
     ew_score = request_dict.get("ew_score")
     notes = request_dict.get("notes")
@@ -195,9 +195,5 @@ class HandHandler(webapp2.RequestHandler):
     elif not isinstance(request_dict.get('ew_score'), int):
       SetErrorStatus(self.response, 400, "Invalid Input",
                      "ew_boards must be an integer")
-      return None
-    elif request_dict.get('calls') is None:
-      SetErrorStatus(self.response, 400, "Invalid Input",
-                     "Calls must be set.")
       return None
     return request_dict
