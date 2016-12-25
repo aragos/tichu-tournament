@@ -198,6 +198,7 @@ Updates the details about a tournament owned by the currently logged in director
 #### Status codes
 
 * **204**: The tournament was successfully updated.
+* **400**: The tournament already has registered hand results.
 * **401**: User is not logged in.
 * **403**: User is logged in, but does not own the given tournament.
 * **404**: No tournament with the given ID exists.

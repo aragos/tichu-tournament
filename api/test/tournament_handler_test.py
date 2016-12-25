@@ -150,6 +150,20 @@ class AppTest(unittest.TestCase):
     response = self.testapp.put_json("/api/tournaments/{}".format(id), params,
                                      expect_errors=True)
     self.assertEqual(response.status_int, 400)
+    
+  def testPutTournament_existing_hands(self):
+    self.loginUser()
+    id = self.AddBasicTournament()
+    params = {'ns_score': 75,
+              'ew_score': 25}
+    response = self.testapp.put_json("/api/tournaments/{}/hands/1/2/3".format(id),
+                                     params)
+    self.assertEqual(response.status_int, 204)
+    params = {'name': 'name2', 'no_pairs': 9, 'no_boards': 27, 
+              'players' : [{ "pair_no": 1, "name": "other name" }]}
+    response = self.testapp.put_json("/api/tournaments/{}".format(id), params,
+                                     expect_errors=True)
+    self.assertEqual(response.status_int, 400)
 
   def testPutTournament(self):
     self.loginUser()
@@ -166,7 +180,8 @@ class AppTest(unittest.TestCase):
     self.assertEqual(1, len(response_dict['players']))
     self.assertEqual(1, response_dict['players'][0]["pair_no"])
     self.assertEqual("other name", response_dict['players'][0]["name"])
-    ## TODO: test that the IDS have changed if you override the number of users
+    self.assertEqual(9, len(json.loads(self.testapp.get(
+        "/api/tournaments/{}/pairids".format(id)).body)["pair_ids"]))
     
   def testPutTournament_override_num_pairs_fewer(self):
     self.loginUser()
@@ -183,10 +198,15 @@ class AppTest(unittest.TestCase):
     self.assertEqual(1, len(response_dict['players']))
     self.assertEqual(2, response_dict['players'][0]["pair_no"])
     self.assertEqual("other name", response_dict['players'][0]["name"])
+    self.assertEqual(7, len(json.loads(self.testapp.get(
+        "/api/tournaments/{}/pairids".format(id)).body)["pair_ids"]))
+   
     
   def testPutTournament_override_just_names(self):
     self.loginUser()
     id = self.AddBasicTournament()
+    original_ids = json.loads(self.testapp.get(
+        "/api/tournaments/{}/pairids".format(id)).body)["pair_ids"]
     params = {'name': 'name2', 'no_pairs': 8, 'no_boards': 24, 
               'players' : [{ "pair_no": 2, "name": "other name" }]}
     self.testapp.put_json("/api/tournaments/{}".format(id), params)
@@ -199,6 +219,9 @@ class AppTest(unittest.TestCase):
     self.assertEqual(1, len(response_dict['players']))
     self.assertEqual(2, response_dict['players'][0]["pair_no"])
     self.assertEqual("other name", response_dict['players'][0]["name"])
+    new_ids = json.loads(self.testapp.get(
+        "/api/tournaments/{}/pairids".format(id)).body)["pair_ids"]
+    self.assertEqual(original_ids, new_ids)
 
   def testDeleteTournament_not_logged_in(self):
     self.loginUser()

@@ -84,9 +84,11 @@ class TourneyHandler(webapp2.RequestHandler):
                                                            no_boards,
                                                            player_list):
       return
-
+    if HandScore.query(ancestor=tourney.key).iter(keys_only=True).has_next():
+      SetErrorStatus(self.response, 400, "Invalid Request",
+                     "Tournament already has registered hands")
+      return
     self.response.set_status(204)
-    # Need to update documentation, this leaves available hand scores alone.
     tourney.no_pairs = no_pairs
     tourney.no_boards = no_boards
     tourney.name = name
