@@ -29,8 +29,9 @@ class PairIdHandler(webapp2.RequestHandler):
     player_pairs = PlayerPair._query(ndb.GenericProperty('id') == 
         pair_id).fetch(projection=[PlayerPair.pair_no])
     if not player_pairs:
-      SetErrorStatus(404, "Invalid Id",
+      SetErrorStatus(self.response, 404, "Invalid Id",
                      "Pair number with this ID does not exist")
+      return
     info_dict = {
       'tournament_infos' : [ {'pair_no' : p.pair_no,
                               'tournament_id' : str(p.key.parent().id()) } for p in player_pairs ]
@@ -42,15 +43,16 @@ class PairIdHandler(webapp2.RequestHandler):
 
 
 class TourneyPairIdHandler(webapp2.RequestHandler):
-  ''' Handles reuqests to /api/tournament/:id/pairid/:pair_no. Responsible for
+  ''' Handles reuqests to /api/tournament/:id/pairids/:pair_no. Responsible for
       finding the opaque ID generated for this pair, unique to this tournament.
   '''
   def get(self, id, pair_no):
-    ''' Returns tournament and pair number information this pair_id.
+    ''' Returns the opaque pair ID for pair with pair nubmer pair_no in this
+        Tournament.
 
         Args: 
           id: Tournament ID for this tournament.
-          pair_id: Opque secret ID used to look up information for the user.
+          pair_no: The pair number whose ID has to be looked up.
     ''' 
     user = users.get_current_user()
     if not CheckUserLoggedInAndMaybeReturnStatus(self.response, user):
@@ -75,9 +77,10 @@ class TourneyPairIdHandler(webapp2.RequestHandler):
     player_pairs = PlayerPair._query(ndb.GenericProperty('pair_no') == 
         int(pair_no), ancestor=tourney.key).fetch(1, projection=[PlayerPair.id])
     if not player_pairs:
-      SetErrorStatus(404, "Invalid Id",
+      SetErrorStatus(self.response, 404, "Invalid Id",
                      "Pair pair number {} does not exist in this " + 
                          "tournament".format(pair_no))
+      return
     self.response.headers['Content-Type'] = 'application/json'
     self.response.set_status(200)
     self.response.out.write(json.dumps({'pair_id' : player_pairs[0].id}, indent=2))
@@ -108,12 +111,6 @@ class TourneyPairIdsHandler(webapp2.RequestHandler):
     if not tourney:
       return
     
-    if (not tourney.metadata) or (not tourney.owner_id):
-      SetErrorStatus(self.response, 500, "Invalid tournament data",
-                     "Tournament data is corrupted. Consider starting a " + 
-                         "new one.")
-      return
-
     if not CheckUserOwnsTournamentAndMaybeReturnStatus(self.response,
                                                        user.user_id(),
                                                        tourney, id):
@@ -127,4 +124,5 @@ class TourneyPairIdsHandler(webapp2.RequestHandler):
                          "Consider resetting tournament info.")
     self.response.headers['Content-Type'] = 'application/json'
     self.response.set_status(200)
-    self.response.out.write(json.dumps([p.id for p in player_pairs], indent=2))
+    self.response.out.write(
+        json.dumps({"pair_ids" : [p.id for p in player_pairs]}, indent=2))
