@@ -346,28 +346,48 @@ Optional. Necessary only for non-tournament owners.
             "email": "anna@anna.com"
         }]
         "movement": [{
-          "round": 1
-          "position": "3N"
-          "opponent": 2
-          "hands": [3, 4, 5]
-          "relay_table": 5
-          "score" : {
-              "calls": {
-                  "north": "T",
-                  "east": "GT",
-                  "west": "",
-                  "south": ""
-              },
-              "ns_score": 150,
-              "ew_score": -150,
-              "notes": "I am a note"
-          }},
-          {
-          "round": 2
-          "position": "1E"
-          "opponent": 4
-          "hands": [7, 8, 9]
-          }]
+            "round": 1
+            "position": "3N"
+            "opponent": 2
+            "hands": [
+                {
+                    "hand_no" : 13
+                    "score" : {
+                        "calls": {
+                            "north": "T",
+                            "east": "GT",
+                            "west": "",
+                            "south": ""
+                         },
+                        "ns_score": 150,
+                        "ew_score": -150,
+                        "notes": "I am a note"
+                    },
+                }
+                {
+                    "hand_no" : 14
+                }
+                {
+                    "hand_no" : 15
+                }
+            ]
+        },
+        {
+            "round": 2
+            "position": "1E"
+            "opponent": 4
+            "hands": [
+                {
+                    "hand_no" : 7
+                }
+                {
+                    "hand_no" : 8
+                }
+                {
+                    "hand_no" : 9
+                }
+        }
+    ]
     }
 
 * `name`: String. A user-specified and user-readable name suitable for display in a tournament list.
@@ -383,18 +403,18 @@ Optional. Necessary only for non-tournament owners.
        table number and ending with either 'N' for North/South or 'E' for East/West.
     * `hands`: List of integers. Set of hand numbers to be played by this team/opponent
        combination.
-    * `relay_table`: Integer. If set, this set of hands must be played simultaneously with
+        * `score`: Object. If the hand has already been scored contains relevant information
+          about the score. Optional.
+          * `calls`: Object. Calls made by players. May have entries for `north`, `east`, `west`, `south`.
+            Each entry may be `"T"`, indicating a call of Tichu, `"GT"`, indicating a call of Grand Tichu,
+            or `""`, indicating no call. If an entry is absent, it is assumed to mean no call.
+          * `ns_score`: Integer or string. The score of the north-south pair, including Tichu bonuses and
+            penalties. May also be the string "AVG+" or "AVG-".
+          * `ew_score`: Integer or string. The score of the east-west pair, including Tichu bonuses and
+            penalties. May also be the string "AVG+" or "AVG-".
+          * `notes`: String. Any additional notes about the hand added by the scorer or the director.
+    * `relay_table`: Boolean. If set, this set of hands must be played simultaneously with
        another table. Optional.
-    * `scoring`: Object. If the hand has already been scored contains relevant information
-       about the score. Optional.
-      * `calls`: Object. Calls made by players. May have entries for `north`, `east`, `west`, `south`.
-        Each entry may be `"T"`, indicating a call of Tichu, `"GT"`, indicating a call of Grand Tichu,
-        or `""`, indicating no call. If an entry is absent, it is assumed to mean no call.
-      * `ns_score`: Integer or string. The score of the north-south pair, including Tichu bonuses and
-        penalties. May also be the string "AVG+" or "AVG-".
-      * `ew_score`: Integer or string. The score of the east-west pair, including Tichu bonuses and
-        penalties. May also be the string "AVG+" or "AVG-".
-      * `notes`: String. Any additional notes about the hand added by the scorer or the director.
 
 ### Check if hand has been scored (HEAD /api/tournaments/:id/hands/:board_no/:ns_pair/:ew_pair)
 

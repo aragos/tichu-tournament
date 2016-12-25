@@ -46,8 +46,8 @@ class MovementHandler(webapp2.RequestHandler):
         tourney.no_pairs,
         NumBoardsPerRoundFromTotal(tourney.no_pairs,
                                    tourney.no_boards)).GetMovement(int(pair_no))
-    for hand in movement:
-      self._UpdateHandWithScore(hand, tourney, int(pair_no))
+    for round in movement:
+      self._UpdateRoundWithScore(round, tourney, int(pair_no))
 
     combined_dict = {
       'name' : tourney.name,
@@ -59,20 +59,27 @@ class MovementHandler(webapp2.RequestHandler):
     self.response.set_status(200)
     self.response.out.write(json.dumps(combined_dict, indent=2))
 
-  def _UpdateHandWithScore(self, hand, tourney, pair_no):
-    if hand['position'][1] == "N":
-      hand_score = HandScore.CreateKey(tourney, hand['round'],
-                                       pair_no, hand['opponent']).get()
-    else:
-      hand_score = HandScore.CreateKey(tourney, hand['round'],
-                                       hand['opponent'], pair_no).get()
-    if hand_score:
-      hand['score'] = {
-          'calls' : json.loads(hand_score.calls),
-          'ns_score' : hand_score.ns_score,
-          'ew_score' : hand_score.ew_score,
-          'notes' : hand_score.notes,
-      }
+  def _UpdateRoundWithScore(self, round, tourney, pair_no):
+    hand_nos = round['hands']
+    del round['hands']
+    for h in hand_nos:  
+      if round['position'][1] == "N":
+        hand_score = HandScore.CreateKey(tourney, h, pair_no, 
+                                         round['opponent']).get()
+      else:
+        hand_score = HandScore.CreateKey(tourney, h, round['opponent'],
+                                         pair_no).get()
+      if hand_score:
+        round.setdefault('hands', []).append({
+          'hand_no' : h,
+          'score': {
+              'calls' : json.loads(hand_score.calls),
+              'ns_score' : hand_score.ns_score,
+              'ew_score' : hand_score.ew_score,
+              'notes' : hand_score.notes,
+        }})
+      else:
+        round.setdefault('hands', []).append({ 'hand_no' : h })
 
   def _CheckValidHandParametersMaybeSetStatus(self, tourney, pair_no):
     error = "Invalid Input"
