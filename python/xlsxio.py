@@ -238,7 +238,9 @@ def WriteXlsxAggressivenessSummaries(max_rounds, scores, sheet):
         SetAlignment(sheet.cell(column=col_no, row=row_no),
                      Alignment(horizontal='right'))
     
-    SetDataTableStyle(sheet, start_row, 1, max_rounds, len(headers))
+    SetDataTableStyle(sheet, start_row, 1, 
+                      len(s.board_aps) + 1 if len(s.board_aps) < max_rounds else len(s.board_aps),
+                      len(headers))
     # Space before the next set of scores.
     sheet.append([])
     row_no += 1
