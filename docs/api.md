@@ -545,6 +545,7 @@ Calculates and returns the final detailed results of the tournament.
             "pair_no": 3,
             "mps": 50,
             "rps": 90
+            "aps": 90
         }],
         "hands": [{
             "board_no": 3,
@@ -562,6 +563,8 @@ Calculates and returns the final detailed results of the tournament.
             "ew_mps": 20,
             "ns_rps": 30,
             "ew_rps": 40,
+            "ns_aps": 5
+            "ew_aps": 2
             "notes": "hahahahahaha what a fool"
         }]
     }
@@ -569,8 +572,9 @@ Calculates and returns the final detailed results of the tournament.
 * `pair_summaries`: List of objects. The summary of results for all pairs playing in this
   tournament. There will be exactly one for each pair between 1 and `no_pairs`.
     * `pair_no`: Integer. The number of the pair this summary is for.
-    * `mps`: Integer. The total number of match points scored by this pair in the tournament.
-    * `rps`: Integer. The total number of RPs scored by this pair in the tournament.
+    * `mps`: Double. The total number of match points scored by this pair in the tournament.
+    * `rps`: Double. The total number of RPs scored by this pair in the tournament.
+    * `aps`: Double. The total number of APs scored by this pair in the tournament.
 * `hands`: List of objects. The final records of all hands played in this tournament. There will be
   at most one per combination of `board_no`, `ns_pair`, and `ew_pair`.
     * `board_no`: Integer. The board number for this hand. Must be between 1 and `no_boards`,
@@ -586,10 +590,12 @@ Calculates and returns the final detailed results of the tournament.
       penalties. May also be the string "AVG+" or "AVG-".
     * `ew_score`: Integer or string. The score of the east-west pair, including Tichu bonuses and
       penalties. May also be the string "AVG+" or "AVG-".
-    * `ns_mps`: Integer. The number of match points scored by the north-south pair in this hand.
-    * `ew_mps`: Integer. The number of match points scored by the east-west pair in this hand.
-    * `ns_mps`: Integer. The number of RPs scored by the north-south pair in this hand.
-    * `ew_mps`: Integer. The number of RPs scored by the east-west pair in this hand.  
+    * `ns_mps`: Double. The number of match points scored by the north-south pair in this hand.
+    * `ew_mps`: Double. The number of match points scored by the east-west pair in this hand.
+    * `ns_mps`: Double. The number of RPs scored by the north-south pair in this hand.
+    * `ew_mps`: Double. The number of RPs scored by the east-west pair in this hand.  
+    * `ns_aps`: Double. The number of APs scored by the north-south pair in this hand.
+    * `ew_aps`: Double. The number of APs scored by the east-west pair in this hand.  
     * `notes`: String. Any additional notes about the hand added by the scorer or the director.
 
 ### Generate final score in XLXS format (GET /api/tournaments/:id/xlsresults)

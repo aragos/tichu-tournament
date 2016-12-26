@@ -34,7 +34,7 @@ def ReadJSONInput(hand_list):
 def OutputJSON(hand_list, team_summaries):
   pair_summaries = []
   for ts in team_summaries:
-    pair_summaries.append({"pair_no": ts.team_no, "mps": ts.mps, "rps": ts.rps})
+    pair_summaries.append({"pair_no": ts.team_no, "mps": ts.mps, "rps": ts.rps, "aps" : ts.aps})
   for hand in hand_list:
     board_no = hand["board_no"]
     ns_pair = hand["ns_pair"]
@@ -43,8 +43,10 @@ def OutputJSON(hand_list, team_summaries):
       if ts.team_no == ns_pair:
          hand["ns_mps"] = ts.board_mps[board_no]
          hand["ns_rps"] = ts.board_rps[board_no]
+         hand["ns_aps"] = ts.board_aps[board_no]
       if ts.team_no == ew_pair:
          hand["ew_mps"] = ts.board_mps[board_no]
          hand["ew_rps"] = ts.board_rps[board_no]
+         hand["ew_aps"] = ts.board_aps[board_no]
   ret = {"pair_summaries": pair_summaries, "hands": hand_list}
   return json.dumps(ret, sort_keys=True, indent=2)
