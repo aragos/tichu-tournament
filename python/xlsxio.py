@@ -405,6 +405,22 @@ def WriteXlsxBoardSummaries(board_list, sheet):
   sheet.column_dimensions['C'].width = 20 
 
 
+def WriteHandNames(name_list, sheet):
+  ''' Writes down players names for reference.
+  Args:
+    hand_list: List of pairs of hand in team numbr order. If a player name is
+               unknown, must be None.
+  '''
+  sheet.append(["Team"])
+  for i in range(len(name_list)):
+    sheet.append([str(i + 1), name_list[i][0], name_list[i][1]])
+  SetSheetHeaders(sheet)
+  
+  for row_no in xrange(2, len(name_list) + 2):
+    cell = sheet.cell(row=row_no, column=1)
+    SetAlignment(cell, Alignment(horizontal='right'))
+  
+
 def WriteXlsxRawScores(board_list, sheet):
   """ Writes down raw scores.
   
@@ -460,7 +476,7 @@ def CopySheet(from_sheet, to_sheet):
 
 
 def WriteResultsToXlsx(max_rounds, mp_scores, ap_scores, board_list,
-                       input_wb=None):
+                       name_list=None, input_wb=None):
   """ Creates an Xlx workbook with all the information about a tournament.
 
       Args: 
@@ -470,6 +486,8 @@ def WriteResultsToXlsx(max_rounds, mp_scores, ap_scores, board_list,
         mp_scores: TeamSummary objects ordered in descending total MP order.
         ap_scores: TeamSummary objects ordered in descending total AP order.
         board_list: List of boards in ascending board number order.
+        name_list: List of player name pairs in ascending team number order.
+          If no name exists for a player, must be None.
         input_wb: The input workbook as it was read in. Used to copy raw hand
           and team details into the output workbook. If None, raw scores and 
           team details will not be present in the output.
@@ -489,7 +507,10 @@ def WriteResultsToXlsx(max_rounds, mp_scores, ap_scores, board_list,
   WriteXlsxRawScores(board_list, raw_scores_sheet)
   # Copy the input sheets into the newly created workbook.
   TEAM_NAMES_TEXT = "Team Names"
-  if input_wb:
+  if name_list:
+      name_sheet = wb.create_sheet(TEAM_NAMES_TEXT)
+      WriteHandNames(name_list, name_sheet)
+  elif input_wb:
       CopySheet(input_wb[TEAM_NAMES_TEXT], wb.create_sheet(TEAM_NAMES_TEXT))
       SetSheetHeaders(wb[TEAM_NAMES_TEXT])
 
