@@ -591,3 +591,23 @@ Calculates and returns the final detailed results of the tournament.
     * `ns_mps`: Integer. The number of RPs scored by the north-south pair in this hand.
     * `ew_mps`: Integer. The number of RPs scored by the east-west pair in this hand.  
     * `notes`: String. Any additional notes about the hand added by the scorer or the director.
+
+### Generate final score in XLXS format (GET /api/tournaments/:id/xlsresults)
+
+**Requires authentication and ownership of the given tournament.**
+Calculates and returns the final detailed results of the tournament as a .xlsx file.
+
+#### Request
+
+* `id`: String. An opaque, unique ID returned from `GET /tournaments` or `POST /tournaments`.
+
+#### Status codes
+
+* **200**: The score has been generated.
+* **401**: User is not logged in.
+* **403**: The user is logged in, but does not own this tournament.
+* **404**: The tournament with the given ID does not exist.
+* **500**: Server failed to generate the score for any other reason.
+
+#### Response
+.xlsx file with all the results.
