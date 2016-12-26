@@ -1,0 +1,296 @@
+{ "1": [{
+      "position" : "1E",
+      "round" : 1,
+      "opponent" : 7,
+      "hands" : [1, 2],
+      "relay_table" : false 
+    }, 
+    { 
+      "position" : "3E",
+      "round" : 2, 
+      "opponent" : 3,
+      "hands" : [13, 14],
+      "relay_table" : false
+    }, 
+    { 
+      "position" : "2E",
+      "round" : 3, 
+      "opponent" : 5, 
+      "hands" : [11, 12],
+      "relay_table" : false 
+    }, 
+    { 
+      "position" : "2E", 
+      "round" : 5, 
+      "opponent" : 2, 
+      "hands" : [7, 8], 
+      "relay_table" : false 
+    }, 
+    { 
+      "position" : "2N",
+      "round" : 6, 
+      "opponent" : 4,
+      "hands" : [3, 4],
+      "relay_table" : false 
+    }, 
+    { 
+      "position" : "3N", 
+      "round" : 7, 
+      "opponent" : 6, 
+      "hands" : [9, 10],
+      "relay_table" : false 
+    }],
+"2" : [{
+      "position" : "1E",
+      "round" : 2, 
+      "opponent" : 7,
+      "hands" : [3, 4],
+      "relay_table" : false
+    }, 
+    { 
+      "position" : "3E", 
+      "round" : 3, 
+      "opponent" : 4, 
+      "hands" : [1, 2], 
+      "relay_table" : false 
+    }, 
+    { 
+      "position" : "2E",
+      "round" : 4, 
+      "opponent" : 6,
+      "hands" : [13, 14],
+      "relay_table" : false 
+    }, 
+    { 
+      "position" : "2N", 
+      "round" : 5, 
+      "opponent" : 1, 
+      "hands" : [7, 8],
+      "relay_table" : false 
+    },
+    { 
+      "position" : "3E",
+      "round" : 6, 
+      "opponent" : 3, 
+      "hands" : [9, 10],
+      "relay_table" : false 
+    },
+    {
+      "position" : "2N",
+      "round" : 7,
+      "opponent" : 5,
+      "hands" : [5, 6],
+      "relay_table" : false 
+    }],
+"3" : [{
+      "position" : "2N",
+      "round" : 1,
+      "opponent" : 6,
+      "hands" : [7, 8],
+      "relay_table" : false 
+    },
+    { 
+      "position" : "3N", 
+      "round" : 2, 
+      "opponent" : 1, 
+      "hands" : [13, 14], 
+      "relay_table" : false 
+    }, 
+    { 
+      "position" : "1E",
+      "round" : 3, 
+      "opponent" : 7,
+      "hands" : [5, 6],
+      "relay_table" : false 
+    }, 
+    { 
+      "position" : "3E", 
+      "round" : 4, 
+      "opponent" : 5, 
+      "hands" : [3, 4],
+      "relay_table" : false 
+    },
+    { 
+      "position" : "3N", 
+      "round" : 6, 
+      "opponent" : 2, 
+      "hands" : [9, 10],
+      "relay_table" : false 
+    },
+    { 
+      "position" : "1E",
+      "round" : 7, 
+      "opponent" : 4, 
+      "hands" : [11, 12],
+      "relay_table" : false 
+    }],
+"4" : [{
+      "position" : "3E",
+      "round" : 1,
+      "opponent" : 5,
+      "hands" : [13, 14],
+      "relay_table" : false 
+    }, 
+    { 
+      "position" : "3N", 
+      "round" : 3, 
+      "opponent" : 2, 
+      "hands" : [1, 2], 
+      "relay_table" : false 
+    }, 
+    { 
+      "position" : "1E",
+      "round" : 4, 
+      "opponent" : 7,
+      "hands" : [7, 8],
+      "relay_table" : false 
+    }, 
+    { 
+      "position" : "3E", 
+      "round" : 5, 
+      "opponent" : 6, 
+      "hands" : [5, 6],
+      "relay_table" : false 
+    },
+    { 
+      "position" : "2E",
+      "round" : 6, 
+      "opponent" : 1, 
+      "hands" : [3, 4],
+      "relay_table" : false
+    }, 
+    {
+      "position" : "1N",
+      "round" : 7, 
+      "opponent" : 3,
+      "hands" : [11, 12],
+      "relay_table" : false
+    }],
+"5" : [
+    {
+      "position" : "3N",
+      "round" : 1, 
+      "opponent" : 4,
+      "hands" : [13, 14],
+      "relay_table" : false
+    }, 
+    { 
+      "position" : "2E",
+      "round" : 2, 
+      "opponent" : 6,
+      "hands" : [1, 2],
+      "relay_table" : false 
+    }, 
+    { 
+      "position" : "2N",
+      "round" : 3, 
+      "opponent" : 1,
+      "hands" : [11, 12],
+      "relay_table" : false 
+    }, 
+    { 
+      "position" : "3N", 
+      "round" : 4, 
+      "opponent" : 3, 
+      "hands" : [3, 4],
+      "relay_table" : false 
+    },
+    { 
+      "position" : "1E",
+      "round" : 5, 
+      "opponent" : 7, 
+      "hands" : [9, 10],
+      "relay_table" : false
+    },
+    { 
+      "position" : "2E",
+      "round" : 7, 
+      "opponent" : 2, 
+      "hands" : [5, 6],
+      "relay_table" : false
+    }],
+"6" : [{
+      "position" : "2E",
+      "round" : 1,
+      "opponent" : 3,
+      "hands" : [7, 8],
+      "relay_table" : false 
+    },
+    { 
+      "position" : "2N",
+      "round" : 2, 
+      "opponent" : 5,
+      "hands" : [1, 2],
+      "relay_table" : false 
+    }, 
+    { 
+      "position" : "2N",
+      "round" : 4, 
+      "opponent" : 2,
+      "hands" : [13, 14],
+      "relay_table" : false 
+    }, 
+    { 
+      "position" : "3N",
+      "round" : 5, 
+      "opponent" : 4,
+      "hands" : [5, 6],
+      "relay_table" : false 
+    }, 
+    { 
+      "position" : "1E",
+      "round" : 6, 
+      "opponent" : 7, 
+      "hands" : [11, 12],
+      "relay_table" : false
+    },
+    { 
+      "position" : "3E",
+      "round" : 7, 
+      "opponent" : 1, 
+      "hands" : [9, 10],
+      "relay_table" : false
+    }],
+"7" : [{
+      "position" : "1N",
+      "round" : 1,
+      "opponent" : 1,
+      "hands" : [1, 2],
+      "relay_table" : false 
+    },
+    { 
+      "position" : "1N",
+      "round" : 2, 
+      "opponent" : 2,
+      "hands" : [3, 4],
+      "relay_table" : false
+    }, 
+    { 
+      "position" : "1N",
+      "round" : 3, 
+      "opponent" : 3,
+      "hands" : [5, 6],
+      "relay_table" : false 
+    }, 
+    { 
+      "position" : "1N",
+      "round" : 4, 
+      "opponent" : 4,
+      "hands" : [7, 8],
+      "relay_table" : false 
+    }, 
+    { 
+      "position" : "1N",
+      "round" : 5, 
+      "opponent" : 5, 
+      "hands" : [9, 10],
+      "relay_table" : false
+    },
+    { 
+      "position" : "1N",
+      "round" : 6, 
+      "opponent" : 6, 
+      "hands" : [11, 12],
+      "relay_table" : false
+    }]
+}

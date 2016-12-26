@@ -19,21 +19,45 @@ class Movement:
               "relay_table": 5
           }
   ''' 
-  def __init__(self, no_pairs, no_hands_per_round):
+  def __init__(self, no_pairs, no_hands_per_round, no_rounds=None):
     ''' Initializes the movement for this configuration.
 
         Raises:
           ValueError if we do not have a defined movement for this configuration.
     '''
-    if no_hands_per_round == 3 and no_pairs == 10:
+    if no_hands_per_round == 3 and no_pairs == 10 and no_rounds == 7:
       json_data=open(os.path.join(os.getcwd(), 
-                     'api/src/movement_files/10_pair_3_hands.txt')).read();
-    elif no_hands_per_round == 2 and no_pairs == 10:
+                     'api/src/movement_files/10_pair_3_hands.txt')).read()
+    elif no_hands_per_round == 2 and no_pairs == 10 and no_rounds == 7:
       json_data=open(os.path.join(os.getcwd(), 
-                     'api/src/movement_files/10_pair_2_hands.txt')).read();
+                     'api/src/movement_files/10_pair_2_hands.txt')).read()
+    elif no_hands_per_round == 3 and no_pairs == 9 and no_rounds == 8:
+      json_data=open(os.path.join(os.getcwd(), 
+                     'api/src/movement_files/9_pair_3_hands_8_rounds.txt')).read()
+    elif no_hands_per_round == 2 and no_pairs == 9 and no_rounds == 8:
+      json_data=open(os.path.join(os.getcwd(), 
+                     'api/src/movement_files/9_pair_2_hands.txt')).read()
+    elif no_hands_per_round == 2 and no_pairs == 9 and no_rounds == 7:
+      json_data=open(os.path.join(os.getcwd(), 
+                     'api/src/movement_files/9_pair_2_hands_7_rounds.txt')).read()
+    elif no_hands_per_round == 3 and no_pairs == 9 and no_rounds == 7:
+      json_data=open(os.path.join(os.getcwd(), 
+                     'api/src/movement_files/9_pair_3_hands_7_rounds.txt')).read()
+    elif no_hands_per_round == 2 and no_pairs == 8 and no_rounds == 6:
+      json_data=open(os.path.join(os.getcwd(), 
+                     'api/src/movement_files/8_pair_2_hands_6_rounds.txt')).read()
+    elif no_hands_per_round == 3 and no_pairs == 8 and no_rounds == 6:
+      json_data=open(os.path.join(os.getcwd(), 
+                     'api/src/movement_files/8_pair_3_hands_6_rounds.txt')).read()
+    elif no_hands_per_round == 2 and no_pairs == 7 and no_rounds == 7:
+      json_data=open(os.path.join(os.getcwd(), 
+                     'api/src/movement_files/7_pair_2_hands_7_rounds.txt')).read()
+    elif no_hands_per_round == 3 and no_pairs == 7 and no_rounds == 7:
+      json_data=open(os.path.join(os.getcwd(), 
+                     'api/src/movement_files/7_pair_3_hands_7_rounds.txt')).read()
     else:
-      raise ValueError("No movements available for the configuration {} " + 
-                           "pairs with {} hands per round".format(
+      raise ValueError(("No movements available for the configuration {} " + 
+                           "pairs with {} hands per round").format(
                                no_pairs, no_hands_per_round))
     self.pair_dict = json.loads(json_data)
 
@@ -58,11 +82,30 @@ def NumBoardsPerRoundFromTotal(no_pairs, total_boards):
       number of pairs and boards in a tournament.
       Returned value is not the only feasible value but the best one as 
       determined by us.
-      Returns 0 if no movement with such a configuration exists.
+      
+      Returns:
+        Tuple (number of boards per round, maximum number of rounds).
+        (0, 0) if no movement configuration exists for this input.
   '''
   if total_boards == 24 and no_pairs == 10:
-    return 3
+    return (3, 7)
   elif total_boards == 16 and no_pairs == 10:
-    return 2
+    return (2, 7)
+  elif total_boards == 18 and no_pairs == 9:
+    return (2, 8)
+  elif total_boards == 27 and no_pairs == 9:
+    return (3, 8)
+  elif total_boards == 14 and no_pairs == 9:
+    return (2, 7)
+  elif total_boards == 21 and no_pairs == 9:
+    return (3, 7)
+  elif total_boards == 16 and no_pairs == 8:
+    return (2, 6)
+  elif total_boards == 24 and no_pairs == 8:
+    return (3, 6)
+  elif total_boards == 14 and no_pairs == 7:
+    return (2, 7)
+  elif total_boards == 21 and no_pairs == 7:
+    return (3, 7)
   else:
-    return 0
+    return (0, 0)

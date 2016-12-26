@@ -42,10 +42,10 @@ class MovementHandler(webapp2.RequestHandler):
         tourney, player_pairs[0]):
       return
 
+    no_hands_per_round, no_rounds = NumBoardsPerRoundFromTotal(
+        tourney.no_pairs, tourney.no_boards)
     movement = Movement(
-        tourney.no_pairs,
-        NumBoardsPerRoundFromTotal(tourney.no_pairs,
-                                   tourney.no_boards)).GetMovement(int(pair_no))
+        tourney.no_pairs, no_hands_per_round, no_rounds).GetMovement(int(pair_no))
     for round in movement:
       self._UpdateRoundWithScore(round, tourney, int(pair_no))
 
