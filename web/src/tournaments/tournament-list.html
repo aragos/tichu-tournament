@@ -1,7 +1,7 @@
 <md-list class="md-dense" flex="noshrink">
     <md-list-item class="md-2-line"
                   href="/tournaments/new">
-        <md-icon md-font-set="material-icons">create</md-icon>
+        <md-icon class="md-avatar-icon" md-font-set="material-icons">create</md-icon>
         <div class="md-list-item-text">
             <h3>New Tournament</h3>
         </div>
@@ -10,7 +10,7 @@
     <md-list-item class="md-2-line"
                   href="/tournaments/{{tournament.id}}"
                   ng-repeat="tournament in tournamentListController.tournaments">
-        <md-icon md-font-set="material-icons">call_split</md-icon>
+        <md-icon class="md-avatar-icon" md-font-set="material-icons">call_split</md-icon>
         <div class="md-list-item-text">
             <h3>{{tournament.name}}</h3>
         </div>
