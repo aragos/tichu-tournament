@@ -171,6 +171,18 @@ class AppTest(unittest.TestCase):
                                      expect_errors=True)
     self.assertEqual(response.status_int, 403)
 
+  def testPut_invalid_config(self):
+    self.loginUser()
+    id = self.AddBasicTournament()
+    params = {'calls': { 'north': "T" }, 
+              'ns_score': 75,
+              'ew_score': 25,
+              'notes': 'I am a note'}
+    response = self.testapp.put_json("/api/tournaments/{}/hands/4/2/3".format(id),
+                                     params, expect_errors=True)
+    self.assertEqual(response.status_int, 400)
+                                    
+
   def testPut_null_calls(self):
     self.loginUser()
     id = self.AddBasicTournament()
@@ -250,7 +262,7 @@ class AppTest(unittest.TestCase):
     params = {'calls': {'south': "T", 'east': "", 'west': "GT", 'north': ""},
               'ns_score': -75,
               'ew_score': 275}
-    response = self.testapp.put_json("/api/tournaments/{}/hands/4/5/6".format(id),
+    response = self.testapp.put_json("/api/tournaments/{}/hands/10/5/6".format(id),
                                      params)
     self.assertEqual(response.status_int, 204)
     response = self.testapp.get("/api/tournaments/{}".format(id))
@@ -266,13 +278,13 @@ class AppTest(unittest.TestCase):
     self.assertEqual(2, first_hand['ns_pair']) 
     self.assertEqual(3, first_hand['ew_pair']) 
 
-    second_hand = self.GetHandFromList(hand_list, 4)
+    second_hand = self.GetHandFromList(hand_list, 10)
     self.assertEqual({'south': "T", 'east': "", 'west': "GT", 'north': ""},
                      second_hand['calls'])
     self.assertEqual(-75, second_hand['ns_score'])
     self.assertEqual(275, second_hand['ew_score'])
     self.assertIsNone(second_hand.get('notes'))
-    self.assertEqual(4, second_hand['board_no'])
+    self.assertEqual(10, second_hand['board_no'])
     self.assertEqual(5, second_hand['ns_pair']) 
     self.assertEqual(6, second_hand['ew_pair']) 
 

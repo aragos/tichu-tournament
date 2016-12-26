@@ -3,6 +3,8 @@ import json
 from google.appengine.ext import ndb
 from models import Tournament
 from models import HandScore
+from movements import Movement
+from movements import NumBoardsPerRoundFromTotal
 
 
 def is_int(s):
@@ -12,6 +14,18 @@ def is_int(s):
   except ValueError:
     return False
 
+def CheckValidMovementConfigAndMaybeSetStatus(response, no_pairs, no_boards):
+  # Check if a valid movement exists for this pair/board combination.
+  no_hands_per_round, no_rounds = NumBoardsPerRoundFromTotal(no_pairs,
+                                                             no_boards)
+  try:
+    movements = Movement(no_pairs, no_hands_per_round, no_rounds)
+  except ValueError:
+    SetErrorStatus(response, 400, 
+                   "No valid configuration {} pairs and {} boards".format(
+                       no_pairs, no_boards))
+    return None
+  return movements
 
 def CheckUserLoggedInAndMaybeReturnStatus(response, user=None):
   if not user:

@@ -67,6 +67,13 @@ class AppTest(unittest.TestCase):
     params = {'name': 'name1', 'no_boards': 24}
     response = self.testapp.post_json("/api/tournaments", params, expect_errors=True)
     self.assertEqual(response.status_int, 400)
+    
+  def testCreateTournament_invalid_movement_config(self):
+    self.loginUser()
+    params = {'name': 'name1', 'no_pairs': 8, 'no_boards': 21}
+    response = self.testapp.post_json("/api/tournaments", params, expect_errors=True)
+    self.assertEqual(response.status_int, 400)
+    
 
   def testListTournaments_unauthorized(self):
     response = self.testapp.get("/api/tournaments", expect_errors=True)

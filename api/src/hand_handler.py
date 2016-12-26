@@ -9,6 +9,7 @@ from google.appengine.api import users
 from google.appengine.ext import ndb
 from handler_utils import CheckUserLoggedInAndMaybeReturnStatus
 from handler_utils import CheckUserOwnsTournamentAndMaybeReturnStatus
+from handler_utils import CheckValidMovementConfigAndMaybeSetStatus
 from handler_utils import GetTourneyWithIdAndMaybeReturnStatus
 from handler_utils import is_int
 from handler_utils import SetErrorStatus
@@ -42,6 +43,16 @@ class HandHandler(webapp2.RequestHandler):
     if not self._CheckValidHandParametersMaybeSetStatus(
         tourney.no_boards, tourney.no_pairs, board_no,
         ns_pair, ew_pair):
+      return
+      
+    
+    movements = CheckValidMovementConfigAndMaybeSetStatus(
+        self.response, tourney.no_pairs, tourney.no_boards)
+    if not self._IsThisCombinationInThisMovement(
+        movements, int(board_no), int(ns_pair), int(ew_pair)):
+      SetErrorStatus(self.response, 400, "Invalid Hand-Players Combination",
+                     "NS and EW pairs do not play each other in this " + 
+                     "tournament format")
       return
 
     request_dict = self._ParseRequestInfoAndMaybeSetStatus()
@@ -127,6 +138,19 @@ class HandHandler(webapp2.RequestHandler):
       return False
     return True
 
+
+  def _IsThisCombinationInThisMovement(self, movements, board_no, ns_pair, ew_pair):
+    if not movements:
+      return False
+    for round in movements.GetMovement(ns_pair):
+      if round['opponent'] != ew_pair:
+        continue
+      if round['position'][1] != "N":
+        return False
+      if not board_no in round['hands']:
+        return False
+      return True
+    return False
 
   def _ValidateHandResultMaybeSetStatus(self, board_no, ns_pair, ew_pair,
                                         ns_score, ew_score, calls):

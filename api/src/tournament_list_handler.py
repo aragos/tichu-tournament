@@ -4,6 +4,7 @@ import json
 from google.appengine.api import users
 from google.appengine.ext import ndb
 from handler_utils import CheckUserLoggedInAndMaybeReturnStatus
+from handler_utils import CheckValidMovementConfigAndMaybeSetStatus
 from handler_utils import is_int
 from handler_utils import SetErrorStatus
 from handler_utils import UserNotLoggedInStatus
@@ -115,4 +116,5 @@ class TourneyListHandler(webapp2.RequestHandler):
                          "Player pair must be between 1 and no_pairs, was {}.".format(
                              player['pair_no']))
           return False
-    return True
+    return CheckValidMovementConfigAndMaybeSetStatus(
+        self.response, no_pairs, no_boards)

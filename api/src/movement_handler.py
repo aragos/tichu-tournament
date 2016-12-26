@@ -44,8 +44,14 @@ class MovementHandler(webapp2.RequestHandler):
 
     no_hands_per_round, no_rounds = NumBoardsPerRoundFromTotal(
         tourney.no_pairs, tourney.no_boards)
-    movement = Movement(
-        tourney.no_pairs, no_hands_per_round, no_rounds).GetMovement(int(pair_no))
+    try:
+      movement = Movement(
+          tourney.no_pairs, no_hands_per_round, no_rounds).GetMovement(int(pair_no))
+    except ValueError:
+      SetErrorStatus(self.response, 500, 
+                     "No valid configuration for this tourney's config")
+      return
+      
     for round in movement:
       self._UpdateRoundWithScore(round, tourney, int(pair_no))
 

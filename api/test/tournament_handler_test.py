@@ -164,6 +164,15 @@ class AppTest(unittest.TestCase):
     response = self.testapp.put_json("/api/tournaments/{}".format(id), params,
                                      expect_errors=True)
     self.assertEqual(response.status_int, 400)
+    
+  def testPutTournament_bad_config(self):
+    self.loginUser()
+    id = self.AddBasicTournament()
+    params = {'name': 'name2', 'no_pairs': 9, 'no_boards': 26, 
+              'players' : [{ "pair_no": 1, "name": "other name" }]}
+    response = self.testapp.put_json("/api/tournaments/{}".format(id), params,
+                                     expect_errors=True)
+    self.assertEqual(response.status_int, 400)
 
   def testPutTournament(self):
     self.loginUser()
