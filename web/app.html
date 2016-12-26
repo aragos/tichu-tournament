@@ -21,7 +21,7 @@
                 layout="row"
                 class="md-whiteframe-z1">
       <div class="md-toolbar-tools">
-        <md-button class="md-icon-button" ng-if="appController.backPath" ng-href="appController.backPath">
+        <md-button class="md-icon-button" ng-if="appController.backPath" ng-href="{{appController.backPath}}">
           <md-icon flex="auto">arrow_back</md-icon>
         </md-button>
         <h2 style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis">{{ appController.header }}</h2>
@@ -42,6 +42,7 @@
   <script src="src/tichu-tournament.js"></script>
   <script src="src/home/home.js"></script>
   <script src="src/movements/movement-detail.js"></script>
+  <script src="src/tournaments/tournament-detail.js"></script>
   <script src="src/tournaments/tournament-list.js"></script>
 </body>
 </html>
