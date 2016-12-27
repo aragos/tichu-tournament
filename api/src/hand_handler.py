@@ -9,6 +9,8 @@ from google.appengine.api import users
 from google.appengine.ext import ndb
 from handler_utils import CheckUserLoggedInAndMaybeReturnStatus
 from handler_utils import CheckUserOwnsTournamentAndMaybeReturnStatus
+from handler_utils import CheckValidHandParametersMaybeSetStatus
+from handler_utils import CheckValidMatchupForMovementAndMaybeSetStatus
 from handler_utils import CheckValidMovementConfigAndMaybeSetStatus
 from handler_utils import GetTourneyWithIdAndMaybeReturnStatus
 from handler_utils import is_int
@@ -24,12 +26,12 @@ class HandHandler(webapp2.RequestHandler):
     if not tourney:
       return
 
-    if not self._CheckValidHandParametersMaybeSetStatus(
-        tourney.no_boards, tourney.no_pairs, board_no,
-        ns_pair, ew_pair):
+    if not CheckValidHandParametersMaybeSetStatus(self.response, tourney,
+        board_no, ns_pair, ew_pair):
       return
 
-    if HandScore.CreateKey(tourney, board_no, ns_pair, ew_pair).get():
+    hand_score = HandScore.CreateKey(tourney, board_no, ns_pair, ew_pair).get()
+    if hand_score and not hand_score.deleted:
       self.response.set_status(200)
       return 
     self.response.set_status(204)
@@ -40,20 +42,16 @@ class HandHandler(webapp2.RequestHandler):
     if not tourney:
       return
 
-    if not self._CheckValidHandParametersMaybeSetStatus(
-        tourney.no_boards, tourney.no_pairs, board_no,
-        ns_pair, ew_pair):
+    if not CheckValidHandParametersMaybeSetStatus(self.response, tourney,
+        board_no, ns_pair, ew_pair):
       return
       
     
     movements = CheckValidMovementConfigAndMaybeSetStatus(
         self.response, tourney.no_pairs, tourney.no_boards)
-    if not self._IsThisCombinationInThisMovement(
-        movements, int(board_no), int(ns_pair), int(ew_pair)):
-      SetErrorStatus(self.response, 400, "Invalid Hand-Players Combination",
-                     "NS and EW pairs do not play each other in this " + 
-                     "tournament format")
-      return
+    if not CheckValidMatchupForMovementAndMaybeSetStatus(
+        self.response, movements, int(board_no), int(ns_pair), int(ew_pair)):
+     return
 
     request_dict = self._ParseRequestInfoAndMaybeSetStatus()
     if not request_dict:
@@ -76,17 +74,13 @@ class HandHandler(webapp2.RequestHandler):
                "ew_score": int(ew_score),
                "notes": notes}
 
-    hand_score = HandScore.CreateKey(tourney, board_no, ns_pair, ew_pair).get()
-    if not hand_score:
-      tourney.PutHandScore(int(board_no), calls, int(ns_pair), int(ew_pair),
-                           notes, int(ns_score), int(ew_score))
+    user_has_access, change_pair_no = self._CheckUserCanOverwriteMaybeSetStatus(
+        tourney, int(ns_pair), int(ew_pair))
+    if not user_has_access:
+      return
     else:
-      if not self._CheckUserCanOverwriteMaybeSetStatus(tourney, int(ns_pair),
-                                                       int(ew_pair)):
-        return
-      else:
-        tourney.PutHandScore(int(board_no), calls, int(ns_pair), int(ew_pair),
-                             notes, int(ns_score), int(ew_score))
+      tourney.PutHandScore(int(board_no), calls, int(ns_pair), int(ew_pair),
+                           notes, int(ns_score), int(ew_score), change_pair_no)
     self.response.set_status(204)
  
  
@@ -104,9 +98,8 @@ class HandHandler(webapp2.RequestHandler):
                                                        id):
       return
 
-    if not self._CheckValidHandParametersMaybeSetStatus(
-        tourney.no_boards, tourney.no_pairs, board_no,
-        ns_pair, ew_pair):
+    if not CheckValidHandParametersMaybeSetStatus(self.response, tourney,
+        board_no, ns_pair, ew_pair):
       return
 
     hand_score = HandScore.CreateKey(tourney, board_no, ns_pair, ew_pair).get()
@@ -114,43 +107,9 @@ class HandHandler(webapp2.RequestHandler):
       SetErrorStatus(self.response, 404, "Invalid Request",
                      "Hand not set in tournament")
       return
-    hand_score.key.delete()
+    hand_score.Delete()
     self.response.set_status(204) 
 
-
-  def _CheckValidHandParametersMaybeSetStatus(self, total_boards, total_pairs,
-                                              board_no, ns_pair, ew_pair):
-    error = "Invalid Hand Parameters"
-    if (not is_int(board_no)) or int(board_no) < 1 or int(board_no) > total_boards:
-      SetErrorStatus(self.response, 404, error,
-                     "Board number {} is invalid".format(board_no))
-      return False
-    elif (not is_int(ns_pair)) or int(ns_pair) < 1 or int(ns_pair) > total_pairs:
-      SetErrorStatus(self.response, 404, error,
-                     "Pair number {} is invalid".format(ns_pair))
-      return False
-    elif (not is_int(ew_pair)) or int(ew_pair) < 1 or int(ew_pair) > total_pairs:
-      SetErrorStatus(self.response, 404, error,
-                     "Pair number {} is invalid".format(ew_pair))
-      return False
-    elif ew_pair == ns_pair:
-      SetErrorStatus(self.response, 404, error, "NS and EW pairs are the same")
-      return False
-    return True
-
-
-  def _IsThisCombinationInThisMovement(self, movements, board_no, ns_pair, ew_pair):
-    if not movements:
-      return False
-    for round in movements.GetMovement(ns_pair):
-      if round['opponent'] != ew_pair:
-        continue
-      if round['position'][1] != "N":
-        return False
-      if not board_no in round['hands']:
-        return False
-      return True
-    return False
 
   def _ValidateHandResultMaybeSetStatus(self, board_no, ns_pair, ew_pair,
                                         ns_score, ew_score, calls):
@@ -182,23 +141,23 @@ class HandHandler(webapp2.RequestHandler):
     user = users.get_current_user()
     error = "Forbidden User"
     if user and tourney.owner_id == user.user_id():
-      return True
+      return (True, 0)
     pair_id = self.request.headers.get('X-tichu-pair-code')
     if not pair_id:
       SetErrorStatus(self.response, 403, error,
                      "User does not own tournament and is not authenticated with" + 
                      "a pair code to overwrite this hand.")
-      return False
+      return (False, None)
     player_pairs = PlayerPair.query(
           ndb.OR(PlayerPair.pair_no == int(ns_pair),
                  PlayerPair.pair_no == int(ew_pair)),
-          ancestor=tourney.key).fetch(projection=[PlayerPair.id])
+          ancestor=tourney.key).fetch()
     if (not player_pairs) or (pair_id not in [p.id for p in player_pairs]):
       SetErrorStatus(self.response, 403, error,
                      "User does not own tournament and is authenticated with the " + 
                      "wrong code for involved pairs")
-      return False
-    return True
+      return (False, None)
+    return (True, next(p.pair_no for p in player_pairs if p.id == pair_id))
 
 
   def _ParseRequestInfoAndMaybeSetStatus(self):

@@ -66,7 +66,7 @@ class AppTest(unittest.TestCase):
                                  expect_errors=True)
     self.assertEqual(response.status_int, 404)
 
-  def testHead_not_present(self):
+  def testHead_present(self):
     self.loginUser()
     id = self.AddBasicTournament()
     self.AddBasicHand(id)
@@ -74,13 +74,25 @@ class AppTest(unittest.TestCase):
     response = self.testapp.head("/api/tournaments/{}/hands/1/2/3".format(id))
     self.assertEqual(response.status_int, 200)
 
-  def testHead_present(self):
+  def testHead_not_present(self):
     self.loginUser()
     id = self.AddBasicTournament()
     self.AddBasicHand(id)
     self.logoutUser()
     response = self.testapp.head("/api/tournaments/{}/hands/2/2/3".format(id))
     self.assertEqual(response.status_int, 204)
+
+  def testHead_deleted(self):
+    self.loginUser()
+    id = self.AddBasicTournament()
+    self.AddBasicHand(id)
+    response = self.testapp.delete("/api/tournaments/{}/hands/1/2/3".format(id))
+    response = self.testapp.head("/api/tournaments/{}/hands/1/2/3".format(id))
+    self.assertEqual(response.status_int, 204)
+    self.AddBasicHand(id)
+    response = self.testapp.head("/api/tournaments/{}/hands/1/2/3".format(id))
+    self.assertEqual(response.status_int, 200)
+    
 
   def testPut_bad_id(self):
     self.loginUser()
@@ -148,10 +160,10 @@ class AppTest(unittest.TestCase):
   def testPut_score_exists_not_logged_in(self):
     self.loginUser()
     id = self.AddBasicTournament()
-    self.logoutUser()
     params = {'calls': {}, 'ns_score': 75, 'ew_score': 25}
     response = self.testapp.put_json("/api/tournaments/{}/hands/1/2/3".format(id),
                                      params)
+    self.logoutUser()
     params = {'calls': {}, 'ns_score': 25, 'ew_score': 75}
     response = self.testapp.put_json("/api/tournaments/{}/hands/1/2/3".format(id),
                                      params, expect_errors=True)
@@ -160,10 +172,10 @@ class AppTest(unittest.TestCase):
   def testPut_score_exists_does_not_own(self):
     self.loginUser()
     id = self.AddBasicTournament()
-    self.loginUser('user2@example.com', '234')
     params = {'calls': {}, 'ns_score': 75, 'ew_score': 25}
     response = self.testapp.put_json("/api/tournaments/{}/hands/1/2/3".format(id),
                                      params)
+    self.loginUser('user2@example.com', '234')
     params = {'calls': {}, 'ns_score': 25, 'ew_score': 75}
     hand_headers = {'X-tichu-pair-code' : 'AAAA'}
     response = self.testapp.put_json("/api/tournaments/{}/hands/1/2/3".format(id),
@@ -196,7 +208,6 @@ class AppTest(unittest.TestCase):
   def testPut(self):
     self.loginUser()
     id = self.AddBasicTournament()
-    self.logoutUser()
     params = {'calls': { 'north': "T" }, 
               'ns_score': 75,
               'ew_score': 25,
@@ -204,7 +215,6 @@ class AppTest(unittest.TestCase):
     response = self.testapp.put_json("/api/tournaments/{}/hands/1/2/3".format(id),
                                      params)
     self.assertEqual(response.status_int, 204)
-    self.loginUser()
     
     # Test the hand is there
     response = self.testapp.get("/api/tournaments/{}".format(id))
@@ -292,8 +302,8 @@ class AppTest(unittest.TestCase):
   def testDelete_not_logged_in(self):
     self.loginUser()
     id = self.AddBasicTournament()
-    self.logoutUser()
     self.AddBasicHand(id)
+    self.logoutUser()
     response = self.testapp.delete("/api/tournaments/{}/hands/1/2/3".format(id),
                                    expect_errors=True)
     self.assertEqual(response.status_int, 401)
@@ -403,6 +413,7 @@ class AppTest(unittest.TestCase):
     self.assertEqual(24, response_dict['no_boards'])
 
   def AddBasicHand(self, id):
+    self.loginUser()
     params = {'calls': {}, 'ns_score': 75, 'ew_score': 25}
     response = self.testapp.put_json("/api/tournaments/{}/hands/1/2/3".format(id),
                                      params)

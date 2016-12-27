@@ -75,7 +75,7 @@ class MovementHandler(webapp2.RequestHandler):
       else:
         hand_score = HandScore.CreateKey(tourney, h, round['opponent'],
                                          pair_no).get()
-      if hand_score:
+      if hand_score and not hand_score.deleted:
         round.setdefault('hands', []).append({
           'hand_no' : h,
           'score': {

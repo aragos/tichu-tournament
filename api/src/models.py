@@ -1,5 +1,6 @@
 import json
 import random
+import datetime
 
 from google.appengine.ext import ndb
 
@@ -79,7 +80,7 @@ class Tournament(ndb.Model):
 
 
   def PutHandScore(self, hand_no, hand_calls, ns_pair, ew_pair, hand_notes,
-                   hand_ns_score, hand_ew_score):
+                   hand_ns_score, hand_ew_score, changed_by):
     ''' Creates a new HandScore Entity corresponding to this hand and puts it 
         into datastore.
 
@@ -93,8 +94,11 @@ class Tournament(ndb.Model):
         hand_ew_score: Integer. Score for the East/West pair.
     '''
     hand_score = HandScore(calls=json.dumps(hand_calls), notes=hand_notes,
-                           ns_score=hand_ns_score, ew_score=hand_ew_score)
+                           ns_score=hand_ns_score, ew_score=hand_ew_score,
+                           deleted=False)
     hand_score.key = HandScore.CreateKey(self, hand_no, ns_pair, ew_pair)
+    hand_score.PutChangeLog(changed_by, hand_calls, hand_notes,
+                            hand_ns_score, hand_ew_score)
     hand_score.put()
 
 
@@ -135,6 +139,7 @@ class HandScore(ndb.Model):
   notes = ndb.TextProperty()
   ns_score = ndb.IntegerProperty()
   ew_score = ndb.IntegerProperty()
+  deleted = ndb.BooleanProperty()
   
   @classmethod
   def CreateKey(cls, parent_tourney, hand_no, ns_pair, ew_pair):
@@ -145,3 +150,40 @@ class HandScore(ndb.Model):
   @classmethod
   def CreateKeyId(cls, hand_no, ns_pair, ew_pair):
     return str(hand_no) + ":" + str(ns_pair) + ":" + str(ew_pair)
+    
+  def Delete(self):
+    self.calls = ''
+    self.notes = ''
+    self.ns_score = None
+    self.ew_score = None
+    self.deleted = True
+    self.PutChangeLog(0, None, None, None, None)
+    self.put()
+  
+  def PutChangeLog(self, changed_by, calls, notes, ns_score, ew_score):
+    change_dict = {
+      "calls" : calls,
+      "notes" : notes,
+      "ns_score" : ns_score,
+      "ew_score" : ew_score,
+    }
+    epoch = datetime.datetime.utcfromtimestamp(0)
+    nowtime = datetime.datetime.now()
+    change_log = ChangeLog(changed_by=changed_by, change=json.dumps(change_dict))
+    change_log.key = ndb.Key("ChangeLog", str((nowtime - epoch).total_seconds()),
+                             parent=self.key)
+    change_log.put()
+    
+
+class ChangeLog(ndb.Model):
+  ''' Model that logs all the changes made to a specific hand. Is a child of
+      some hand. Keyed by timestamp.
+  '''
+  # Pair number of the user making the change. If 0, changed by director.
+  changed_by = ndb.IntegerProperty()
+  # The state of the hand the change is made. Encoded as JSON object as:
+  change = ndb.JsonProperty()
+  
+  def to_dict(self):
+    return { 'changed_by' : self.changed_by, 'change' : json.loads(self.change),
+             'timestamp_sec' :  self.key.id()}

@@ -1,4 +1,5 @@
 import webapp2
+from change_log_handler import ChangeLogHandler
 from hand_handler import HandHandler
 from movement_handler import MovementHandler
 from pair_id_handler import PairIdHandler
@@ -19,4 +20,5 @@ app = webapp2.WSGIApplication([
     ('/api/tournaments/([^/]+)/pairids/?', TourneyPairIdsHandler),
     ('/api/tournaments/pairno/([^/]+)/?', PairIdHandler),
     ('/api/tournaments/([^/]+)/movement/([^/]+)/?', MovementHandler),
+    ('/api/tournaments/([^/]+)/hands/changelog/([^/]+)/([^/]+)/([^/]+)/?', ChangeLogHandler),
 ], debug=True)

@@ -440,9 +440,8 @@ Checks if the given hand was already scored.
 
 ### Submit score for hand (PUT /api/tournaments/:id/hands/:board_no/:ns_pair/:ew_pair)
 
-Submits a score for the given hand.
-Or, **if the user is authenticated and owns this tournament or the request header 
-contain ann appropriate pair id**, updates an already submitted score.
+**Requires that the user is authenticated and owns this tournament or the request
+header contain an appropriate pair id**, Submits a score for the given hand.
 
 #### Request Header
 Optional. Necessary only for overriding hand scores for non-tournament owners.
@@ -492,8 +491,8 @@ Optional. Necessary only for overriding hand scores for non-tournament owners.
 
 * **204**: The hand has been scored.
 * **400**: Validation failed for one or more of the fields in the score.
-* **403**: The score for this hand has already been submitted, and the user does not own this
-  tournament or is not logged in.
+* **403**: The user does not own this tournament is not logged in and the request was not authenticate
+  with the right pair id.
 * **404**: The tournament with the given ID does not exist, the board/pair numbers are invalid
   or the pairs are not scheduled to play this board in the tournament movement scheme.
 * **500**: Server failed to score the hand for any other reason.
@@ -520,6 +519,85 @@ Deletes the score for the given hand from the server, allowing it to be scored a
 * **403**: The user is logged in, but does not own this tournament.
 * **404**: The tournament with the given ID does not exist, or the board/pair numbers are invalid.
 * **500**: Server failed to delete the hand for any other reason.
+
+### Get change log for a hand (GET /api/tournaments/:id/hands/changelog/:board_no/:ns_pair/:ew_pair)
+
+**Requires authentication and ownership of the given tournament.**
+Gets a complete change log for a specific hand.
+
+#### Request
+
+* `id`: String. An opaque, unique ID returned from `GET /tournaments` or `POST /tournaments`.
+* `board_no`: Integer. The board number for this hand. Must be between 1 and `no_boards`,
+  inclusive.
+* `ns_pair`: Integer. The number of the north-south pair. Must be between 1 and `no_pairs`,
+  inclusive, and different from `ew_pair`.
+* `ew_pair`: Integer. The number of the east-west pair. Must be between 1 and `no_pairs`,
+  inclusive, and different from `ns_pair`.
+
+<!-- time 4 code -->
+
+    {
+        "changes": [
+            {
+                "change": {
+                    "calls": {
+                        "north": "", 
+                        "south": "T", 
+                        "west": "", 
+                        "east": ""
+                    }, 
+                    "ew_score": 20, 
+                    "ns_score": 180
+                }, 
+                "timestamp_sec": "1482804837.85", 
+                "changed_by": 1
+            }, 
+            {
+                "change": {
+                    "ns_score": 180, 
+                    "calls": {
+                        "north": "", 
+                        "south": "T", 
+                        "west": "", 
+                        "east": ""
+                    }, 
+                    "ew_score": 20, 
+                    "notes" : "Hello there"
+                }, 
+                "timestamp_sec": "1482804384.03", 
+                "changed_by": 1
+            }
+        ]
+    }
+
+* `changes` : List of objects. Every change made to the score ordered in reverse 
+  timestamp order. Deletions are have all empty fields except `timestamp_sec`. May be empty
+  if the hand was never scored.
+  * `change`: Object. The change made at a given time. Required.
+    * `calls`: Object. Calls made by players. May have entries for `north`, `east`, `west`, `south`.
+      Each entry may be `"T"`, indicating a call of Tichu, `"GT"`, indicating a call of Grand Tichu,
+      or `""`, indicating no call. If an entry is absent, it is assumed to mean no call. Must be null
+      or not present for a hand deletion change. Optional.
+    * `ns_score`: Integer or string. The score of the north-south pair, including Tichu bonuses and
+      penalties. May also be the string "AVG+" or "AVG-". Must be null or not present for a hand 
+      deletion change. Required.
+    * `ew_score`: Integer or string. The score of the east-west pair, including Tichu bonuses and
+      penalties. May also be the string "AVG+" or "AVG-". Must be null or not present for a hand
+      deletion change. Required.
+    * `notes`: String. Any additional notes about the hand added by the scorer or the director.
+      Must be null or not present for a hand deletion change. Required.
+  * `timestamp_sec`: Float. Time in seconds from epoch when the change was made. Required.
+  * `changed_by`: Integer. Pair number of the team that made the change. If 0, change was made
+    by the director. Required.
+
+#### Status codes
+
+* **204**: The change log was successfully fetched.
+* **403**: The user does not own this tournament or is not logged in.
+* **404**: The tournament with the given ID does not exist, the board/pair numbers are invalid
+  or the pairs are not scheduled to play this board in the tournament movement scheme.
+* **500**: Server failed to score the hand for any other reason.
 
 ### Generate final score (GET /api/tournaments/:id/results)
 
@@ -572,9 +650,9 @@ Calculates and returns the final detailed results of the tournament.
 * `pair_summaries`: List of objects. The summary of results for all pairs playing in this
   tournament. There will be exactly one for each pair between 1 and `no_pairs`.
     * `pair_no`: Integer. The number of the pair this summary is for.
-    * `mps`: Double. The total number of match points scored by this pair in the tournament.
-    * `rps`: Double. The total number of RPs scored by this pair in the tournament.
-    * `aps`: Double. The total number of APs scored by this pair in the tournament.
+    * `mps`: Float. The total number of match points scored by this pair in the tournament.
+    * `rps`: Float. The total number of RPs scored by this pair in the tournament.
+    * `aps`: Float. The total number of APs scored by this pair in the tournament.
 * `hands`: List of objects. The final records of all hands played in this tournament. There will be
   at most one per combination of `board_no`, `ns_pair`, and `ew_pair`.
     * `board_no`: Integer. The board number for this hand. Must be between 1 and `no_boards`,
@@ -590,15 +668,15 @@ Calculates and returns the final detailed results of the tournament.
       penalties. May also be the string "AVG+" or "AVG-".
     * `ew_score`: Integer or string. The score of the east-west pair, including Tichu bonuses and
       penalties. May also be the string "AVG+" or "AVG-".
-    * `ns_mps`: Double. The number of match points scored by the north-south pair in this hand.
-    * `ew_mps`: Double. The number of match points scored by the east-west pair in this hand.
-    * `ns_mps`: Double. The number of RPs scored by the north-south pair in this hand.
-    * `ew_mps`: Double. The number of RPs scored by the east-west pair in this hand.  
-    * `ns_aps`: Double. The number of APs scored by the north-south pair in this hand.
-    * `ew_aps`: Double. The number of APs scored by the east-west pair in this hand.  
+    * `ns_mps`: Float. The number of match points scored by the north-south pair in this hand.
+    * `ew_mps`: Float. The number of match points scored by the east-west pair in this hand.
+    * `ns_mps`: Float. The number of RPs scored by the north-south pair in this hand.
+    * `ew_mps`: Float. The number of RPs scored by the east-west pair in this hand.  
+    * `ns_aps`: Float. The number of APs scored by the north-south pair in this hand.
+    * `ew_aps`: Float. The number of APs scored by the east-west pair in this hand.  
     * `notes`: String. Any additional notes about the hand added by the scorer or the director.
 
-### Generate final score in XLXS format (GET /api/tournaments/:id/xlsresults)
+### Generate final score in XLSX format (GET /api/tournaments/:id/xlsresults)
 
 **Requires authentication and ownership of the given tournament.**
 Calculates and returns the final detailed results of the tournament as a .xlsx file.
