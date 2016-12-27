@@ -79,7 +79,7 @@ class MovementHandler(webapp2.RequestHandler):
         round.setdefault('hands', []).append({
           'hand_no' : h,
           'score': {
-              'calls' : json.loads(hand_score.calls),
+              'calls' : hand_score.calls_dict(),
               'ns_score' : hand_score.ns_score,
               'ew_score' : hand_score.ew_score,
               'notes' : hand_score.notes,

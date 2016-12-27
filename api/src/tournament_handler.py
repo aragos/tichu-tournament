@@ -50,7 +50,7 @@ class TourneyHandler(webapp2.RequestHandler):
                      'hands' : GetHandListForTourney(tourney)}
     for player_pair in PlayerPair.query(ancestor=tourney.key).fetch():
       if player_pair.players:
-        for player in json.loads(player_pair.players):
+        for player in player_pair.player_list():
           player['pair_no'] = player_pair.pair_no
           combined_dict.setdefault('players', []).append(player)
 

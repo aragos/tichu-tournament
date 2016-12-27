@@ -13,7 +13,6 @@ from handler_utils import CheckValidHandParametersMaybeSetStatus
 from handler_utils import CheckValidMatchupForMovementAndMaybeSetStatus
 from handler_utils import CheckValidMovementConfigAndMaybeSetStatus
 from handler_utils import GetTourneyWithIdAndMaybeReturnStatus
-from handler_utils import is_int
 from handler_utils import SetErrorStatus
 from models import HandScore
 from models import PlayerPair
@@ -114,26 +113,17 @@ class HandHandler(webapp2.RequestHandler):
   def _ValidateHandResultMaybeSetStatus(self, board_no, ns_pair, ew_pair,
                                         ns_score, ew_score, calls):
     error =  "Invalid Score"
-    if (not is_int(ns_score)):
+    try:
+      HandResult(board_no, ns_pair, ew_pair, int(ns_score),
+                 int(ew_score), Calls.FromDict(calls))
+    except InvalidScoreError as err:
       SetErrorStatus(self.response, 400, error,
-                     "NS score {} is invalid".format(ns_score))
+                   "These scores are not a valid Tichu score")
       return False
-    elif (not is_int(ew_score)):
+    except InvalidCallError as err:
       SetErrorStatus(self.response, 400, error,
-                     "EW score {} is invalid".format(ew_score))
+                    "{} are not valid Tichu calls".format(calls))
       return False
-    else: 
-      try:
-        HandResult(board_no, ns_pair, ew_pair, int(ns_score),
-                   int(ew_score), Calls.FromDict(calls))
-      except InvalidScoreError as err:
-        SetErrorStatus(self.response, 400, error,
-                     "These scores are not a valid Tichu score")
-        return False
-      except InvalidCallError as err:
-        SetErrorStatus(self.response, 400, error,
-                      "{} are not valid Tichu calls".format(calls))
-        return False
     return True
 
 

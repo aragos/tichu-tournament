@@ -130,6 +130,9 @@ class PlayerPair(ndb.Model):
   pair_no = ndb.IntegerProperty()
   id = ndb.StringProperty()
   
+  def player_list(self):
+    return json.loads(self.players) if self.players else []
+  
 class HandScore(ndb.Model):
   ''' Model for all the information about a single hand that was played between
       two teams. Must be a child of some tournament. Must be keyed as 
@@ -152,8 +155,8 @@ class HandScore(ndb.Model):
     return str(hand_no) + ":" + str(ns_pair) + ":" + str(ew_pair)
     
   def Delete(self):
-    self.calls = ''
-    self.notes = ''
+    self.calls = None
+    self.notes = None
     self.ns_score = None
     self.ew_score = None
     self.deleted = True
@@ -174,6 +177,8 @@ class HandScore(ndb.Model):
                              parent=self.key)
     change_log.put()
     
+  def calls_dict(self):
+    return json.loads(self.calls) if self.calls else {}
 
 class ChangeLog(ndb.Model):
   ''' Model that logs all the changes made to a specific hand. Is a child of

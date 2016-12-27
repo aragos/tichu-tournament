@@ -2,6 +2,7 @@ import json
 import unittest
 import webtest
 import os
+import time
 
 from google.appengine.ext import testbed
 
@@ -116,6 +117,8 @@ class AppTest(unittest.TestCase):
     response = self.testapp.put_json("/api/tournaments/{}/hands/1/2/3".format(id),
                                      params)
     self.assertEqual(response.status_int, 204)
+    # Add sleep because keying by timestamp makes quick tests flaky.
+    time.sleep(0.05)
     
     # Then changed by Pair 2
     self.logoutUser()
@@ -126,10 +129,12 @@ class AppTest(unittest.TestCase):
               'notes': 'I am another note'}
     self.testapp.put_json("/api/tournaments/{}/hands/1/2/3".format(id),
                           headers=hand_headers, params=params)
+    time.sleep(0.05)
     
     # Then deleted by the director
     self.loginUser()
     self.testapp.delete("/api/tournaments/{}/hands/1/2/3".format(id))
+    time.sleep(0.05)
     
     # Then readded by Pair 3
     self.logoutUser()
