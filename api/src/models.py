@@ -1,19 +1,18 @@
+import datetime
 import json
 import random
-import datetime
 
 from google.appengine.ext import ndb
+
 
 class Tournament(ndb.Model):
   ''' Model for all the information needed to describe a Tournament
      
-      Attributes:
-        hands: json object describing a list of raw hand records including
-               scores and calls. Required.
-        owner_id: owner of the tournament. Required.
-        name: name of the tournament. Required.
-        no_boards: Number of boards in the tournament. Required.
-        no_pairs: Number of pairs in the tournament. Required.
+  Attributes:
+    owner_id: Google ID for the owner of the tournament. Required.
+    name: name of the tournament. Required.
+    no_boards: Number of boards in the tournament. Required.
+    no_pairs: Number of pairs in the tournament. Required.
   '''
   owner_id = ndb.StringProperty()
   name = ndb.StringProperty()
@@ -23,19 +22,19 @@ class Tournament(ndb.Model):
   def PutPlayers(self, player_list, no_pairs):
     ''' Create a new PlayerPair Entity corresponding to each player pair for 
         pair numbers 1 ... no_pairs saving any useful information from 
-        player_list and puts it into Datastore as a child of this Tournament.
-        Also, if this is the no_players has changed, generates a unique 
+        player_list and put it into Datastore as a child of this Tournament.
+        Also, the no_players has changed, generates a unique 
         (for this tournament) id associated with each pair.
 
-      Args:
-        player_list: list of dicts with keys pair_no (req), name (opt), 
-          and email (opt)
-        no_pairs: the total number of pairs in this tournament. Exactly this many
-          PlayerPairs are created today.
+    Args:
+      player_list: list of dicts with keys pair_no (req), name (opt), 
+        and email (opt)
+      no_pairs: the total number of pairs in this tournament. Exactly this many
+        PlayerPairs are created.
     '''
     if not player_list:
       return
-      
+
     pair_dict = {}
     for player in player_list : 
       pair_no = player['pair_no']
@@ -61,27 +60,19 @@ class Tournament(ndb.Model):
     # number.
     for i in range(1, no_pairs + 1):
       pair_members = pair_dict.get(i) 
-      if pair_members:
-        if override_existing:
+      str_pair_members = json.dumps(pair_members) if pair_members else ''
+      if override_existing:
           player_pair = player_list[i-1]
-          player_pair.players = json.dumps(pair_members)
-        else:
-          player_pair = PlayerPair(players=json.dumps(pair_members),
-                                   pair_no=i, id=random_ids[i-1],
-                                   parent=self.key)
-      else: 
-        if override_existing:
-          player_pair = player_list[i-1]
-          player_pair.players = ''
-        else:
-          player_pair = PlayerPair(players='', pair_no=i, id=random_ids[i-1],
-                                   parent=self.key)
+          player_pair.players = str_pair_members
+      else:
+        player_pair = PlayerPair(players=str_pair_members,
+                                 pair_no=i, id=random_ids[i-1],
+                                 parent=self.key)
       player_pair.put()
-
 
   def PutHandScore(self, hand_no, ns_pair, ew_pair, hand_calls, hand_ns_score,
                    hand_ew_score, hand_notes, changed_by):
-    ''' Create a new HandScore Entity corresponding to this hand and puts it 
+    ''' Create a new HandScore Entity corresponding to this hand and put it 
         into datastore.
 
       Args:
@@ -98,20 +89,19 @@ class Tournament(ndb.Model):
                            ns_score=hand_ns_score, ew_score=hand_ew_score,
                            deleted=False)
     hand_score.key = HandScore.CreateKey(self, hand_no, ns_pair, ew_pair)
-    hand_score.PutChangeLog(changed_by, hand_calls, hand_notes,
-                            hand_ns_score, hand_ew_score)
+    hand_score.PutChangeLog(changed_by)
     hand_score.put()
 
-
   def _RandomId(self, num_ids):
-    ''' Generates a list of num_ids unique random 4 character capitalized ids.
+    ''' Generate a list of num_ids unique random 4 character capitalized ids.
     '''
     seen = set()
     ret = []
     for i in range(num_ids):
       id = None
       while (not id) or (id in seen):
-        id = ''.join(random.choice('ABCDEFGHIJKLMNOPQRSTUVWXYZ') for j in range(4))
+        id = ''.join(
+            random.choice('ABCDEFGHIJKLMNOPQRSTUVWXYZ') for j in range(4))
       seen.add(id)
       ret.append(id)
     return ret
@@ -119,57 +109,103 @@ class Tournament(ndb.Model):
 
 class PlayerPair(ndb.Model):
   ''' Model for all the information about a player pair in a specific tournament.
-      Must be a child of some tournament.
-     
-      Fields:
-        players: json object describing a list of players. Should have length
-                 at most 2.
-        pair_no: the number associated with this pair in this tournament
-        id: a 4 character capitalized letter string that identifies this pair.
+
+  Must be a child of some tournament.
+
+  Attribtes:
+    players: json object describing a list of players. Should have length at
+             most 2.
+    pair_no: the number associated with this pair in this tournament
+    id: a 4 character capitalized letter string that identifies this pair.
   '''
   players = ndb.JsonProperty()
   pair_no = ndb.IntegerProperty()
   id = ndb.StringProperty()
-  
+
   def player_list(self):
     return json.loads(self.players) if self.players else []
-  
+
+
 class HandScore(ndb.Model):
-  ''' Model for all the information about a single hand that was played between
-      two teams. Must be a child of some tournament. Must be keyed as 
-      a concatenation of hand number, ns pair number, and ew pair number.
+  ''' Model for all the information about a single hand.
+
+  Must be a child of some tournament. Must be keyed as a concatenation of hand
+  number, ns pair number, and ew pair number.
+
+  Attributes:
+    calls: json object describing the calls for the hand. Can be None.
+    notes: hand related notes. Can be None.
+    ns_score: North/South score. Can be None for deleted hands only.
+    ew_score: East/West score. Can be None for deleted hands only. 
+    deleted: True iff the hand used to exist but has been deleted. Object is
+             kept around for change log stability.
   '''
   calls = ndb.JsonProperty()
   notes = ndb.TextProperty()
   ns_score = ndb.IntegerProperty()
   ew_score = ndb.IntegerProperty()
   deleted = ndb.BooleanProperty()
-  
+
+  def calls_dict(self):
+    ''' Returns the calls property as a dictionary if set. None otherwise.'''
+    return json.loads(self.calls) if self.calls else None
+
   @classmethod
   def CreateKey(cls, parent_tourney, hand_no, ns_pair, ew_pair):
+    ''' Create a key for this tournament, hand, opponents combination.
+
+    Args:
+        hand_no: Integer. Number of this hand.
+        ns_pair: Integer. Number of the North/South pair.
+        ew_pair: Integer. Number of the East/West pair.
+
+    Returns:
+      ndb.Key that has parent_tourney as a parent.
+    '''
     return ndb.Key(cls._get_kind(),
                    cls.CreateKeyId(hand_no, ns_pair, ew_pair), 
                    parent=parent_tourney.key)
 
   @classmethod
   def CreateKeyId(cls, hand_no, ns_pair, ew_pair):
+    ''' Create a string id for this tournament, hand, opponents combination.
+
+    Args:
+        hand_no: Integer. Number of this hand.
+        ns_pair: Integer. Number of the North/South pair.
+        ew_pair: Integer. Number of the East/West pair.
+
+    Returns:
+      string to be used as id for a HandPair
+    '''
     return str(hand_no) + ":" + str(ns_pair) + ":" + str(ew_pair)
-    
+
   def Delete(self):
+    ''' Mark this hand as deleted and add to Datastore. Also update changelog.
+
+    Assumes this change has been made by the tournament's director.
+    '''
     self.calls = None
     self.notes = None
     self.ns_score = None
     self.ew_score = None
     self.deleted = True
-    self.PutChangeLog(0, None, None, None, None)
+    self.PutChangeLog(0)
     self.put()
   
-  def PutChangeLog(self, changed_by, calls, notes, ns_score, ew_score):
+  def PutChangeLog(self, changed_by):
+    ''' Create a change log for the current state of the hand.
+
+    Uses current timestamp in seconds as key.
+
+    Args:
+        changed_by: Integer. Pair number for the user requesting the change.
+    '''
     change_dict = {
-      "calls" : calls,
-      "notes" : notes,
-      "ns_score" : ns_score,
-      "ew_score" : ew_score,
+      "calls" : self.calls_dict(),
+      "notes" : self.notes,
+      "ns_score" : self.ns_score,
+      "ew_score" : self.ew_score,
     }
     epoch = datetime.datetime.utcfromtimestamp(0)
     nowtime = datetime.datetime.now()
@@ -177,19 +213,27 @@ class HandScore(ndb.Model):
     change_log.key = ndb.Key("ChangeLog", str((nowtime - epoch).total_seconds()),
                              parent=self.key)
     change_log.put()
-    
-  def calls_dict(self):
-    return json.loads(self.calls) if self.calls else {}
+
 
 class ChangeLog(ndb.Model):
-  ''' Model that logs all the changes made to a specific hand. Is a child of
-      some hand. Keyed by timestamp.
+  ''' Model that logs all the changes made to a specific hand.
+
+  Is a child of some hand. Keyed by timestamp. This model is assumed to be 
+  called regularly and not often parsed.
+      
+  Attributes:
+    changed_by: Integer. Pair number of the user that requested the change. 0
+      for the director.
+    change: json object describing all the action of the hand. See api for 
+      json format of a single change.  
   '''
   # Pair number of the user making the change. If 0, changed by director.
   changed_by = ndb.IntegerProperty()
   # The state of the hand the change is made. Encoded as JSON object as:
   change = ndb.JsonProperty()
-  
+
   def to_dict(self):
-    return { 'changed_by' : self.changed_by, 'change' : json.loads(self.change),
-             'timestamp_sec' :  self.key.id()}
+    ''' Returns a dict version of this ChangeLog. See api for format '''
+    return { 'changed_by' : self.changed_by,
+             'change' : json.loads(self.change),
+             'timestamp_sec' :  self.key.id() }
