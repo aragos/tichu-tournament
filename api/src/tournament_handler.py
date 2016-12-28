@@ -37,7 +37,7 @@ class TourneyHandler(webapp2.RequestHandler):
     combined_dict = {'no_pairs' : tourney.no_pairs,
                      'no_boards' :tourney.no_boards,
                      'name' : tourney.name,
-                     'hands' : tourney.GetHandList()}
+                     'hands' : tourney.GetScoredHandList()}
     for player_pair in PlayerPair.query(ancestor=tourney.key).fetch():
       if player_pair.players:
         for player in player_pair.player_list():

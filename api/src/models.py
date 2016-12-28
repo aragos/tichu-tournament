@@ -107,7 +107,7 @@ class Tournament(ndb.Model):
       ret.append(id)
     return ret
 
-  def GetHandList(self):
+  def GetScoredHandList(self):
     ''' Fetch the list of all hands that are associated with this tournament.
 
     Returns:

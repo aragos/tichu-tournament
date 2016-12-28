@@ -27,7 +27,7 @@ class ResultHandler(webapp2.RequestHandler):
     if not CheckUserOwnsTournamentAndMaybeReturnStatus(self.response,
                                                        user, tourney):
       return
-    hand_list = tourney.GetHandList()
+    hand_list = tourney.GetScoredHandList()
     boards = ReadJSONInput(hand_list)
     summaries = Calculate(boards, GetMaxRounds(boards))
     self.response.headers['Content-Type'] = 'application/json'
@@ -53,7 +53,7 @@ class XlxsResultHandler(webapp2.RequestHandler):
                                                        user.user_id(), tourney):
       return
     
-    boards = ReadJSONInput(GetHandListForTourney(tourney))
+    boards = ReadJSONInput(tourney.GetScoredHandList())
     max_rounds = GetMaxRounds(boards)
     summaries = Calculate(boards, max_rounds)
     mp_summaries = summaries
