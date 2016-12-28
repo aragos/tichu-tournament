@@ -5,7 +5,6 @@ from google.appengine.api import users
 from google.appengine.ext import ndb
 from handler_utils import BuildMovementAndMaybeSetStatus
 from handler_utils import CheckUserOwnsTournamentAndMaybeReturnStatus
-from handler_utils import GetHandListForTourney
 from handler_utils import GetTourneyWithIdAndMaybeReturnStatus
 from handler_utils import is_int
 from handler_utils import TourneyDoesNotExistStatus
@@ -38,7 +37,7 @@ class TourneyHandler(webapp2.RequestHandler):
     combined_dict = {'no_pairs' : tourney.no_pairs,
                      'no_boards' :tourney.no_boards,
                      'name' : tourney.name,
-                     'hands' : GetHandListForTourney(tourney)}
+                     'hands' : tourney.GetHandList()}
     for player_pair in PlayerPair.query(ancestor=tourney.key).fetch():
       if player_pair.players:
         for player in player_pair.player_list():

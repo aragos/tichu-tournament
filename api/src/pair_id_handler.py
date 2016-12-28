@@ -4,7 +4,6 @@ import json
 from google.appengine.api import users
 from google.appengine.ext import ndb
 from handler_utils import CheckUserOwnsTournamentAndMaybeReturnStatus
-from handler_utils import GetHandListForTourney
 from handler_utils import GetTourneyWithIdAndMaybeReturnStatus
 from handler_utils import is_int
 from handler_utils import TourneyDoesNotExistStatus

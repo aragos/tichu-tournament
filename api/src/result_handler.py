@@ -5,7 +5,6 @@ from python.calculator import Calculate
 from python.calculator import GetMaxRounds
 from google.appengine.api import users
 from handler_utils import CheckUserOwnsTournamentAndMaybeReturnStatus
-from handler_utils import GetHandListForTourney
 from handler_utils import GetTourneyWithIdAndMaybeReturnStatus
 from handler_utils import is_int
 from handler_utils import SetErrorStatus
@@ -28,7 +27,7 @@ class ResultHandler(webapp2.RequestHandler):
     if not CheckUserOwnsTournamentAndMaybeReturnStatus(self.response,
                                                        user, tourney):
       return
-    hand_list = GetHandListForTourney(tourney)
+    hand_list = tourney.GetHandList()
     boards = ReadJSONInput(hand_list)
     summaries = Calculate(boards, GetMaxRounds(boards))
     self.response.headers['Content-Type'] = 'application/json'

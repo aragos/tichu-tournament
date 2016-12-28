@@ -68,6 +68,7 @@ class Tournament(ndb.Model):
         player_pair = PlayerPair(players=str_pair_members,
                                  pair_no=i, id=random_ids[i-1],
                                  parent=self.key)
+      player_pair.key = PlayerPair.CreateKey(self, i)
       player_pair.put()
 
   def PutHandScore(self, hand_no, ns_pair, ew_pair, hand_calls, hand_ns_score,
@@ -75,15 +76,15 @@ class Tournament(ndb.Model):
     ''' Create a new HandScore Entity corresponding to this hand and put it 
         into datastore.
 
-      Args:
-        hand_no: Integer. Number of this hand.
-        ns_pair: Integer. Number of the North/South pair.
-        ew_pair: Integer. Number of the East/West pair.
-        hand_calls: Dict representation of the calls to this hand
-        hand_ns_score: Integer. Score for the North/South pair.
-        hand_ew_score: Integer. Score for the East/West pair.
-        hand_notes: String. Notes for the hand.
-        changed_by: Integer. Pair number of the requestor. 0 if director.
+    Args:
+      hand_no: Integer. Number of this hand.
+      ns_pair: Integer. Number of the North/South pair.
+      ew_pair: Integer. Number of the East/West pair.
+      hand_calls: Dict representation of the calls to this hand
+      hand_ns_score: Integer. Score for the North/South pair.
+      hand_ew_score: Integer. Score for the East/West pair.
+      hand_notes: String. Notes for the hand.
+      changed_by: Integer. Pair number of the requestor. 0 if director.
     '''
     hand_score = HandScore(calls=json.dumps(hand_calls), notes=hand_notes,
                            ns_score=hand_ns_score, ew_score=hand_ew_score,
@@ -106,6 +107,44 @@ class Tournament(ndb.Model):
       ret.append(id)
     return ret
 
+  def GetHandList(self):
+    ''' Fetch the list of all hands that are associated with this tournament.
+
+    Returns:
+      List of dicts each corresponding to a non-deleted hand that has been scored
+        in this tournament. Dicts have the following structure:
+        {
+          "calls": {
+            "north": "T",
+            "east": "GT",
+            "west": "",
+            "south": ""
+           },
+          "ns_score": 150,
+          "ew_score": -150,
+          "notes": "hahahahahaha what a fool"
+          "board_no": 1,
+          "ns_pair": 2, 
+          "ns_score": 100
+          "ew_score": 0
+        }
+      calls and notes may be null.
+    '''
+    hand_list = []
+    for hand_score in HandScore.query(ancestor=self.key).fetch():
+      if hand_score.deleted:
+        continue
+      split_key = hand_score.key.id().split(":")
+      hand_list.append(
+          {'calls': hand_score.calls_dict(),
+           'board_no': int(split_key[0]),
+           'ns_pair': int(split_key[1]), 
+           'ew_pair': int(split_key[2]),
+           'ns_score': hand_score.ns_score,
+           'ew_score': hand_score.ew_score,
+           'notes': hand_score.notes})
+    return hand_list
+
 
 class PlayerPair(ndb.Model):
   ''' Model for all the information about a player pair in a specific tournament.
@@ -125,6 +164,32 @@ class PlayerPair(ndb.Model):
   def player_list(self):
     return json.loads(self.players) if self.players else []
 
+  @classmethod
+  def CreateKey(cls, parent_tourney, pair_no):
+    ''' Create a key for pair number pair_no in parent_tourney.
+
+    Args:
+      parent_tourney: Tournament. Tournament in which this hand happened.
+      pair_no: Integer. Pair number for a pair whose key we are getting. 
+
+    Returns:
+      ndb.Key that has parent_tourney as a parent.
+    '''
+    return ndb.Key(cls._get_kind(), pair_no, parent=parent_tourney.key)
+    
+  @classmethod
+  def GetByPairNo(cls, parent_tourney, pair_no):
+    ''' Fetches a PlayerPair given its parent tournament and pair number.
+
+    Args:
+      parent_tourney: Tournament. Tournament in which this hand happened.
+      pair_no: Integer. Pair number for the pair we are fetching.
+
+    Returns:
+      PlayerPair with this pair_no if it exists in the tournament. None 
+      otherwise.
+    '''
+    return cls.CreateKey(parent_tourney, pair_no).get()
 
 class HandScore(ndb.Model):
   ''' Model for all the information about a single hand.
@@ -155,9 +220,10 @@ class HandScore(ndb.Model):
     ''' Create a key for this tournament, hand, opponents combination.
 
     Args:
-        hand_no: Integer. Number of this hand.
-        ns_pair: Integer. Number of the North/South pair.
-        ew_pair: Integer. Number of the East/West pair.
+      parent_tourney: Tournament. Tournament in which this hand happened.
+      hand_no: Integer. Number of this hand.
+      ns_pair: Integer. Number of the North/South pair.
+      ew_pair: Integer. Number of the East/West pair.
 
     Returns:
       ndb.Key that has parent_tourney as a parent.
@@ -171,14 +237,31 @@ class HandScore(ndb.Model):
     ''' Create a string id for this tournament, hand, opponents combination.
 
     Args:
-        hand_no: Integer. Number of this hand.
-        ns_pair: Integer. Number of the North/South pair.
-        ew_pair: Integer. Number of the East/West pair.
+      hand_no: Integer. Number of this hand.
+      ns_pair: Integer. Number of the North/South pair.
+      ew_pair: Integer. Number of the East/West pair.
 
     Returns:
       string to be used as id for a HandPair
     '''
     return str(hand_no) + ":" + str(ns_pair) + ":" + str(ew_pair)
+
+  @classmethod
+  def GetByHandParams(cls, parent_tourney, hand_no, ns_pair, ew_pair):
+    ''' Gets a HandScore given its parent, hand number, and opponents.
+
+    Args:
+      parent_tourney: Tournament. Tournament in which this hand happened.
+      hand_no: Integer. Number of this hand.
+      ns_pair: Integer. Number of the North/South pair.
+      ew_pair: Integer. Number of the East/West pair.
+
+    Returns:
+      HandScore corresponding to these params if it exists in the tournament and
+      has not been deleted. None otherwise.
+    '''
+    score = cls.CreateKey(parent_tourney, hand_no, ns_pair, ew_pair).get()
+    return score if (score and not score.deleted) else None
 
   def Delete(self):
     ''' Mark this hand as deleted and add to Datastore. Also update changelog.

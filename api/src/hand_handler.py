@@ -9,6 +9,7 @@ from google.appengine.api import users
 from google.appengine.ext import ndb
 from handler_utils import CheckUserOwnsTournamentAndMaybeReturnStatus
 from handler_utils import CheckValidHandPlayersCombinationAndMaybeSetStatus
+from handler_utils import GetPairIdFromRequest
 from handler_utils import GetTourneyWithIdAndMaybeReturnStatus
 from handler_utils import SetErrorStatus
 from models import HandScore
@@ -38,7 +39,7 @@ class HandHandler(webapp2.RequestHandler):
         self.response, tourney, board_no, ns_pair, ew_pair):
       return
 
-    hand_score = HandScore.CreateKey(tourney, board_no, ns_pair, ew_pair).get()
+    hand_score = HandScore.GetByHandParams(tourney, board_no, ns_pair, ew_pair)
     if hand_score and not hand_score.deleted:
       self.response.set_status(200)
       return 
@@ -108,7 +109,7 @@ class HandHandler(webapp2.RequestHandler):
         self.response, tourney, board_no, ns_pair, ew_pair):
       return
 
-    hand_score = HandScore.CreateKey(tourney, board_no, ns_pair, ew_pair).get()
+    hand_score = HandScore.GetByHandParams(tourney, board_no, ns_pair, ew_pair)
     if not hand_score:
       SetErrorStatus(self.response, 404, "Invalid Request",
                      "Hand not set in tournament")
@@ -164,7 +165,7 @@ class HandHandler(webapp2.RequestHandler):
     error = "Forbidden User"
     if user and tourney.owner_id == user.user_id():
       return (True, 0)
-    pair_id = self.request.headers.get('X-tichu-pair-code')
+    pair_id = GetPairIdFromRequest(self.request)
     if not pair_id:
       SetErrorStatus(self.response, 403, error,
                      "User does not own tournament and is not authenticated " + 

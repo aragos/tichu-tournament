@@ -197,49 +197,21 @@ def TourneyDoesNotExistStatus(response, id, debug=True):
   SetErrorStatus(response, 404, "Invalid tournament ID",
                  "Tournament with id {} does not exit".format(id))
 
-def GetHandListForTourney(tourney):
-  ''' Fetches the list of all hands that are associated with this tournament.
-   
+def GetPairIdFromRequest(request):
+  ''' Get the obfuscated pair id from the request headers if present.
+
   Args:
-    tourney: Tournament. Tournament whose hands are being fetched.
+    request. Request.
 
   Returns:
-    List of dicts each corresponding to a non-deleted hand that has been scored
-      in this tournament. Dicts have the following structure:
-      {
-        "calls": {
-          "north": "T",
-          "east": "GT",
-          "west": "",
-          "south": ""
-         },
-        "ns_score": 150,
-        "ew_score": -150,
-        "notes": "hahahahahaha what a fool"
-        "board_no": 1,
-        "ns_pair": 2, 
-        "ns_score": 100
-        "ew_score": 0
-      }
-    calls and notes may be null.
+    The 4 character obfuscated pair id from the headers if they are present.
+    None otherwise.
   '''
-  hand_list = []
-  for hand_score in HandScore.query(ancestor=tourney.key).fetch():
-    if hand_score.deleted:
-      continue
-    split_key = hand_score.key.id().split(":")
-    hand_list.append(
-        {'calls': hand_score.calls_dict(),
-         'board_no': int(split_key[0]),
-         'ns_pair': int(split_key[1]), 
-         'ew_pair': int(split_key[2]),
-         'ns_score': hand_score.ns_score,
-         'ew_score': hand_score.ew_score,
-         'notes': hand_score.notes})
-  return hand_list
+  pair_id = request.headers.get('X-tichu-pair-code')
+  return pair_id
 
 def SetErrorStatus(response, status, error=None, detail=None):
-  ''' Sets an error status on response.
+  ''' Set an error status on response.
 
   Args:
     response: Reponse.

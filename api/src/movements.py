@@ -8,16 +8,16 @@ class Movement:
       provides a fair and feasible tournament (all hands played the same number
       of times, no impossible opponent combinations, etc).
       
-      Attributes:
-        pair_dict: Dictionary from pair number to movement pair movement
-          where pair movement is a list of dicts describing a round as below.
-          {
-             "round": 1
-             "position": "3N"
-             "opponent": 2
-             "hands": [3, 4, 5]
-              "relay_table": 5
-          }
+  Attributes:
+    pair_dict: Dictionary from pair number to movement pair movement
+      where pair movement is a list of dicts describing a round as below.
+      {
+         "round": 1
+         "position": "3N"
+         "opponent": 2
+         "hands": [3, 4, 5]
+          "relay_table": 5
+      }
   ''' 
   def __init__(self, no_pairs, no_hands_per_round, no_rounds=None):
     ''' Initializes the movement for this configuration.
@@ -78,14 +78,15 @@ class Movement:
 
 
 def NumBoardsPerRoundFromTotal(no_pairs, total_boards):
-  ''' Determines how many boards are to be used per round from the total 
+  ''' Determine how many boards are to be used per round from the total 
       number of pairs and boards in a tournament.
-      Returned value is not the only feasible value but the best one as 
-      determined by us.
+
+  Returned value is not the only feasible value but the best one as 
+  determined by us.
       
-      Returns:
-        Tuple (number of boards per round, maximum number of rounds).
-        (0, 0) if no movement configuration exists for this input.
+  Returns:
+    Tuple (number of boards per round, maximum number of rounds).
+      (0, 0) if no movement configuration exists for this input.
   '''
   if total_boards == 24 and no_pairs == 10:
     return (3, 7)
