@@ -74,7 +74,7 @@ class Calls:
             calls are invalid. 
         """
         return cls(dict.get("north", ""), dict.get("south", ""), 
-                   dict.get("east", ""), dict.get("west", ""))
+                   dict.get("east", ""), dict.get("west", "")) if dict else cls('', '', '', '')
 
 class HandResult:
     """ Contains all information about a single hand between two teams. """

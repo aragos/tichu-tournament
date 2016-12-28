@@ -21,7 +21,7 @@ class Tournament(ndb.Model):
   no_pairs = ndb.IntegerProperty()
 
   def PutPlayers(self, player_list, no_pairs):
-    ''' Creates a new PlayerPair Entity corresponding to each player pair for 
+    ''' Create a new PlayerPair Entity corresponding to each player pair for 
         pair numbers 1 ... no_pairs saving any useful information from 
         player_list and puts it into Datastore as a child of this Tournament.
         Also, if this is the no_players has changed, generates a unique 
@@ -79,19 +79,20 @@ class Tournament(ndb.Model):
       player_pair.put()
 
 
-  def PutHandScore(self, hand_no, hand_calls, ns_pair, ew_pair, hand_notes,
-                   hand_ns_score, hand_ew_score, changed_by):
-    ''' Creates a new HandScore Entity corresponding to this hand and puts it 
+  def PutHandScore(self, hand_no, ns_pair, ew_pair, hand_calls, hand_ns_score,
+                   hand_ew_score, hand_notes, changed_by):
+    ''' Create a new HandScore Entity corresponding to this hand and puts it 
         into datastore.
 
       Args:
         hand_no: Integer. Number of this hand.
-        hand_calls: Dict representation of the calls to this hand
         ns_pair: Integer. Number of the North/South pair.
         ew_pair: Integer. Number of the East/West pair.
-        hand_notes: String. Notes for the hand.
+        hand_calls: Dict representation of the calls to this hand
         hand_ns_score: Integer. Score for the North/South pair.
         hand_ew_score: Integer. Score for the East/West pair.
+        hand_notes: String. Notes for the hand.
+        changed_by: Integer. Pair number of the requestor. 0 if director.
     '''
     hand_score = HandScore(calls=json.dumps(hand_calls), notes=hand_notes,
                            ns_score=hand_ns_score, ew_score=hand_ew_score,

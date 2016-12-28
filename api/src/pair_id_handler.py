@@ -4,7 +4,6 @@ import json
 from google.appengine.api import users
 from google.appengine.ext import ndb
 from handler_utils import CheckUserOwnsTournamentAndMaybeReturnStatus
-from handler_utils import CheckUserLoggedInAndMaybeReturnStatus
 from handler_utils import GetHandListForTourney
 from handler_utils import GetTourneyWithIdAndMaybeReturnStatus
 from handler_utils import is_int
@@ -36,7 +35,7 @@ class PairIdHandler(webapp2.RequestHandler):
       'tournament_infos' : [ {'pair_no' : p.pair_no,
                               'tournament_id' : str(p.key.parent().id()) } for p in player_pairs ]
     }
-    
+
     self.response.headers['Content-Type'] = 'application/json'
     self.response.set_status(200)
     self.response.out.write(json.dumps(info_dict, indent=2))
@@ -54,15 +53,8 @@ class TourneyPairIdHandler(webapp2.RequestHandler):
           id: Tournament ID for this tournament.
           pair_no: The pair number whose ID has to be looked up.
     ''' 
-    user = users.get_current_user()
-    if not CheckUserLoggedInAndMaybeReturnStatus(self.response, user):
-      return
-
-    if not is_int(id):
-      TourneyDoesNotExistStatus(self.response, id)
-      return
     if not is_int(pair_no):
-      SetErorStatus(self.response, 404, "Invalid Pair Number", 
+      SetErrorStatus(self.response, 404, "Invalid Pair Number", 
                     "Pair number must be an integer, was {}".format(pair_no))
       return
 
@@ -70,9 +62,8 @@ class TourneyPairIdHandler(webapp2.RequestHandler):
     if not tourney:
       return
     
-    if not CheckUserOwnsTournamentAndMaybeReturnStatus(self.response,
-                                                       user.user_id(),
-                                                       tourney, id):
+    if not CheckUserOwnsTournamentAndMaybeReturnStatus(self.response, 
+        users.get_current_user(), tourney):
       return
     player_pairs = PlayerPair._query(ndb.GenericProperty('pair_no') == 
         int(pair_no), ancestor=tourney.key).fetch(1, projection=[PlayerPair.id])
@@ -84,8 +75,8 @@ class TourneyPairIdHandler(webapp2.RequestHandler):
     self.response.headers['Content-Type'] = 'application/json'
     self.response.set_status(200)
     self.response.out.write(json.dumps({'pair_id' : player_pairs[0].id}, indent=2))
-    
-    
+
+
 class TourneyPairIdsHandler(webapp2.RequestHandler):
   ''' Handles reuqests to /api/tournament/:id/pairids. Responsible for
       finding the opaque IDs generated for all pairs in this tournament.
@@ -99,21 +90,12 @@ class TourneyPairIdsHandler(webapp2.RequestHandler):
           a list of all unique ids in order. Length will necessarily equal
           to the number of pairs in this tournament.
     ''' 
-    user = users.get_current_user()
-    if not CheckUserLoggedInAndMaybeReturnStatus(self.response, user):
-      return
-
-    if not is_int(id):
-      TourneyDoesNotExistStatus(self.response, id)
-      return
-    
     tourney = GetTourneyWithIdAndMaybeReturnStatus(self.response, id)
     if not tourney:
       return
     
     if not CheckUserOwnsTournamentAndMaybeReturnStatus(self.response,
-                                                       user.user_id(),
-                                                       tourney, id):
+        users.get_current_user(), tourney):
       return
     player_pairs = PlayerPair._query(ancestor=tourney.key).fetch(
         projection=[PlayerPair.id, PlayerPair.pair_no])

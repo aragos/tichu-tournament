@@ -3,9 +3,8 @@ import json
 
 from google.appengine.api import users
 from google.appengine.ext import ndb
+from handler_utils import BuildMovementAndMaybeSetStatus
 from handler_utils import CheckUserOwnsTournamentAndMaybeReturnStatus
-from handler_utils import CheckUserLoggedInAndMaybeReturnStatus
-from handler_utils import CheckValidMovementConfigAndMaybeSetStatus
 from handler_utils import GetHandListForTourney
 from handler_utils import GetTourneyWithIdAndMaybeReturnStatus
 from handler_utils import is_int
@@ -28,20 +27,12 @@ class TourneyHandler(webapp2.RequestHandler):
               created.
     ''' 
     user = users.get_current_user()
-    if not CheckUserLoggedInAndMaybeReturnStatus(self.response, user):
-      return
-
-    if not is_int(id):
-      TourneyDoesNotExistStatus(self.response, id)
-      return
-
     tourney = GetTourneyWithIdAndMaybeReturnStatus(self.response, id)
     if not tourney:
       return
     
-    if not CheckUserOwnsTournamentAndMaybeReturnStatus(self.response,
-                                                       user.user_id(),
-                                                       tourney, id):
+    if not CheckUserOwnsTournamentAndMaybeReturnStatus(self.response, user,
+                                                       tourney):
       return
 
     combined_dict = {'no_pairs' : tourney.no_pairs,
@@ -61,16 +52,12 @@ class TourneyHandler(webapp2.RequestHandler):
 
   def put(self, id):
     user = users.get_current_user()
-    if not CheckUserLoggedInAndMaybeReturnStatus(self.response, user):
-      return
-      
     tourney = GetTourneyWithIdAndMaybeReturnStatus(self.response, id)
     if not tourney:
       return
 
-    if not CheckUserOwnsTournamentAndMaybeReturnStatus(self.response,
-                                                       user.user_id(),
-                                                       tourney, id):
+    if not CheckUserOwnsTournamentAndMaybeReturnStatus(self.response, user,
+                                                       tourney):
       return
 
     request_dict = self._ParseRequestInfoAndMaybeSetStatus()
@@ -99,16 +86,12 @@ class TourneyHandler(webapp2.RequestHandler):
 
   def delete(self, id):
     user = users.get_current_user()
-    if not CheckUserLoggedInAndMaybeReturnStatus(self.response, user):
-      return
-
     tourney = GetTourneyWithIdAndMaybeReturnStatus(self.response, id)
     if not tourney:
       return
 
-    if not CheckUserOwnsTournamentAndMaybeReturnStatus(self.response,
-                                                       user.user_id(),
-                                                       tourney, id):
+    if not CheckUserOwnsTournamentAndMaybeReturnStatus(self.response, user,
+                                                       tourney):
       return
 
     self.response.set_status(204)
@@ -175,5 +158,5 @@ class TourneyHandler(webapp2.RequestHandler):
                          "Player pair must be between 1 and no_pairs, was {}.".format(
                              player['pair_no']))
           return False
-    return CheckValidMovementConfigAndMaybeSetStatus(
-        self.response, no_pairs, no_boards)
+    return BuildMovementAndMaybeSetStatus(
+        self.response, no_pairs, no_boards) is not None

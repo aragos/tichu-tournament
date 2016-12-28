@@ -1,4 +1,5 @@
 import webapp2
+
 from change_log_handler import ChangeLogHandler
 from hand_handler import HandHandler
 from movement_handler import MovementHandler
@@ -12,13 +13,13 @@ from tournament_list_handler import TourneyListHandler
 
 app = webapp2.WSGIApplication([
     ('/api/tournaments/?', TourneyListHandler),
+    ('/api/tournaments/pairno/([^/]+)/?', PairIdHandler),
     ('/api/tournaments/([^/]+)/?', TourneyHandler),
-    ('/api/tournaments/([^/]+)/results/?', ResultHandler),
-    ('/api/tournaments/([^/]+)/xlsresults/?', XlxsResultHandler),
     ('/api/tournaments/([^/]+)/hands/([^/]+)/([^/]+)/([^/]+)/?', HandHandler),
+    ('/api/tournaments/([^/]+)/hands/changelog/([^/]+)/([^/]+)/([^/]+)/?', ChangeLogHandler),
     ('/api/tournaments/([^/]+)/pairids/([^/]+)/?', TourneyPairIdHandler),
     ('/api/tournaments/([^/]+)/pairids/?', TourneyPairIdsHandler),
-    ('/api/tournaments/pairno/([^/]+)/?', PairIdHandler),
     ('/api/tournaments/([^/]+)/movement/([^/]+)/?', MovementHandler),
-    ('/api/tournaments/([^/]+)/hands/changelog/([^/]+)/([^/]+)/([^/]+)/?', ChangeLogHandler),
+    ('/api/tournaments/([^/]+)/results/?', ResultHandler),
+    ('/api/tournaments/([^/]+)/xlsresults/?', XlxsResultHandler),
 ], debug=True)

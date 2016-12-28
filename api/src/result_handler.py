@@ -5,7 +5,6 @@ from python.calculator import Calculate
 from python.calculator import GetMaxRounds
 from google.appengine.api import users
 from handler_utils import CheckUserOwnsTournamentAndMaybeReturnStatus
-from handler_utils import CheckUserLoggedInAndMaybeReturnStatus
 from handler_utils import GetHandListForTourney
 from handler_utils import GetTourneyWithIdAndMaybeReturnStatus
 from handler_utils import is_int
@@ -22,20 +21,12 @@ from models import Tournament
 class ResultHandler(webapp2.RequestHandler):
   def get(self, id):
     user = users.get_current_user()
-    if not CheckUserLoggedInAndMaybeReturnStatus(self.response, user):
-      return
-
-    if not is_int(id):
-      TourneyDoesNotExistStatus(self.response, id)
-      return
-
     tourney = GetTourneyWithIdAndMaybeReturnStatus(self.response, id)
     if not tourney:
       return
 
     if not CheckUserOwnsTournamentAndMaybeReturnStatus(self.response,
-                                                       user.user_id(), tourney,
-                                                       id):
+                                                       user, tourney):
       return
     hand_list = GetHandListForTourney(tourney)
     boards = ReadJSONInput(hand_list)
@@ -60,8 +51,7 @@ class XlxsResultHandler(webapp2.RequestHandler):
       return
  
     if not CheckUserOwnsTournamentAndMaybeReturnStatus(self.response,
-                                                       user.user_id(), tourney,
-                                                       id):
+                                                       user.user_id(), tourney):
       return
     
     boards = ReadJSONInput(GetHandListForTourney(tourney))

@@ -2,11 +2,9 @@ import webapp2
 import json
 
 from google.appengine.api import users
-from handler_utils import CheckUserLoggedInAndMaybeReturnStatus
+from handler_utils import CheckValidHandPlayersCombinationAndMaybeSetStatus
 from handler_utils import CheckUserOwnsTournamentAndMaybeReturnStatus
-from handler_utils import CheckValidHandParametersMaybeSetStatus
 from handler_utils import CheckValidMatchupForMovementAndMaybeSetStatus
-from handler_utils import CheckValidMovementConfigAndMaybeSetStatus
 from handler_utils import GetTourneyWithIdAndMaybeReturnStatus
 from models import ChangeLog
 from models import HandScore
@@ -19,28 +17,17 @@ class ChangeLogHandler(webapp2.RequestHandler):
   def get(self, id, board_no, ns_pair, ew_pair):
     ''' Returns the complete change log for a hand to tournament owners.
     ''' 
-    user = users.get_current_user()
-    if not CheckUserLoggedInAndMaybeReturnStatus(self.response, user):
-      return
-
     tourney = GetTourneyWithIdAndMaybeReturnStatus(self.response, id)
     if not tourney:
       return
     
-    if not CheckUserOwnsTournamentAndMaybeReturnStatus(self.response,
-                                                       user.user_id(),
-                                                       tourney, id):
+    if not CheckUserOwnsTournamentAndMaybeReturnStatus(self.response, 
+        users.get_current_user(), tourney):
       return
     
-    if not CheckValidHandParametersMaybeSetStatus(self.response, tourney,
-        board_no, ns_pair, ew_pair):
+    if not CheckValidHandPlayersCombinationAndMaybeSetStatus(
+        self.response, tourney, board_no, ns_pair, ew_pair):
       return
-
-    movements = CheckValidMovementConfigAndMaybeSetStatus(
-        self.response, tourney.no_pairs, tourney.no_boards)
-    if not CheckValidMatchupForMovementAndMaybeSetStatus(
-        self.response, movements, int(board_no), int(ns_pair), int(ew_pair)):
-     return
 
     change_logs = ChangeLog._query(
         ancestor=HandScore.CreateKey(tourney, board_no, ns_pair, ew_pair)).order(

@@ -14,7 +14,71 @@ def is_int(s):
   except ValueError:
     return False
 
-def CheckValidMovementConfigAndMaybeSetStatus(response, no_pairs, no_boards):
+def CheckValidHandPlayersCombinationAndMaybeSetStatus(response, tourney,
+    board_no, ns_pair, ew_pair):
+  ''' Test if the input board number and player pairs are valid in this tourney.
+   
+  Args:
+    response: Response.
+    tourney: Tournament. Existing tournament that is used to check config 
+      validity.
+    board_no: String. String representation of hand number.
+    ns_pair: String. String representation of pair number of team playing
+      North/South.
+    ew_pair: String. String representation of pair number of team playing
+      East/West.
+
+  Side effects:
+    Sets response to status 400 with a detailed error if either the inputs are
+      invalid or the proposed players do not play this board against each other
+      in this tournament.
+
+  Returns:
+    True iff the Hand/Player Pairs combination is legal in this tourney.
+  '''
+  # First basic sanity checks on inputs.
+  error = "Invalid Hand Parameters"
+  if (not is_int(board_no)) or int(board_no) < 1 or int(board_no) > tourney.no_boards:
+    SetErrorStatus(response, 404, error,
+                   "Board number {} is invalid".format(board_no))
+    return False
+  elif (not is_int(ns_pair)) or int(ns_pair) < 1 or int(ns_pair) > tourney.no_pairs:
+    SetErrorStatus(response, 404, error,
+                   "Pair number {} is invalid".format(ns_pair))
+    return False
+  elif (not is_int(ew_pair)) or int(ew_pair) < 1 or int(ew_pair) > tourney.no_pairs:
+    SetErrorStatus(response, 404, error,
+                   "Pair number {} is invalid".format(ew_pair))
+    return False
+  elif ew_pair == ns_pair:
+    SetErrorStatus(response, 404, error, "NS and EW pairs are the same")
+    return False
+
+  # Now check if they make sense in this tournament setup.
+  movements = BuildMovementAndMaybeSetStatus(response, tourney.no_pairs,
+                                             tourney.no_boards)
+  if not movements:
+    SetErrorStatus(response, 400, error, detail)
+    return False
+  return CheckValidMatchupForMovementAndMaybeSetStatus(response, movements,
+      int(board_no), int(ns_pair), int(ew_pair))
+
+def BuildMovementAndMaybeSetStatus(response, no_pairs, no_boards):
+  ''' Build a unique valid Movement for this tourney.
+   
+  Args:
+    response: Response.
+    no_pairs: Integer. Number of pairs in the tournament.
+    no_boards: Integer. Number of hands in the tournament.
+
+  Side effects:
+    Sets response to status 400 with a detailed error if configuration is 
+      invalid.
+
+  Returns:
+    A valid movement if it is feasible, or None if no such movement exists
+    for the configuration of boards and pairs in tourney.
+  '''
   # Check if a valid movement exists for this pair/board combination.
   no_hands_per_round, no_rounds = NumBoardsPerRoundFromTotal(no_pairs,
                                                              no_boards)
@@ -26,16 +90,29 @@ def CheckValidMovementConfigAndMaybeSetStatus(response, no_pairs, no_boards):
                        no_pairs, no_boards))
     return None
   return movements
-  
-  
-def CheckValidMatchupForMovementAndMaybeSetStatus(response, movements, board_no,
+
+def CheckValidMatchupForMovementAndMaybeSetStatus(response, movement, board_no,
                                                   ns_pair, ew_pair):
+  ''' Test if the ns_pair plays ew_pair for board_no in this movements.
+   
+  Args:
+    response: Response.
+    movement: Movement. 
+    board_no: Integer. Hand number.
+    ns_pair: Integer. Pair number of team playing North/South.
+    ew_pair: Integer. Pair number of team playing East/West.
+
+  Side effects:
+    Sets response to status 400 with a detailed error if configuration is 
+      invalid.
+
+  Returns:
+    True iff the Hand/Player Pairs combination is legal in this Movement scheme.
+  '''
   error = "Invalid Hand-Players Combination"
-  detail = "NS and EW pairs do not play each other in this tournament format"
-  if not movements:
-    SetErrorStatus(response, 400, error, detail)
-    return
-  for round in movements.GetMovement(ns_pair):
+  detail = ("NS pair {} and EW pairs {} do not play board {} against each " + 
+           "other in this tournament format").format(ns_pair, ew_pair, board_no)
+  for round in movement.GetMovement(ns_pair):
     if round['opponent'] != ew_pair:
       continue
     if round['position'][1] != "N":
@@ -45,79 +122,114 @@ def CheckValidMatchupForMovementAndMaybeSetStatus(response, movements, board_no,
       SetErrorStatus(response, 400, error, detail)
       return False
     return True
-  SetErrorStatusSetErrorStatus(response, 400, error, detail)
+
+  # There is no round where ns_pair plays ew_pair.
+  SetErrorStatus(response, 400, error, detail)
   return False
-    
-def CheckValidHandParametersMaybeSetStatus(response, tourney,
-                                           board_no, ns_pair, ew_pair):
-    error = "Invalid Hand Parameters"
-    if (not is_int(board_no)) or int(board_no) < 1 or int(board_no) > tourney.no_boards:
-      SetErrorStatus(response, 404, error,
-                     "Board number {} is invalid".format(board_no))
-      return False
-    elif (not is_int(ns_pair)) or int(ns_pair) < 1 or int(ns_pair) > tourney.no_pairs:
-      SetErrorStatus(response, 404, error,
-                     "Pair number {} is invalid".format(ns_pair))
-      return False
-    elif (not is_int(ew_pair)) or int(ew_pair) < 1 or int(ew_pair) > tourney.no_pairs:
-      SetErrorStatus(response, 404, error,
-                     "Pair number {} is invalid".format(ew_pair))
-      return False
-    elif ew_pair == ns_pair:
-      SetErrorStatus(response, 404, error, "NS and EW pairs are the same")
-      return False
-    return True
 
-def CheckUserLoggedInAndMaybeReturnStatus(response, user=None):
+def CheckUserLoggedInAndMaybeReturnStatus(response, user):
+  ''' Test if the user is logged in.
+   
+  Args:
+    response: Response.
+     
+
+  Side effects:
+    Sets response to status 401 with a detailed error if the user is not logged
+      in.
+
+  Returns:
+    True iff the user is logged in.
+  '''
   if not user:
-    UserNotLoggedInStatus(response)
+    SetErrorStatus(response, 401, "User is not logged in.",
+                   "Seriously, not logged in, not even a little.")
     return False
-  else:
-    return True
+  return True
 
+def CheckUserOwnsTournamentAndMaybeReturnStatus(response, user, tourney):
+  ''' Test if the user owns this tourney.
+   
+  Args:
+    response: Response.
+    user: google.appengine.api.users.User. Maybe None if user is not logged in.
+    tourney: Tournament. Tournament whose ownership is being checked.
 
-def UserNotLoggedInStatus(response, debug=True):
-  SetErrorStatus(response, 401, "User is not logged in.",
-                 "Seriously, not logged in, not even a little.")
+  Side effects:
+    Sets response to status 401 if the user is not logged in and 401 if the user
+      does not own the tournament.
 
-
-def CheckUserOwnsTournamentAndMaybeReturnStatus(response, user_id, tourney, id):
-  if tourney.owner_id != user_id:
-    DoesNotOwnTournamentStatus(response, id)
+  Returns:
+    True iff the user owns the tournament.
+  '''
+  if not CheckUserLoggedInAndMaybeReturnStatus(response, user):
     return False
-  else:
-    return True
-
-
-def DoesNotOwnTournamentStatus(response, id, debug=True):
-  SetErrorStatus(response, 403, "Forbidden User",
-                 "User is not director of tournament with id {}".format(id))
-
+  if tourney.owner_id != user.user_id():
+    SetErrorStatus(response, 403, "Forbidden User",
+                   "User is not director of tournament with id {}".format(id))
+    return False
+  return True
 
 def GetTourneyWithIdAndMaybeReturnStatus(response, id):
+  ''' Fetches a tournament with requested id.
+   
+  Args:
+    response: Response.
+    id: String. Unique id assigned to the desired tournament.
+
+  Side effects:
+    Sets response to status 403 with a detailed error if tournament does not
+      exist.
+
+  Returns:
+    Tournament corresponding to the id or None if it does not exist.
+  '''
   if not is_int(id):
     TourneyDoesNotExistStatus(response, id)
-    return
+    return None
   tourney = Tournament.get_by_id(int(id));
   if not tourney:
     TourneyDoesNotExistStatus(response, id)
-    return
+    return None
   return tourney
-
 
 def TourneyDoesNotExistStatus(response, id, debug=True):
   SetErrorStatus(response, 404, "Invalid tournament ID",
                  "Tournament with id {} does not exit".format(id))
 
-
 def GetHandListForTourney(tourney):
+  ''' Fetches the list of all hands that are associated with this tournament.
+   
+  Args:
+    tourney: Tournament. Tournament whose hands are being fetched.
+
+  Returns:
+    List of dicts each corresponding to a non-deleted hand that has been scored
+      in this tournament. Dicts have the following structure:
+      {
+        "calls": {
+          "north": "T",
+          "east": "GT",
+          "west": "",
+          "south": ""
+         },
+        "ns_score": 150,
+        "ew_score": -150,
+        "notes": "hahahahahaha what a fool"
+        "board_no": 1,
+        "ns_pair": 2, 
+        "ns_score": 100
+        "ew_score": 0
+      }
+    calls and notes may be null.
+  '''
   hand_list = []
   for hand_score in HandScore.query(ancestor=tourney.key).fetch():
     if hand_score.deleted:
       continue
     split_key = hand_score.key.id().split(":")
     hand_list.append(
-        {'calls': json.loads(hand_score.calls),
+        {'calls': hand_score.calls_dict(),
          'board_no': int(split_key[0]),
          'ns_pair': int(split_key[1]), 
          'ew_pair': int(split_key[2]),
@@ -126,8 +238,19 @@ def GetHandListForTourney(tourney):
          'notes': hand_score.notes})
   return hand_list
 
-
 def SetErrorStatus(response, status, error=None, detail=None):
+  ''' Sets an error status on response.
+
+  Args:
+    response: Reponse.
+    status: Integer. HTTP status for the response.
+    error: String. Brief error explanation.
+    detail: String. Detailed error explanation.
+
+  Side effects:
+    Sets "Content-Type" headers to "application/json" along with the error code
+      and message.
+  '''
   response.set_status(status)
   if error and detail:
     response.headers['Content-Type'] = 'application/json'
