@@ -11,20 +11,20 @@ from models import HandScore
 from models import PlayerPair
 from models import Tournament
 from movements import Movement
-from movements import NumBoardsPerRoundFromTotal
 
 
 class MovementHandler(webapp2.RequestHandler):
-  def get(self, id, pair_no):
-    ''' Returns pair movement if the reqiest contains a header with the correct
-        string id corresponding to this pair_no in the tournament with this id.
+  ''' Class to handle requests to /api/tournaments/:id/movement/:pair_no '''
 
-        Args: 
-          id: tournament ID to look up. Tournament must already have been
-              created.
-          pair_no: number of the pair to look up.
-              
-    ''' 
+  def get(self, id, pair_no):
+    ''' Fetch movement for tournament with id and team pair_no. 
+
+    Args:
+      id: String. Tournament id. 
+      pair_no: Integer. Pair number for the team whose movement we're getting.
+
+    See api for request and response documentation.
+    '''
     tourney = GetTourneyWithIdAndMaybeReturnStatus(self.response, id)
     if not tourney:
       return
@@ -42,7 +42,7 @@ class MovementHandler(webapp2.RequestHandler):
         tourney, player_pair):
       return
 
-    no_hands_per_round, no_rounds = NumBoardsPerRoundFromTotal(
+    no_hands_per_round, no_rounds = Movement.NumBoardsPerRoundFromTotal(
         tourney.no_pairs, tourney.no_boards)
     try:
       movement = Movement(
@@ -50,7 +50,7 @@ class MovementHandler(webapp2.RequestHandler):
               int(pair_no))
     except ValueError:
       SetErrorStatus(self.response, 500, "Corrupted Data",
-                     "No valid configuration for this tourney's config")
+                     "No valid movement for this tourney's config")
       return
 
     for round in movement:
@@ -67,6 +67,36 @@ class MovementHandler(webapp2.RequestHandler):
     self.response.out.write(json.dumps(combined_dict, indent=2))
 
   def _UpdateRoundWithScore(self, round, tourney, pair_no):
+    ''' Update round information with scored hands if any 
+
+    Args:
+      round: Dictionary. Contains all player/hand information about a specific
+        matchup from the point of view of Pair pair_no. Has the following
+        structure:
+        {
+           "round": 1
+           "position": "3N"
+           "opponent": 2
+           "hands": [3, 4, 5]
+           "relay_table": True
+        }
+      tourney: Tournament. Tournament in which this is happening.
+      pair_no: Pair from whose point of view this movement is seen.
+
+    Side effects:
+      Field "hands" in round is updated to a dictionary with added fields that 
+        contain score related information. Dictionary has the following
+        structure:
+        {
+          "hand_no": 3,
+          "score": {
+            "calls" : {}
+            "ns_score": 100
+            "ew_score": 0
+            "notes": "Hello"
+            }
+        } 
+    '''
     hand_nos = round['hands']
     del round['hands']
     for h in hand_nos:  
@@ -89,6 +119,12 @@ class MovementHandler(webapp2.RequestHandler):
         round.setdefault('hands', []).append({ 'hand_no' : h })
 
   def _CheckValidPairMaybeSetStatus(self, tourney, pair_no):
+    ''' Test if the provided pair number is valid for tourney. 
+
+    Args:
+      tourney: Tournament. Tournament the pair number is being validated for.
+      pair_no: Integer. Pair number for the team we are validating.
+    '''
     error = "Invalid Input"
     if (not is_int(pair_no)) or int(pair_no) < 1 or int(pair_no) > tourney.no_pairs:
       SetErrorStatus(self.response, 404, error,

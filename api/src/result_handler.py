@@ -19,13 +19,12 @@ from models import Tournament
 
 class ResultHandler(webapp2.RequestHandler):
   def get(self, id):
-    user = users.get_current_user()
     tourney = GetTourneyWithIdAndMaybeReturnStatus(self.response, id)
     if not tourney:
       return
 
     if not CheckUserOwnsTournamentAndMaybeReturnStatus(self.response,
-                                                       user, tourney):
+        users.get_current_user(), tourney):
       return
     hand_list = tourney.GetScoredHandList()
     boards = ReadJSONInput(hand_list)
@@ -37,25 +36,15 @@ class ResultHandler(webapp2.RequestHandler):
 
 class XlxsResultHandler(webapp2.RequestHandler):
   def get(self, id):
-    user = users.get_current_user()
-    if not CheckUserLoggedInAndMaybeReturnStatus(self.response, user):
-      return
-
-    if not is_int(id):
-      TourneyDoesNotExistStatus(self.response, id)
-      return
-
     tourney = GetTourneyWithIdAndMaybeReturnStatus(self.response, id)
     if not tourney:
       return
  
     if not CheckUserOwnsTournamentAndMaybeReturnStatus(self.response,
-                                                       user.user_id(), tourney):
+        users.get_current_user(), tourney):
       return
-    
     boards = ReadJSONInput(tourney.GetScoredHandList())
-    max_rounds = GetMaxRounds(boards)
-    summaries = Calculate(boards, max_rounds)
+    summaries = Calculate(boards, GetMaxRounds(boards))
     mp_summaries = summaries
     ap_summaries = summaries
     boards.sort(key=lambda bs : bs._board_no, reverse = False)

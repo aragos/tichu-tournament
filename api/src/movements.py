@@ -71,42 +71,42 @@ class Movement:
              "position": "3N"
              "opponent": 2
              "hands": [3, 4, 5]
-              "relay_table": 5
+             "relay_table": True
           }
     '''
     return self.pair_dict[str(pair_no)]
 
+  @staticmethod
+  def NumBoardsPerRoundFromTotal(no_pairs, total_boards):
+    ''' Determine how many boards are to be used per round from the total 
+        number of pairs and boards in a tournament.
 
-def NumBoardsPerRoundFromTotal(no_pairs, total_boards):
-  ''' Determine how many boards are to be used per round from the total 
-      number of pairs and boards in a tournament.
-
-  Returned value is not the only feasible value but the best one as 
-  determined by us.
+    Returned value is not the only feasible value but the best one as 
+    determined by us.
       
-  Returns:
-    Tuple (number of boards per round, maximum number of rounds).
-      (0, 0) if no movement configuration exists for this input.
-  '''
-  if total_boards == 24 and no_pairs == 10:
-    return (3, 7)
-  elif total_boards == 16 and no_pairs == 10:
-    return (2, 7)
-  elif total_boards == 18 and no_pairs == 9:
-    return (2, 8)
-  elif total_boards == 27 and no_pairs == 9:
-    return (3, 8)
-  elif total_boards == 14 and no_pairs == 9:
-    return (2, 7)
-  elif total_boards == 21 and no_pairs == 9:
-    return (3, 7)
-  elif total_boards == 16 and no_pairs == 8:
-    return (2, 6)
-  elif total_boards == 24 and no_pairs == 8:
-    return (3, 6)
-  elif total_boards == 14 and no_pairs == 7:
-    return (2, 7)
-  elif total_boards == 21 and no_pairs == 7:
-    return (3, 7)
-  else:
-    return (0, 0)
+    Returns:
+      Tuple (number of boards per round, maximum number of rounds).
+        (0, 0) if no movement configuration exists for this input.
+    '''
+    if total_boards == 24 and no_pairs == 10:
+      return (3, 7)
+    elif total_boards == 16 and no_pairs == 10:
+      return (2, 7)
+    elif total_boards == 18 and no_pairs == 9:
+      return (2, 8)
+    elif total_boards == 27 and no_pairs == 9:
+      return (3, 8)
+    elif total_boards == 14 and no_pairs == 9:
+      return (2, 7)
+    elif total_boards == 21 and no_pairs == 9:
+      return (3, 7)
+    elif total_boards == 16 and no_pairs == 8:
+      return (2, 6)
+    elif total_boards == 24 and no_pairs == 8:
+      return (3, 6)
+    elif total_boards == 14 and no_pairs == 7:
+      return (2, 7)
+    elif total_boards == 21 and no_pairs == 7:
+      return (3, 7)
+    else:
+      return (0, 0)

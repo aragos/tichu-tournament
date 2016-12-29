@@ -18,7 +18,8 @@ from models import Tournament
 
 
 class HandHandler(webapp2.RequestHandler):
-  ''' Handle requests to /api/tournaments/:id/hands/:hand_no/:ns_pair/:ew_pair
+  ''' Class to handle requests to 
+      /api/tournaments/:id/hands/:hand_no/:ns_pair/:ew_pair
   '''
   def head(self, id, board_no, ns_pair, ew_pair):
     ''' Check if a hand with this configuration is present in tournament id. 

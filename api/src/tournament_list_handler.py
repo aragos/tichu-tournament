@@ -18,7 +18,7 @@ class TourneyListHandler(webapp2.RequestHandler):
       return
 
     # TODO: Implement paging if ever needed.
-    tourneys = Tournament._query(ndb.GenericProperty('owner_id') == 
+    tourneys = Tournament._query(Tournament.owner_id == 
         user.user_id()).fetch(projection=[Tournament.name])
     tourney_list =  [{"id": t.key.id(), "name": t.name} for t in tourneys]
     self.response.set_status(200)

@@ -77,7 +77,7 @@ class TourneyPairIdHandler(webapp2.RequestHandler):
 
 
 class TourneyPairIdsHandler(webapp2.RequestHandler):
-  ''' Handles reuqests to /api/tournament/:id/pairids. Responsible for
+  ''' Handles requests to /api/tournament/:id/pairids. Responsible for
       finding the opaque IDs generated for all pairs in this tournament.
   '''
   def get(self, id):

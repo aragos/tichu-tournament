@@ -4,7 +4,6 @@ from google.appengine.ext import ndb
 from models import Tournament
 from models import HandScore
 from movements import Movement
-from movements import NumBoardsPerRoundFromTotal
 
 
 def is_int(s):
@@ -80,8 +79,8 @@ def BuildMovementAndMaybeSetStatus(response, no_pairs, no_boards):
     for the configuration of boards and pairs in tourney.
   '''
   # Check if a valid movement exists for this pair/board combination.
-  no_hands_per_round, no_rounds = NumBoardsPerRoundFromTotal(no_pairs,
-                                                             no_boards)
+  no_hands_per_round, no_rounds = Movement.NumBoardsPerRoundFromTotal(
+      no_pairs, no_boards)
   try:
     movements = Movement(no_pairs, no_hands_per_round, no_rounds)
   except ValueError:
