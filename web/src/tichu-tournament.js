@@ -94,7 +94,8 @@
           "tichu-home",
           "tichu-movement-detail",
           "tichu-tournament-detail",
-          "tichu-tournament-list"])
+          "tichu-tournament-list",
+          "tichu-tournament-service"])
       .controller("AppController", AppController)
       .config(configureTheme)
       .config(setDefaultRoute);

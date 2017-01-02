@@ -5,10 +5,14 @@
    *
    * @constructor
    * @param {!angular.Scope} $scope
-   * @param {!tichu.TournamentSummary[]} tournaments
+   * @param {!angular.$window} $window
+   * @param {!$route} $route
+   * @param {!angular.$location} $location
+   * @param {!$mdDialog} $mdDialog
+   * @param {!{failure: {redirectToLogin: boolean, error: string, detail: string}, tournaments: tichu.TournamentSummary[]}} loadResults
    * @ngInject
    */
-  function TournamentListController($scope, tournaments) {
+  function TournamentListController($scope, $window, $route, $location, $mdDialog, loadResults) {
     $scope.appController.setPageHeader({
       header: "Tournaments",
       backPath: "/home",
@@ -21,19 +25,64 @@
      * @type {!tichu.TournamentSummary[]}
      * @export
      */
-    this.tournaments = tournaments;
+    this.tournaments = loadResults.tournaments;
+
+    /**
+     * The details about the failure, if there was one.
+     *
+     * @type {{redirectToLogin: boolean, error: string, detail: string}}
+     */
+    this.failure = loadResults.failure;
+
+    if (this.failure) {
+      var redirectToLogin = this.failure.redirectToLogin;
+      var dialog = $mdDialog.confirm()
+          .title(this.failure.error)
+          .textContent(this.failure.detail);
+      if (redirectToLogin) {
+        dialog = dialog
+            .ok("Log me in")
+            .cancel("Never mind");
+      } else {
+        dialog = dialog
+            .ok("Try again")
+            .cancel("Never mind");
+      }
+      $mdDialog.show(dialog).then(function() {
+        if (redirectToLogin) {
+          // use $window.location since we're going out of the Angular app
+          $window.location.href = '/api/login?then=' + encodeURIComponent($location.url())
+        } else {
+          $route.reload();
+        }
+      }, function(autoHidden) {
+        if (!autoHidden) {
+          $location.url("/home");
+        }
+      });
+
+      $scope.$on("$destroy", function() {
+        $mdDialog.cancel(true);
+      })
+    }
   }
 
   /**
    * Asynchronously loads the list of tournaments.
    *
-   * @param {!angular.$q} $q
-   * @return {!angular.$q.Promise<tichu.TournamentSummary[]>}
+   * @param {TichuTournamentService} tournamentService
+   * @return {!angular.$q.Promise}
    */
-  function loadTournamentList($q) {
-    return $q.when([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17].map(function(index) {
-      return {"id": (37 * index).toString(), "name": "Example Tournament #" + index};
-    }));
+  function loadTournamentList(tournamentService) {
+    return tournamentService.getTournaments().then(function(result) {
+      return {
+        tournaments: result
+      };
+    }).catch(function(rejection) {
+      return {
+        failure: rejection
+      };
+    });
   }
 
   /**
@@ -49,14 +98,14 @@
           controller: "TournamentListController",
           controllerAs: "tournamentListController",
           resolve: {
-            "tournaments": /** @ngInject */ function($q) {
-              return loadTournamentList($q);
+            "loadResults": /** @ngInject */ function(TichuTournamentService) {
+              return loadTournamentList(TichuTournamentService);
             }
           }
         });
   }
 
-  angular.module("tichu-tournament-list", ["ng", "ngRoute"])
+  angular.module("tichu-tournament-list", ["ng", "ngRoute", "ngMaterial"])
       .controller("TournamentListController", TournamentListController)
       .config(mapRoute);
 })(angular);

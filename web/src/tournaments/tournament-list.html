@@ -1,4 +1,4 @@
-<md-list class="md-dense" flex="noshrink">
+<md-list class="md-dense" flex="noshrink" ng-if="!tournamentListController.failure">
     <md-list-item class="md-2-line"
                   href="/tournaments/new">
         <md-icon class="md-avatar-icon" md-font-set="material-icons">create</md-icon>
@@ -6,7 +6,7 @@
             <h3>New Tournament</h3>
         </div>
     </md-list-item>
-    <md-subheader>Active Tournaments</md-subheader>
+    <md-subheader ng-if="tournamentListController.tournaments">Active Tournaments</md-subheader>
     <md-list-item class="md-2-line"
                   href="/tournaments/{{tournament.id}}"
                   ng-repeat="tournament in tournamentListController.tournaments">
@@ -15,5 +15,4 @@
             <h3>{{tournament.name}}</h3>
         </div>
     </md-list-item>
-    <md-subheader>Completed Tournaments</md-subheader>
 </md-list>
