@@ -7,8 +7,7 @@ from handler_utils import SetErrorStatus
 
 
 class LoginHandler(webapp2.RequestHandler):
-  ''' Class to handle requests to /api/login?then=<url>
-  '''
+  ''' Class to handle requests to /api/login?then=<url> '''
   def get(self):
     ''' Redirect to Google login page, followed by another redirect to the 
     URL specified by [then] argument.
@@ -36,8 +35,7 @@ class AuthHandler(webapp2.RequestHandler):
     self.response.out.write(json.dumps({"user": user.nickname()}, indent=2))
 
 class LogoutHandler(webapp2.RequestHandler):
-  ''' Class to handle requests to /api/logout?then=<url>
-  '''
+  ''' Class to handle requests to /api/logout?then=<url> '''
   def get(self):
     ''' Redirect to Google logout page, followed by another redirect to the 
     URL specified by [then] argument.
