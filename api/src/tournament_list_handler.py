@@ -20,7 +20,7 @@ class TourneyListHandler(webapp2.RequestHandler):
     # TODO: Implement paging if ever needed.
     tourneys = Tournament._query(Tournament.owner_id == 
         user.user_id()).fetch(projection=[Tournament.name])
-    tourney_list =  [{"id": t.key.id(), "name": t.name} for t in tourneys]
+    tourney_list =  [{"id": str(t.key.id()), "name": t.name} for t in tourneys]
     self.response.set_status(200)
     self.response.headers['Content-Type'] = 'application/json'
     self.response.out.write(json.dumps({"tournaments": tourney_list}, indent=2))
@@ -52,7 +52,7 @@ class TourneyListHandler(webapp2.RequestHandler):
     tourney.PutPlayers(player_list, no_pairs)
     self.response.set_status(201)
     self.response.headers['Content-Type'] = 'application/json'
-    self.response.out.write(json.dumps({"id": tourney_key.id()}))
+    self.response.out.write(json.dumps({"id": str(tourney_key.id())}))
 
 
   def _ParseRequestInfoAndMaybeSetStatus(self):

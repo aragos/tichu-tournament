@@ -95,7 +95,7 @@ class AppTest(unittest.TestCase):
     self.assertIsNotNone(tourneys_list)
     self.assertEqual(1, len(tourneys_list))
     self.assertEqual('name1', tourneys_list[0]['name'])
-    self.assertEqual(int(id), tourneys_list[0]['id'])
+    self.assertEqual(id, tourneys_list[0]['id'])
 
   def testListTournaments(self):
     self.loginUser()

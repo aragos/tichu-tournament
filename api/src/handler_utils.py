@@ -84,7 +84,7 @@ def BuildMovementAndMaybeSetStatus(response, no_pairs, no_boards):
   try:
     movements = Movement(no_pairs, no_hands_per_round, no_rounds)
   except ValueError:
-    SetErrorStatus(response, 400, 
+    SetErrorStatus(response, 400, "Invalid Tournament Config",
                    "No valid configuration {} pairs and {} boards".format(
                        no_pairs, no_boards))
     return None
