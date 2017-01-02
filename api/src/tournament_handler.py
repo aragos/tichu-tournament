@@ -139,15 +139,15 @@ class TourneyHandler(webapp2.RequestHandler):
         Assumes no_pairs and no_boards are integers.
     '''
     if not name or name == "":
-      SetErrorStatus(self.response, 400, "Invalid input",
+      SetErrorStatus(self.response, 400, "Invalid Input",
                      "Tournament name must be nonempty")
       return False
     elif no_pairs < 2:
-      SetErrorStatus(self.response, 400, "Invalid input",
+      SetErrorStatus(self.response, 400, "Invalid Input",
                      "Number of pairs must be > 1, was {}".format(no_pairs))
       return False
     elif no_boards < 1:
-      SetErrorStatus(self.response, 400, "Invalid input",
+      SetErrorStatus(self.response, 400, "Invalid Input",
                      "Number of boards must be > 0, was {}".format(no_boards))
       return False
     elif players:

@@ -3,10 +3,10 @@ import os
 
 class Movement:
   ''' Class that defines a movement structure within a tournament. It is 
-      wholly defined by the number of pairs participating and the number of
-      hands per round. The movement is guaranteed to be valid, in that it 
-      provides a fair and feasible tournament (all hands played the same number
-      of times, no impossible opponent combinations, etc).
+  wholly defined by the number of pairs participating and the number of
+  hands per round. The movement is guaranteed to be valid, in that it 
+  provides a fair and feasible tournament (all hands played the same number
+  of times, no impossible opponent combinations, etc).
       
   Attributes:
     pair_dict: Dictionary from pair number to movement pair movement
@@ -62,10 +62,11 @@ class Movement:
     self.pair_dict = json.loads(json_data)
 
   def GetMovement(self, pair_no):
-    ''' Returns a dictionary for this movement type.
-        
-        Returns: Dictionary from pair number to movement pair movement
-          where pair movement is a list of dicts describing a round as below.
+    ''' Construct a dictionary for this movement.
+
+        Returns: 
+          Dictionary from pair number to movement pair movement where pair 
+          movement is a list of dicts describing a round as below.
           {
              "round": 1
              "position": "3N"
@@ -83,7 +84,7 @@ class Movement:
 
     Returned value is not the only feasible value but the best one as 
     determined by us.
-      
+
     Returns:
       Tuple (number of boards per round, maximum number of rounds).
         (0, 0) if no movement configuration exists for this input.

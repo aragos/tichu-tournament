@@ -6,9 +6,7 @@ from python.calculator import GetMaxRounds
 from google.appengine.api import users
 from handler_utils import CheckUserOwnsTournamentAndMaybeReturnStatus
 from handler_utils import GetTourneyWithIdAndMaybeReturnStatus
-from handler_utils import is_int
 from handler_utils import SetErrorStatus
-from handler_utils import TourneyDoesNotExistStatus
 from python.jsonio import ReadJSONInput
 from python.jsonio import OutputJSON
 from python.xlsxio import WriteResultsToXlsx
