@@ -4,21 +4,31 @@ describe("tichu-tournament-list module", function() {
 
   describe("TournamentListController controller", function() {
     var scope;
-    var appController;
+    var header;
     var tournamentListController;
 
     beforeEach(inject(function(/** angular.Scope */ $rootScope,
                                /** angular.$controller */ $controller) {
       var appScope = $rootScope.$new(false);
-      appController = {"header": ""};
-      appScope.appController = appController;
+      appScope.appController = {
+        setPageHeader: function(_header_) {
+          header = _header_;
+        }
+      };
       scope = appScope.$new(false);
       tournamentListController =
-          $controller("TournamentListController as tournamentListController", {"$scope": scope});
+          $controller("TournamentListController as tournamentListController", {
+            "$scope": scope,
+            "tournaments": [{
+              "id": "12345",
+              "name": "turn"
+            }]});
     }));
 
     it("sets a header", function() {
-      expect(appController.header).toBe("Tournaments");
+      expect(header.header).toBe("Tournaments");
+      expect(header.backPath).toBe("/home");
+      expect(header.showHeader).toBe(true);
     });
 
     it("has some tournaments", function() {
