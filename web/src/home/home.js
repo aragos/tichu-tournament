@@ -58,7 +58,7 @@
         });
   }
 
-  angular.module("tichu-home", ["ng", "ngRoute"])
+  angular.module("tichu-home", ["ng", "ngRoute", "ngMaterial"])
       .controller("HomeController", HomeController)
       .config(mapRoute);
 })(angular);

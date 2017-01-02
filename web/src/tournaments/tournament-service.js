@@ -4,11 +4,12 @@
    * Service to interact with the server's tournament APIs.
    *
    * @constructor
+   * @name TichuTournamentService
    * @param {angular.$http} $http
    * @param {angular.$q} $q
    * @ngInject
    */
-  function TournamentService($http, $q) {
+  function TichuTournamentService($http, $q) {
     /**
      * The HTTP request service injected at creation.
      *
@@ -47,7 +48,7 @@
    *
    * @returns {angular.$q.Promise<Tournament[]>}
    */
-  TournamentService.prototype.getTournaments = function() {
+  TichuTournamentService.prototype.getTournaments = function getTournaments() {
     var $q = this._$q;
     if (this._tournamentList !== null) {
       return $q.when(this._tournamentList);
@@ -114,6 +115,6 @@
     return this._tournamentPromise;
   };
 
-  angular.module("tichu-tournament-service", [])
-      .service("TichuTournamentService", TournamentService);
+  angular.module("tichu-tournament-service", ["ng"])
+      .service("TichuTournamentService", TichuTournamentService);
 })(angular);

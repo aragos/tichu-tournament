@@ -185,7 +185,7 @@
         });
   }
 
-  angular.module("tichu-movement-detail", ["ng", "ngRoute"])
+  angular.module("tichu-movement-detail", ["ng", "ngRoute", "ngMaterial"])
       .controller("MovementDetailController", MovementDetailController)
       .config(mapRoute)
       .filter("tichuMovementGetTableFromPosition", function() {

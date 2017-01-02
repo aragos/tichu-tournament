@@ -103,7 +103,7 @@
         });
   }
 
-  angular.module("tichu-tournament-detail", ["ng", "ngRoute"])
+  angular.module("tichu-tournament-detail", ["ng", "ngRoute", "ngMaterial"])
       .controller("TournamentDetailController", TournamentDetailController)
       .config(mapRoute)
       .filter("tichuTournamentPairNoList", function() {
