@@ -93,6 +93,7 @@
           "ngMessages",
           "tichu-home",
           "tichu-movement-detail",
+          "tichu-tournament-detail",
           "tichu-tournament-list"])
       .controller("AppController", AppController)
       .config(configureTheme)

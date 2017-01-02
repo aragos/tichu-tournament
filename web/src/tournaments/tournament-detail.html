@@ -1,0 +1,27 @@
+<md-list class="md-dense" flex="noshrink">
+    <md-list-item class="md-2-line"
+                  ng-href="/tournaments/{{tournamentDetailController.tournamentId}}/edit">
+        <md-icon class="md-avatar-icon" md-font-set="material-icons">settings</md-icon>
+        <div class="md-list-item-text">
+            <h3>Tournament Configuration</h3>
+            <p>
+                {{tournamentDetailController.tournament.no_pairs}} Pairs
+                playing {{tournamentDetailController.tournament.no_boards}} Boards
+            </p>
+        </div>
+    </md-list-item>
+    <md-subheader>Pairs</md-subheader>
+    <md-list-item class="md-2-line"
+                  ng-href="/tournaments/{{tournamentDetailController.tournamentId}}/movement/{{pair_no}}"
+                  ng-repeat="pair_no in tournamentDetailController.tournament.no_pairs | tichuTournamentPairNoList">
+        <md-icon class="md-avatar-icon" md-font-set="material-icons">people</md-icon>
+        <div class="md-list-item-text">
+            <h3>Pair #{{ pair_no }}</h3>
+            <p>
+                <span ng-repeat="player in tournamentDetailController.tournament.players | filter:{pair_no: pair_no}:true">
+                    {{player.name}}<span ng-if="!$last">, </span>
+                </span>
+            </p>
+        </div>
+    </md-list-item>
+</md-list>
