@@ -75,6 +75,20 @@ class MovementTest(unittest.TestCase):
     self.checkConsistentOpponents(movement, 7, 3)
     self.checkHandsPlayedRightNumberOfTimes(movement, 7, 3)
     self.checkTableConsistency(movement, 7, 3)
+    
+  def testConsistentOpponents_eleven_two_seven(self):
+    movement = movements.Movement(11, 2, 7)
+    self.checkConsistentSchedule(movement, 11, 2)
+    self.checkConsistentOpponents(movement, 11, 2)
+    self.checkHandsPlayedRightNumberOfTimes(movement, 11, 2)
+    self.checkTableConsistency(movement, 11, 2)
+
+  def testConsistentOpponents_eleven_three_seven(self):
+    movement = movements.Movement(11, 3, 7)
+    self.checkConsistentSchedule(movement, 11, 3)
+    self.checkConsistentOpponents(movement, 11, 3)
+    self.checkHandsPlayedRightNumberOfTimes(movement, 11, 3)
+    self.checkTableConsistency(movement, 11, 3)
   
   def checkConsistentSchedule(self, movement, num_pairs, num_hands_per_round):
     for i in range(num_pairs):
@@ -179,7 +193,7 @@ class MovementTest(unittest.TestCase):
                          msg=("Non relay hand {} is played {} times in round " + 
                              "{}").format(h, n, r))
         self.assertTrue((not relay_hands.get(r)) or (not relay_hands[r].get(h)), 
-                        msg="Non relay hand {} is present in relay table".format(h))
+                        msg="Non relay hand {} is present in relay table in round {}".format(h, r))
 
     for r, hl in relay_hands.items():
       for h, n in hl.items():
