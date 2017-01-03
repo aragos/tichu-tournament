@@ -5,23 +5,20 @@
    *
    * @constructor
    * @param {!angular.Scope} $scope
-   * @param {{id: string, tournament: tichu.Tournament}} tournament
+   * @param {$mdDialog} $mdDialog
+   * @param {angular.$window} $window
+   * @param {angular.$location} $location
+   * @param {$route} $route
+   * @param {{failure: {redirectToLogin: boolean, error: string, detail: string}, tournament: Tournament}} loadResults
    * @ngInject
    */
-  function TournamentDetailController($scope, tournament) {
+  function TournamentDetailController($scope, $mdDialog, $window, $location, $route, loadResults) {
     $scope.appController.setPageHeader({
-      header: tournament.tournament.name,
+      header: loadResults.failure ? "Tournament Error" : loadResults.tournament.name,
       backPath: "/tournaments",
       showHeader: true
     });
 
-    /**
-     * The ID of the tournament being displayed to the user.
-     *
-     * @type {string}
-     * @export
-     */
-    this.tournamentId = tournament.id;
 
     /**
      * The tournament being displayed to the user.
@@ -29,58 +26,65 @@
      * @type {!tichu.Tournament}
      * @export
      */
-    this.tournament = tournament.tournament;
+    this.tournament = loadResults.tournament;
+
+    /**
+     * The details about the failure, if there was one.
+     *
+     * @type {{redirectToLogin: boolean, error: string, detail: string}}
+     */
+    this.failure = loadResults.failure;
+
+    if (this.failure) {
+      var redirectToLogin = this.failure.redirectToLogin;
+      var dialog = $mdDialog.confirm()
+          .title(this.failure.error)
+          .textContent(this.failure.detail);
+      if (redirectToLogin) {
+        dialog = dialog
+            .ok("Log me in")
+            .cancel("Never mind");
+      } else {
+        dialog = dialog
+            .ok("Try again")
+            .cancel("Never mind");
+      }
+      $mdDialog.show(dialog).then(function () {
+        if (redirectToLogin) {
+          // use $window.location since we're going out of the Angular app
+          $window.location.href = '/api/login?then=' + encodeURIComponent($location.url())
+        } else {
+          $route.reload();
+        }
+      }, function (autoHidden) {
+        if (!autoHidden) {
+          $location.url("/home");
+        }
+      });
+
+      $scope.$on("$destroy", function () {
+        $mdDialog.cancel(true);
+      });
+    }
   }
 
   /**
-   * Asynchronously loads the list of tournaments.
+   * Asynchronously loads the requested tournament.
    *
-   * @param {!angular.$q} $q
+   * @param {TichuTournamentService} tournamentService
    * @param {string} id
-   * @return {!angular.$q.Promise<{id: string, tournament: tichu.Tournament}>}
+   * @return {!angular.$q.Promise}
    */
-  function loadTournament($q, id) {
-    return $q.when({
-      "id": id,
-      "tournament": {
-      "name": "Tournament Name",
-        "no_pairs": 8,
-        "no_boards": 10,
-        "players": [{
-      "pair_no": 1,
-      "name": "Michael the Magnificent",
-      "email": "michael@michael.com"
-    }],
-        "hands": [{
-      "board_no": 3,
-      "ns_pair": 4,
-      "ew_pair": 6,
-      "calls": {
-        "north": "T",
-        "east": "GT",
-        "west": "",
-        "south": ""
-      },
-      "ns_score": 150,
-      "ew_score": -150,
-      "notes": "hahahahahaha what a fool"
-    }]
-    }
-  });
-  }
-
-  /**
-   * Composes a list of pair numbers from the number of pairs.
-   *
-   * @param {number} noPairs The number of pair numbers to produce
-   * @returns {number[]}
-   */
-  function composePairList(noPairs) {
-    var result = [];
-    for (var pairNo = 1; pairNo <= noPairs; pairNo += 1) {
-      result.push(pairNo);
-    }
-    return result;
+  function loadTournament(tournamentService, id) {
+    return tournamentService.getTournament(id).then(function(result) {
+      return {
+        tournament: result
+      };
+    }).catch(function(rejection) {
+      return {
+        failure: rejection
+      };
+    });
   }
 
   /**
@@ -96,17 +100,14 @@
           controller: "TournamentDetailController",
           controllerAs: "tournamentDetailController",
           resolve: {
-            "tournament": /** @ngInject */ function($q, $route) {
-              return loadTournament($q, $route.current.params["id"]);
+            "loadResults": /** @ngInject */ function($route, TichuTournamentService) {
+              return loadTournament(TichuTournamentService, $route.current.params["id"]);
             }
           }
         });
   }
 
-  angular.module("tichu-tournament-detail", ["ng", "ngRoute", "ngMaterial"])
+  angular.module("tichu-tournament-detail", ["ng", "ngRoute", "ngMaterial", "tichu-tournament-service"])
       .controller("TournamentDetailController", TournamentDetailController)
-      .config(mapRoute)
-      .filter("tichuTournamentPairNoList", function() {
-        return composePairList;
-      });
+      .config(mapRoute);
 })(angular);
