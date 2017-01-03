@@ -9,7 +9,7 @@
    * @param {!$route} $route
    * @param {!angular.$location} $location
    * @param {!$mdDialog} $mdDialog
-   * @param {!{failure: {redirectToLogin: boolean, error: string, detail: string}, tournaments: tichu.TournamentSummary[]}} loadResults
+   * @param {!{failure: {redirectToLogin: boolean, error: string, detail: string}, tournaments: !tichu.TournamentHeader[]}} loadResults
    * @ngInject
    */
   function TournamentListController($scope, $window, $route, $location, $mdDialog, loadResults) {
@@ -22,7 +22,7 @@
     /**
      * List of tournaments to be displayed to the user.
      *
-     * @type {!tichu.TournamentSummary[]}
+     * @type {!tichu.TournamentHeader[]}
      * @export
      */
     this.tournaments = loadResults.tournaments;
@@ -63,7 +63,7 @@
 
       $scope.$on("$destroy", function() {
         $mdDialog.cancel(true);
-      })
+      });
     }
   }
 
@@ -105,7 +105,7 @@
         });
   }
 
-  angular.module("tichu-tournament-list", ["ng", "ngRoute", "ngMaterial"])
+  angular.module("tichu-tournament-list", ["ng", "ngRoute", "ngMaterial", "tichu-tournament-service"])
       .controller("TournamentListController", TournamentListController)
       .config(mapRoute);
 })(angular);

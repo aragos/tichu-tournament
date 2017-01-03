@@ -1,113 +1,5 @@
 "use strict";
 (function(angular) {
-  /**
-   * Holder for the basics of tournament data, as received from the server when listing tournaments.
-   * @constructor
-   * @name TournamentHeader
-   * @param {string} id The identifier used for this tournament.
-   */
-  function TournamentHeader(id) {
-    /**
-     * The identifier of this tournament.
-     * @type {string}
-     * @export
-     */
-    this.id = id;
-    /**
-     * The name of this tournament.
-     * @type {string}
-     * @export
-     */
-    this.name = "Unnamed Tournament";
-    Object.seal(this);
-  }
-
-  /**
-   * Holder for data about a player in a tournament.
-   * @constructor
-   */
-  function TournamentPlayer() {
-    /**
-     * The name of this player.
-     * @type {string}
-     */
-    this.name = "Player";
-    /**
-     * The email of this player.
-     * @type {?string}
-     */
-    this.email = null;
-    Object.seal(this);
-  }
-
-  /**
-   * Holder for data about a single pair.
-   * @param {number} pairNo
-   * @name TournamentPair
-   * @constructor
-   */
-  function TournamentPair(pairNo) {
-    /**
-     * The number of this pair.
-     * @type {number}
-     */
-    this.pairNo = pairNo;
-    /**
-     * The players in this pair.
-     * @type {TournamentPlayer[]}
-     */
-    this.players = [];
-    Object.seal(this);
-  }
-
-  /**
-   * The tournament object, containing the full details about the tournament and related objects.
-   * @param {!TournamentHeader} header The header object this tournament is associated with.
-   * @name Tournament
-   * @constructor
-   */
-  function Tournament(header) {
-    this._header = header;
-    this.noBoards = 0;
-    this.pairs = [];
-    Object.seal(this);
-  }
-
-  Object.defineProperty(Tournament.prototype, "id", {
-    enumerable: true,
-    get: function getId() {
-      return this._header.id;
-    }
-  });
-
-  Object.defineProperty(Tournament.prototype, "name", {
-    enumerable: true,
-    get: function getName() {
-      return this._header.name;
-    },
-    set: function setName(name) {
-      this._header.name = name;
-    }
-  });
-
-  Object.defineProperty(Tournament.prototype, "noPairs", {
-    enumerable: true,
-    get: function getNoPairs() {
-      return this.pairs.length;
-    },
-    set: function setNoPairs(num) {
-      if (num < 0 || num > 10 || Math.floor(num) !== num) {
-        throw new Error("no_pairs must be an integer >= 0 and <= 10");
-      }
-      if (this.pairs.length > num) {
-        this.pairs.splice(num);
-      } else {
-        while(this.pairs.length < num) {
-          this.pairs.push(new TournamentPair(this.pairs.length + 1));
-        }
-      }
-    }
-  });
 
   /**
    * Asserts that the given object has the given type.
@@ -191,7 +83,7 @@
     /**
      * The current outstanding promise to return the tournament headers from the server.
      *
-     * @type {angular.$q.Promise<TournamentHeader[]>}
+     * @type {angular.$q.Promise<tichu.TournamentHeader[]>}
      * @private
      */
     this._tournamentListPromise = null;
@@ -199,7 +91,7 @@
     /**
      * The cache of tournament headers in the order they were received from the server.
      *
-     * @type {TournamentHeader[]}
+     * @type {tichu.TournamentHeader[]}
      * @private
      */
     this._tournamentList = null;
@@ -232,7 +124,7 @@
   /**
    * Promises to return the tournament list (sans details) from the server.
    *
-   * @returns {angular.$q.Promise<TournamentHeader[]>}
+   * @returns {angular.$q.Promise<tichu.TournamentHeader[]>}
    */
   TichuTournamentService.prototype.getTournaments = function getTournaments() {
     var $q = this._$q;
@@ -272,12 +164,12 @@
    * @param {string} id The ID of the TournamentHeader.
    * @param {string} name
    * @private
-   * @returns {TournamentHeader}
+   * @returns {tichu.TournamentHeader}
    */
   TichuTournamentService.prototype._constructTournamentHeader = function _constructTournamentHeader(id, name) {
     var result = this._headerCache.get(id);
     if (!result) {
-      result = new TournamentHeader(id);
+      result = new tichu.TournamentHeader(id);
       this._headerCache.put(id, result);
     }
     result.name = name;
@@ -289,7 +181,7 @@
    * reusing a cached TournamentHeader if there is one in the cache.
    * @param {any} header
    * @private
-   * @returns {TournamentHeader}
+   * @returns {tichu.TournamentHeader}
    */
   TichuTournamentService.prototype._parseTournamentHeader = function _parseTournamentHeader(header) {
     assertType('tournament header', header, 'object');
@@ -303,7 +195,7 @@
    * reusing cached TournamentHeaders if they are in the cache.
    * @param {any} data
    * @private
-   * @returns {TournamentHeader[]}
+   * @returns {tichu.TournamentHeader[]}
    */
   TichuTournamentService.prototype._parseTournamentList = function _parseTournamentList(data) {
     assertType('tournament data', data, 'object');
@@ -314,7 +206,7 @@
   /**
    * Retrieves a single tournament, calling the server only if necessary.
    * @param {string} id The ID of the tournament to be retrieved.
-   * @returns {angular.$q.Promise<Tournament>}
+   * @returns {angular.$q.Promise<tichu.Tournament>}
    */
   TichuTournamentService.prototype.getTournament = function getTournament(id) {
     var $q = this._$q;
@@ -353,16 +245,16 @@
   /**
    * Memoized form of the Tournament constructor. Creates a new Tournament if it doesn't
    * exist and then caches it, or gets one from the cache if it did exist.
-   * @param {TournamentHeader} header
+   * @param {tichu.TournamentHeader} header
    * @private
-   * @returns {Tournament}
+   * @returns {tichu.Tournament}
    */
   TichuTournamentService.prototype._constructTournament = function _constructTournament(header) {
     var result = this._tournamentCache.get(header.id);
     if (result) {
       return result;
     }
-    result = new Tournament(header);
+    result = new tichu.Tournament(header);
     this._tournamentCache.put(header.id, result);
     return result;
   };
@@ -373,7 +265,7 @@
    * @param {string} id
    * @param {any} data
    * @private
-   * @returns {Tournament}
+   * @returns {tichu.Tournament}
    */
   TichuTournamentService.prototype._parseTournament = function _parseTournament(id, data) {
     assertType('tournament data', data, 'object');
@@ -408,7 +300,7 @@
           oldPlayers.splice(playersFromData.length);
         } else {
           while (oldPlayers.length < playersFromData.length) {
-            oldPlayers.push(new TournamentPlayer());
+            oldPlayers.push(new tichu.TournamentPlayer());
           }
         }
         oldPlayers.forEach(function(player, playerIndex) {
