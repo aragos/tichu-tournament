@@ -19,7 +19,7 @@ tichu.TournamentHeader = function TournamentHeader(id) {
    * @export
    */
   this.name = "Unnamed Tournament";
-}
+};
 
 /**
  * Holder for data about a player in a tournament.
@@ -36,7 +36,7 @@ tichu.TournamentPlayer = function TournamentPlayer() {
    * @type {?string}
    */
   this.email = null;
-}
+};
 
 /**
  * Holder for data about a single pair.
@@ -51,21 +51,21 @@ tichu.TournamentPair = function TournamentPair(pairNo) {
   this.pairNo = pairNo;
   /**
    * The players in this pair.
-   * @type {TournamentPlayer[]}
+   * @type {tichu.TournamentPlayer[]}
    */
   this.players = [];
-}
+};
 
 /**
  * The tournament object, containing the full details about the tournament and related objects.
- * @param {!TournamentHeader} header The header object this tournament is associated with.
+ * @param {!tichu.TournamentHeader} header The header object this tournament is associated with.
  * @constructor
  */
 tichu.Tournament = function Tournament(header) {
   this._header = header;
   this.noBoards = 0;
   this.pairs = [];
-}
+};
 
 Object.defineProperty(tichu.Tournament.prototype, "id", {
   enumerable: true,
