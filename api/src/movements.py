@@ -61,6 +61,12 @@ class Movement:
     elif no_hands_per_round == 3 and no_pairs == 11 and no_rounds == 7:
       json_data=open(os.path.join(os.getcwd(), 
                      'api/src/movement_files/11_pair_3_hands_7_rounds.txt')).read()
+    elif no_hands_per_round == 2 and no_pairs == 11 and no_rounds == 6:
+      json_data=open(os.path.join(os.getcwd(), 
+                     'api/src/movement_files/11_pair_2_hands_7_rounds_6_max.txt')).read()
+    elif no_hands_per_round == 3 and no_pairs == 11 and no_rounds == 6:
+      json_data=open(os.path.join(os.getcwd(), 
+                     'api/src/movement_files/11_pair_3_hands_7_rounds_6_max.txt')).read()
     else:
       raise ValueError(("No movements available for the configuration {} " + 
                            "pairs with {} hands per round").format(
@@ -99,6 +105,10 @@ class Movement:
       return (2, 7)
     if total_boards == 21 and no_pairs == 11:
       return (3, 7)
+    if total_boards == 16 and no_pairs == 11:
+      return (2, 6)
+    if total_boards == 24 and no_pairs == 11:
+      return (3, 6)
     if total_boards == 24 and no_pairs == 10:
       return (3, 7)
     elif total_boards == 16 and no_pairs == 10:
