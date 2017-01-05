@@ -58,7 +58,7 @@ class MovementHandler(webapp2.RequestHandler):
 
     combined_dict = {
       'name' : tourney.name,
-      'players' : player_pair.players,
+      'players' : player_pair.player_list(),
       'movement': movement
     }
 

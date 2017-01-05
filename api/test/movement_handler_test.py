@@ -49,7 +49,7 @@ class AppTest(unittest.TestCase):
                                 expect_errors=True)
     self.assertEqual(response.status_int, 200)
     response_dict = json.loads(response.body)
-    self.assertEqual('', response_dict['players'])
+    self.assertEqual([], response_dict['players'])
     self.assertEqual('name', response_dict['name'])
     self.assertEqual(6, len(response_dict['movement']))
 
@@ -66,7 +66,7 @@ class AppTest(unittest.TestCase):
                                 headers=hand_headers)
     self.assertEqual(response.status_int, 200)
     response_dict = json.loads(response.body)
-    self.assertEqual('[{"email": "My email", "name": "My name"}]',
+    self.assertEqual([{"email": "My email", "name": "My name"}],
                      response_dict['players'])
     self.assertEqual('name', response_dict['name'])
     self.assertEqual(6, len(response_dict['movement']))
@@ -129,7 +129,7 @@ class AppTest(unittest.TestCase):
         headers={'X-tichu-pair-code' : str(opaque_id_team1_tourney1)})
     self.assertEqual(response.status_int, 200)
     response_dict = json.loads(response.body)
-    self.assertEqual('', response_dict['players'])
+    self.assertEqual([], response_dict['players'])
     self.assertEqual('name', response_dict['name'])
     self.assertEqual(6, len(response_dict['movement']))
     expected_hands = [
@@ -147,7 +147,7 @@ class AppTest(unittest.TestCase):
         headers={'X-tichu-pair-code' : str(opaque_id_team2_tourney1)})
     self.assertEqual(response.status_int, 200)
     response_dict = json.loads(response.body)
-    self.assertEqual('[{"email": "My email", "name": "My name"}]',
+    self.assertEqual([{"email": "My email", "name": "My name"}],
                      response_dict['players'])
     self.assertEqual('name', response_dict['name'])
     self.assertEqual(6, len(response_dict['movement']))
@@ -170,7 +170,7 @@ class AppTest(unittest.TestCase):
         headers={'X-tichu-pair-code' : str(opaque_id_team4_tourney1)})
     self.assertEqual(response.status_int, 200)
     response_dict = json.loads(response.body)
-    self.assertEqual('', response_dict['players'])
+    self.assertEqual([], response_dict['players'])
     self.assertEqual('name', response_dict['name'])
     self.assertEqual(7, len(response_dict['movement']))
     expected_hands = [
@@ -187,7 +187,7 @@ class AppTest(unittest.TestCase):
         headers={'X-tichu-pair-code' : str(opaque_id_team5_tourney1)})
     self.assertEqual(response.status_int, 200)
     response_dict = json.loads(response.body)
-    self.assertEqual('', response_dict['players'])
+    self.assertEqual([], response_dict['players'])
     self.assertEqual('name', response_dict['name'])
     self.assertEqual(6, len(response_dict['movement']))
     self.assertScoresNotPresent(response_dict['movement'],
@@ -200,7 +200,7 @@ class AppTest(unittest.TestCase):
         headers={'X-tichu-pair-code' : str(opaque_id_team7_tourney1)})
     self.assertEqual(response.status_int, 200)
     response_dict = json.loads(response.body)
-    self.assertEqual('', response_dict['players'])
+    self.assertEqual([], response_dict['players'])
     self.assertEqual('name', response_dict['name'])
     self.assertEqual(6, len(response_dict['movement']))
     expected_hands = [
@@ -222,7 +222,7 @@ class AppTest(unittest.TestCase):
         headers={'X-tichu-pair-code' : str(opaque_id_team1_tourney2)})
     self.assertEqual(response.status_int, 200)
     response_dict = json.loads(response.body)
-    self.assertEqual('', response_dict['players'])
+    self.assertEqual([], response_dict['players'])
     self.assertEqual('name', response_dict['name'])
     self.assertEqual(6, len(response_dict['movement']))
     expected_hands = [
@@ -240,7 +240,7 @@ class AppTest(unittest.TestCase):
         headers={'X-tichu-pair-code' : str(opaque_id_team2_tourney2)})
     self.assertEqual(response.status_int, 200)
     response_dict = json.loads(response.body)
-    self.assertEqual('[{"email": "My email", "name": "My name"}]',
+    self.assertEqual([{"email": "My email", "name": "My name"}],
                      response_dict['players'])
     self.assertEqual('name', response_dict['name'])
     self.assertEqual(6, len(response_dict['movement']))
