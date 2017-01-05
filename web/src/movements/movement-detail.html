@@ -1,0 +1,54 @@
+<div layout="column" layout-align="start center">
+    <div style="width: 30em; padding: 0.5em" ng-if="movementDetailController.movement.pair.players">
+        <md-icon md-font-set="material-icons">people</md-icon>
+        <span ng-repeat="player in movementDetailController.movement.pair.players">
+            {{player.name}}<span ng-if="!$last">, </span>
+        </span>
+    </div>
+    <div style="width: 30em" layout="column">
+        <md-card flex="noshrink" ng-repeat="round in movementDetailController.movement.rounds">
+            <md-card-header style="padding-bottom: 0">
+                <md-card-header-text>
+                    <span class="md-title">Round {{round.roundNo}}</span>
+                    <span class="md-subhead">
+                        vs. Pair #{{round.opponent}}
+                        at table #{{round.table}}
+                        <span ng-switch="round.position">
+                            (
+                            <span ng-switch-when="N">North/South</span>
+                            <span ng-switch-when="E">East/West</span>
+                            <span ng-switch-default>{{ round.position }}</span>
+                            )
+                        </span>
+                    </span>
+                </md-card-header-text>
+            </md-card-header>
+            <md-card-content layout="column" style="padding-top: 0">
+                <md-list class="md-dense" style="padding-bottom: 0">
+                    <md-list-item class="md-2-line" ng-repeat="hand in round.hands" ng-click="alert('wut')">
+                        <md-icon class="md-avatar-icon"
+                                 ng-bind="hand.score ? 'assignment_turned_in' : 'assignment'"></md-icon>
+                        <div class="md-list-item-text" layout="column">
+                            <h3>Board #{{hand.handNo}}<span ng-if="round.isRelayTable">R</span></h3>
+                            <p ng-if="round.score">
+                                {{round.score | tichuMovementGetMyScore:round.position}}
+                                vs. {{round.score | tichuMovementGetOpponentsScore:round.position}}
+                            </p>
+                            <p ng-if="!round.score">Click to score hand</p>
+                            <p ng-if="round.score && round.score.calls">
+                                <span ng-repeat="call in round.score.calls">
+                                    {{ call | tichuMovementFormatCall}}
+                                    <span ng-if="!$last"> / </span>
+                                </span>
+                            </p>
+                            <p ng-if="round.score && !round.score.calls">
+                                No calls
+                            </p>
+                        </div>
+                        <md-icon ng-if="round.score && round.score.notes" class="md-secondary">comment</md-icon>
+                    </md-list-item>
+                </md-list>
+            </md-card-content>
+        </md-card>
+    </div>
+</div>

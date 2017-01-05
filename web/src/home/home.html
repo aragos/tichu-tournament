@@ -1,0 +1,40 @@
+<div flex layout="column">
+    <div flex="noshrink" layout="column" layout-align="center center">
+        <h1>Tichu Tournament</h1>
+    </div>
+    <form name="playerForm"
+          flex="noshrink"
+          layout="column"
+          layout-align="start center"
+          ng-submit="homeController.loadCode()">
+        <md-input-container class="md-block">
+            <label for="playerCode">Player Code</label>
+            <input id="playerCode"
+                   autocomplete="off"
+                   name="playerCode"
+                   ng-model="homeController.code"
+                   ng-disabled="homeController.loading"
+                   required
+                   md-maxlength="4"
+                   ng-pattern="/[A-Za-z]{4}/" />
+            <div ng-messages="playerForm.playerCode.$error" role="alert">
+                <div ng-message-exp="['required', 'pattern', 'md-maxlength']">
+                    Enter a 4-letter player code.
+                </div>
+            </div>
+        </md-input-container>
+        <div style="min-height: 50px" layout="column" layout-align="center center">
+            <md-button ng-if="!homeController.loading"
+                       ng-disabled="!playerForm.$valid"
+                       ng-click="homeController.loadCode()"
+                       class="md-raised md-primary">
+                Join as Player
+            </md-button>
+            <md-progress-circular ng-if="homeController.loading" md-diameter="50px"></md-progress-circular>
+        </div>
+    </form>
+    <div flex="noshrink" layout="column" layout-align="center center">
+        <div>Tournament director?</div>
+        <md-button href="/tournaments">Manage Tournaments</md-button>
+    </div>
+</div>
