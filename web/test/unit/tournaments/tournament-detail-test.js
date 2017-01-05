@@ -68,7 +68,6 @@ describe("tichu-tournament-detail module", function() {
       var tournamentHeader = new tichu.TournamentHeader("123456789");
       tournamentHeader.name = "my tournament";
       var tournament = new tichu.Tournament(tournamentHeader);
-      tournament.noPairs = 8;
       loadController({
         tournament: tournament
       });
@@ -81,7 +80,6 @@ describe("tichu-tournament-detail module", function() {
       var tournamentHeader = new tichu.TournamentHeader("123456789");
       tournamentHeader.name = "a tournament";
       var tournament = new tichu.Tournament(tournamentHeader);
-      tournament.noPairs = 8;
       var tournamentDetailController = loadController({
         tournament: tournament
       });

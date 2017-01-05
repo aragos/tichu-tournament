@@ -1,57 +1,11 @@
 "use strict";
 (function(angular) {
-
   /**
-   * Asserts that the given object has the given type.
-   *
-   * @template T
-   * @param {string} context the string describing the value to put in the error message
-   * @param {T} value the value to test the type of
-   * @param {string} type the type to test for
-   * @param {boolean=} allowUndefined whether undefined is allowed
-   * @returns {T} the original value
+   * Maximum number of pairs the tournament service will try to parse.
+   * @const
+   * @type {number}
    */
-  function assertType(context, value, type, allowUndefined) {
-    if (allowUndefined && value === undefined) {
-      return value;
-    }
-    var actualType = angular.isArray(value) ? 'array' : typeof value;
-    if (actualType !== type) {
-      throw new Error(context + " was " + actualType + ", not " + type);
-    }
-    return value;
-  }
-
-  /**
-   * Creates an error handler for the standard API error structure.
-   * @param {angular.$q} $q The promise service to reject with.
-   * @param {string} path The API path that was called and failed.
-   * @returns {Function} A response handler.
-   */
-  function handleErrorIn($q, path) {
-    return function onError(response) {
-      var rejection = {};
-      if (typeof response.status === 'number') {
-        console.log(
-            "Got error calling " + path + " (" + response.status + " " + response.statusText + "):\n"
-            + JSON.stringify(response.data));
-        rejection.redirectToLogin = (response.status === 401);
-        if (typeof response.data === 'object' && response.data.error && response.data.detail) {
-          rejection.error = response.data.error;
-          rejection.detail = response.data.detail;
-        } else {
-          rejection.error = response.statusText + " (" + response.status + ")";
-          rejection.detail = response.data;
-        }
-      } else {
-        console.log(response);
-        rejection.redirectToLogin = false;
-        rejection.error = "Client Error";
-        rejection.detail = "Something went wrong when talking to the server...";
-      }
-      return $q.reject(rejection);
-    }
-  }
+  var MAX_PAIRS_PER_TOURNAMENT = 50;
 
   /**
    * Service to interact with the server's tournament APIs.
@@ -61,9 +15,10 @@
    * @param {angular.$http} $http
    * @param {angular.$q} $q
    * @param {angular.$cacheFactory} $cacheFactory
+   * @param {TichuTournamentStore} TichuTournamentStore
    * @ngInject
    */
-  function TichuTournamentService($http, $q, $cacheFactory) {
+  function TichuTournamentService($http, $q, $cacheFactory, TichuTournamentStore) {
     /**
      * The HTTP request service injected at creation.
      *
@@ -89,22 +44,6 @@
     this._tournamentListPromise = null;
 
     /**
-     * The cache of tournament headers in the order they were received from the server.
-     *
-     * @type {tichu.TournamentHeader[]}
-     * @private
-     */
-    this._tournamentList = null;
-
-    /**
-     * The cache of TournamentHeader instances.
-     *
-     * @type {angular.$cacheFactory.Cache}
-     * @private
-     */
-    this._headerCache = $cacheFactory("TournamentHeaders");
-
-    /**
      * The current outstanding promise(s) for loading tournaments.
      *
      * @type {angular.$cacheFactory.Cache}
@@ -113,12 +52,20 @@
     this._tournamentPromises = $cacheFactory("TournamentPromises");
 
     /**
-     * The cache of Tournament instances.
+     * The cache of tournament headers in the order they were received from the server.
      *
-     * @type {angular.$cacheFactory.Cache}
+     * @type {tichu.TournamentHeader[]}
      * @private
      */
-    this._tournamentCache = $cacheFactory("Tournaments");
+    this._tournamentList = null;
+
+    /**
+     * The cache of Tournament-related objects.
+     *
+     * @type {TichuTournamentStore}
+     * @private
+     */
+    this._tournamentStore = TichuTournamentStore;
   }
 
   /**
@@ -151,7 +98,7 @@
             detail: "The list of tournaments... wasn't."
           });
         }
-      }, handleErrorIn($q, "/api/tournaments")).finally(function afterResolution() {
+      }, ServiceHelpers.handleErrorIn($q, "/api/tournaments")).finally(function afterResolution() {
         self._tournamentListPromise = null;
       });
     }
@@ -159,47 +106,31 @@
   };
 
   /**
-   * Memoized form of the TournamentHeader constructor. Creates a new TournamentHeader if it doesn't
-   * exist and then caches it, or gets one from the cache and updates its name if it did exist.
-   * @param {string} id The ID of the TournamentHeader.
-   * @param {string} name
-   * @private
-   * @returns {tichu.TournamentHeader}
-   */
-  TichuTournamentService.prototype._constructTournamentHeader = function _constructTournamentHeader(id, name) {
-    var result = this._headerCache.get(id);
-    if (!result) {
-      result = new tichu.TournamentHeader(id);
-      this._headerCache.put(id, result);
-    }
-    result.name = name;
-    return result;
-  };
-
-  /**
    * Converts the given tournament header from the server into a TournamentHeader,
    * reusing a cached TournamentHeader if there is one in the cache.
-   * @param {any} header
+   * @param {*} headerData The JSON to parse.
    * @private
    * @returns {tichu.TournamentHeader}
    */
-  TichuTournamentService.prototype._parseTournamentHeader = function _parseTournamentHeader(header) {
-    assertType('tournament header', header, 'object');
-    assertType('tournament id', header['id'], 'string');
-    assertType('tournament name', header['name'], 'string');
-    return this._constructTournamentHeader(header['id'], header['name']);
+  TichuTournamentService.prototype._parseTournamentHeader = function _parseTournamentHeader(headerData) {
+    ServiceHelpers.assertType('tournament header', headerData, 'object');
+    ServiceHelpers.assertType('tournament id', headerData['id'], 'string');
+    ServiceHelpers.assertType('tournament name', headerData['name'], 'string');
+    var header = this._tournamentStore.getOrCreateTournamentHeader(headerData['id']);
+    header.name = headerData['name'];
+    return header;
   };
 
   /**
    * Converts the given tournament list from the server into an array of TournamentHeaders,
    * reusing cached TournamentHeaders if they are in the cache.
-   * @param {any} data
+   * @param {*} data
    * @private
    * @returns {tichu.TournamentHeader[]}
    */
   TichuTournamentService.prototype._parseTournamentList = function _parseTournamentList(data) {
-    assertType('tournament data', data, 'object');
-    return assertType('tournament list', data['tournaments'], 'array').map(
+    ServiceHelpers.assertType('tournament data', data, 'object');
+    return ServiceHelpers.assertType('tournament list', data['tournaments'], 'array').map(
         this._parseTournamentHeader.bind(this));
   };
 
@@ -210,9 +141,8 @@
    */
   TichuTournamentService.prototype.getTournament = function getTournament(id) {
     var $q = this._$q;
-    var cached = this._tournamentCache.get(id);
-    if (cached) {
-      return $q.when(cached);
+    if (this._tournamentStore.hasTournament(id)) {
+      return $q.when(this._tournamentStore.getOrCreateTournament(id));
     }
     if (!this._tournamentPromises.get(id)) {
       var self = this;
@@ -222,8 +152,7 @@
         url: path
       }).then(function onSuccess(response) {
         try {
-          self._parseTournament(id, response.data);
-          return self._tournamentCache.get(id);
+          return self._parseTournament(id, response.data);
         } catch (ex) {
           console.log(
               "Malformed response from " + path + " (" + response.status + " " + response.statusText + "):\n"
@@ -235,7 +164,7 @@
             detail: "The tournament... wasn't."
           });
         }
-      }, handleErrorIn($q, path)).finally(function afterResolution() {
+      }, ServiceHelpers.handleErrorIn($q, path)).finally(function afterResolution() {
         self._tournamentPromises.remove(id);
       }));
     }
@@ -243,75 +172,63 @@
   };
 
   /**
-   * Memoized form of the Tournament constructor. Creates a new Tournament if it doesn't
-   * exist and then caches it, or gets one from the cache if it did exist.
-   * @param {tichu.TournamentHeader} header
-   * @private
-   * @returns {tichu.Tournament}
-   */
-  TichuTournamentService.prototype._constructTournament = function _constructTournament(header) {
-    var result = this._tournamentCache.get(header.id);
-    if (result) {
-      return result;
-    }
-    result = new tichu.Tournament(header);
-    this._tournamentCache.put(header.id, result);
-    return result;
-  };
-
-  /**
    * Converts the given tournament list from the server into a Tournament, reusing a cached Tournament
    * if it is in the cache.
    * @param {string} id
-   * @param {any} data
+   * @param {*} data
    * @private
    * @returns {tichu.Tournament}
    */
   TichuTournamentService.prototype._parseTournament = function _parseTournament(id, data) {
-    assertType('tournament data', data, 'object');
-    assertType('tournament name', data['name'], 'string');
-    var header = this._constructTournamentHeader(id, data['name']);
-    var tournament = this._constructTournament(header);
-    assertType('tournament pair count', data['no_pairs'], 'number');
-    tournament.noPairs = data['no_pairs'];
-    assertType('tournament board count', data['no_boards'], 'number');
-    tournament.noBoards = data['no_boards'];
+    ServiceHelpers.assertType('tournament data', data, 'object');
+    ServiceHelpers.assertType('tournament name', data['name'], 'string');
+    ServiceHelpers.assertType('tournament pair count', data['no_pairs'], 'number');
+    if (data['no_pairs'] < 0
+        || data['no_pairs'] > MAX_PAIRS_PER_TOURNAMENT
+        || Math.floor(data['no_pairs']) !== data['no_pairs']) {
+      throw new Error('tournament pair count was not an integer in the legal range');
+    }
+    ServiceHelpers.assertType('tournament board count', data['no_boards'], 'number');
+    ServiceHelpers.assertType('tournament player list', data['players'], 'array', true);
+    var playerLists;
     if (data['players']) {
-      assertType('tournament player list', data['players'], 'array', true);
-      var playerLists = data['players'].reduce(function validatePlayer(collection, player, index) {
-        assertType('players[' + index + '] pair number', player['pair_no'], 'number');
+      playerLists = [];
+      for (var i = 0; i < data['no_pairs']; i += 1) {
+        playerLists[i] = [];
+      }
+      playerLists = data['players'].reduce(function validatePlayer(collection, player, index) {
+        ServiceHelpers.assertType('players[' + index + '] pair number', player['pair_no'], 'number');
         if (player['pair_no'] <= 0
-            || player['pair_no'] > tournament.noPairs
+            || player['pair_no'] > data['no_pairs']
             || Math.floor(player['pair_no']) !== player['pair_no']) {
           throw new Error('players[' + index + '] pair number (' + player['pair_no']
               + ') was not an integer in the legal range');
         }
-        assertType('players[' + index + '] name', player['name'], 'string');
-        assertType('players[' + index + '] email', player['email'], 'string', true);
+        ServiceHelpers.assertType('players[' + index + '] name', player['name'], 'string', true);
+        ServiceHelpers.assertType('players[' + index + '] email', player['email'], 'string', true);
         var pairIndex = player['pair_no'] - 1;
         collection[pairIndex] = collection[pairIndex] || [];
-        collection[pairIndex].push(player);
-        return collection;
-      }, []);
-      tournament.pairs.forEach(function(pair, pairIndex) {
-        var playersFromData = playerLists[pairIndex] || [];
-        var oldPlayers = pair.players;
-        if (oldPlayers.length > playersFromData.length) {
-          oldPlayers.splice(playersFromData.length);
-        } else {
-          while (oldPlayers.length < playersFromData.length) {
-            oldPlayers.push(new tichu.TournamentPlayer());
-          }
-        }
-        oldPlayers.forEach(function(player, playerIndex) {
-          player.name = playersFromData[playerIndex]['name'];
-          player.email = playersFromData[playerIndex]['email'] || null;
+        collection[pairIndex].push({
+          name: player['name'] || null,
+          email: player['email'] || null
         });
+        return collection;
+      }, playerLists);
+    }
+    var tournament = this._tournamentStore.getOrCreateTournament(id);
+    tournament.name = data['name'];
+    tournament.noBoards = data['no_boards'];
+    tournament.setNoPairs(
+        data['no_pairs'],
+        this._tournamentStore.getOrCreateTournamentPair.bind(this._tournamentStore, id));
+    if(playerLists) {
+      tournament.pairs.forEach(function(pair, index) {
+        pair.setPlayers(playerLists[index]);
       });
     }
     return tournament;
   };
 
-  angular.module("tichu-tournament-service", ["ng"])
+  angular.module("tichu-tournament-service", ["ng", "tichu-tournament-store"])
       .service("TichuTournamentService", TichuTournamentService);
 })(angular);
