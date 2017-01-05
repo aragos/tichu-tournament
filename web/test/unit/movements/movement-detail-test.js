@@ -1,8 +1,8 @@
 "use strict";
-describe("tichu-tournament-detail module", function() {
-  beforeEach(module("tichu-tournament-detail"));
+describe("tichu-movement-detail module", function() {
+  beforeEach(module("tichu-movement-detail"));
 
-  describe("TournamentDetailController controller", function() {
+  describe("MovementDetailController controller", function() {
     var scope;
     var $rootScope;
     var header;
@@ -14,7 +14,7 @@ describe("tichu-tournament-detail module", function() {
     var dialogDeferred;
 
     beforeEach(module(function($provide) {
-      $window = {location: {href: "/tournaments/123456"}};
+      $window = {location: {href: "/tournaments/123456/movement/7"}};
       $provide.value("$window", $window);
     }));
 
@@ -53,41 +53,62 @@ describe("tichu-tournament-detail module", function() {
      * Starts up the controller with the given load results.
      *
      * @param {Object=} results
-     * @returns {TournamentDetailController}
+     * @returns {MovementDetailController}
      */
     function loadController(results) {
-      return $controller("TournamentDetailController as tournamentDetailController", {
+      return $controller("MovementDetailController as movementDetailController", {
         "$scope": scope,
         "loadResults": results || {
-          tournament: new tichu.Tournament(new tichu.TournamentHeader("123456"))
+          pairCode: null,
+          movement: new tichu.Movement(
+              new tichu.TournamentHeader("123456"),
+              new tichu.TournamentPair(7))
         }
       });
     }
 
-    it("sets a header", function() {
+    it("sets a header which goes back to the tournament if no code was used", function() {
       var tournamentHeader = new tichu.TournamentHeader("123456789");
       tournamentHeader.name = "my tournament";
-      var tournament = new tichu.Tournament(tournamentHeader);
+      var pair = new tichu.TournamentPair(7);
+      var movement = new tichu.Movement(tournamentHeader, pair);
       loadController({
-        tournament: tournament
+        pairCode: null,
+        movement: movement
       });
-      expect(header.header).toBe("my tournament");
-      expect(header.backPath).toBe("/tournaments");
+      expect(header.header).toBe("Pair #7 - my tournament");
+      expect(header.backPath).toBe("/tournaments/123456789");
       expect(header.showHeader).toBe(true);
     });
 
-    it("has a tournament with a name and ID and some pairs", function() {
+    it("sets backPath to /home if a code was used", function() {
       var tournamentHeader = new tichu.TournamentHeader("123456789");
-      tournamentHeader.name = "a tournament";
-      var tournament = new tichu.Tournament(tournamentHeader);
-      var tournamentDetailController = loadController({
-        tournament: tournament
+      tournamentHeader.name = "my tournament";
+      var pair = new tichu.TournamentPair(7);
+      var movement = new tichu.Movement(tournamentHeader, pair);
+      loadController({
+        pairCode: "CODE",
+        movement: movement
       });
-      expect(tournamentDetailController.tournament).toBe(tournament);
+      expect(header.backPath).toBe("/home");
+    });
+
+    it("has a movement and code from the load results", function() {
+      var tournamentHeader = new tichu.TournamentHeader("123456789");
+      tournamentHeader.name = "my tournament";
+      var pair = new tichu.TournamentPair(7);
+      var movement = new tichu.Movement(tournamentHeader, pair);
+      var movementDetailController = loadController({
+        pairCode: "CODE",
+        movement: movement
+      });
+      expect(movementDetailController.playerCode).toBe("CODE");
+      expect(movementDetailController.movement).toBe(movement);
     });
 
     it("displays a dialog in case of error", function() {
       loadController({
+        pairCode: null,
         failure: {
           redirectToLogin: false,
           error: "An error happened",
@@ -99,6 +120,7 @@ describe("tichu-tournament-detail module", function() {
 
     it("reloads the page when the dialog is OK'd", function() {
       loadController({
+        pairCode: null,
         failure: {
           redirectToLogin: false,
           error: "An error happened",
@@ -112,6 +134,7 @@ describe("tichu-tournament-detail module", function() {
 
     it("leaves for /home when the dialog is canceled", function() {
       loadController({
+        pairCode: null,
         failure: {
           redirectToLogin: false,
           error: "An error happened",
@@ -124,8 +147,9 @@ describe("tichu-tournament-detail module", function() {
     });
 
     it("opens the login page when the dialog is OK'd on a login error", function() {
-      $location.url("/tournaments/123456");
+      $location.url("/tournaments/123456/movement/7");
       loadController({
+        pairCode: null,
         failure: {
           redirectToLogin: true,
           error: "Log in already",
@@ -134,11 +158,26 @@ describe("tichu-tournament-detail module", function() {
       });
       dialogDeferred.resolve();
       $rootScope.$apply();
-      expect($window.location.href).toBe("/api/login?then=%2Ftournaments%2F123456");
+      expect($window.location.href).toBe("/api/login?then=%2Ftournaments%2F123456%2Fmovement%2F7");
+    });
+
+    it("returns /home when the dialog is OK'd on a login error if a code was set", function() {
+      $location.url("/tournaments/123456/movement/7?playerCode=CODE");
+      loadController({
+        pairCode: "CODE",
+        failure: {
+          redirectToLogin: true,
+          error: "Log in already",
+          detail: "What are you even doing here"
+        }
+      });
+      dialogDeferred.resolve();
+      $rootScope.$apply();
+      expect($location.url()).toBe("/home");
     });
 
     it("cancels the dialog and doesn't change URLs when the scope is destroyed", function() {
-      $location.url("/tournaments/123456");
+      $location.url("/tournaments/123456/movement/7");
       loadController({
         failure: {
           redirectToLogin: false,
@@ -149,7 +188,7 @@ describe("tichu-tournament-detail module", function() {
       scope.$destroy();
       expect($mdDialog.cancel).toHaveBeenCalled();
       $rootScope.$apply();
-      expect($location.url()).toBe("/tournaments/123456");
+      expect($location.url()).toBe("/tournaments/123456/movement/7");
     })
   });
 });

@@ -5,84 +5,96 @@
    *
    * @constructor
    * @param {!angular.Scope} $scope
-   * @param {!{tournamentId: string, pairNo: number, playerCode: ?string, movement: !tichu.Movement}} movementData
+   * @param {$mdDialog} $mdDialog
+   * @param {angular.$window} $window
+   * @param {angular.$location} $location
+   * @param {$route} $route
+   * @param {!{pairCode: ?string, failure: ({redirectToLogin: boolean, error: string, detail: string}|undefined), movement: (tichu.Movement|undefined)}} loadResults
    * @ngInject
    */
-  function MovementDetailController($scope, movementData) {
+  function MovementDetailController($scope, $mdDialog, $window, $location, $route, loadResults) {
     $scope.appController.setPageHeader({
-      header: "Pair #" + movementData.pairNo + " - " + movementData.movement["name"],
-      backPath: movementData.playerCode ? "/home" : "/tournaments/" + movementData.tournamentId,
+      header: loadResults.failure
+          ? "Movement Error"
+          : "Pair #" + loadResults.movement.pair.pairNo + " - " + loadResults.movement.tournamentId.name,
+      backPath: (loadResults.pairCode || loadResults.failure) ? "/home" : "/tournaments/" + loadResults.movement.tournamentId.id,
       showHeader: true
     });
 
     /**
-     * The ID of the tournament this movement is from.
-     *
-     * @type {string}
+     * The movement being displayed.
+     * @type {tichu.Movement}
      * @export
      */
-    this.tournamentId = movementData.tournamentId;
+    this.movement = loadResults.movement;
 
     /**
-     * The number of the pair whose movement is being displayed.
-     *
-     * @type {number}
-     * @export
-     */
-    this.pairNo = movementData.pairNo;
-
-    /**
-     * The player code which was used.
+     * The player code which was used, if any.
      *
      * @type {?string}
      * @export
      */
-    this.playerCode = movementData.playerCode;
+    this.playerCode = loadResults.pairCode;
 
     /**
-     * The full movement information.
-     *
-     * @type {!tichu.Movement}
+     * The error experienced while loading, if any.
+     * @type {{redirectToLogin: boolean, error: string, detail: string}}
      * @export
      */
-    this.movement = movementData.movement;
+    this.failure = loadResults.failure;
+
+    if (this.failure) {
+      var hasPlayerCode = !!this.playerCode;
+      var redirectToLogin = this.failure.redirectToLogin;
+      var dialog = $mdDialog.confirm()
+          .title(this.failure.error)
+          .textContent(this.failure.detail);
+      if (redirectToLogin) {
+        if (hasPlayerCode) {
+          dialog = dialog
+              .ok("Try a different code")
+              .cancel("Never mind")
+        } else {
+          dialog = dialog
+              .ok("Log me in")
+              .cancel("Never mind");
+        }
+      } else {
+        dialog = dialog
+            .ok("Try again")
+            .cancel("Never mind");
+      }
+      $mdDialog.show(dialog).then(function () {
+        if (redirectToLogin && hasPlayerCode) {
+          $location.url("/home");
+        } else if (redirectToLogin && !hasPlayerCode) {
+          // use $window.location since we're going out of the Angular app
+          $window.location.href = '/api/login?then=' + encodeURIComponent($location.url())
+        } else {
+          $route.reload();
+        }
+      }, function (autoHidden) {
+        if (!autoHidden) {
+          $location.url("/home");
+        }
+      });
+
+      $scope.$on("$destroy", function () {
+        $mdDialog.cancel(true);
+      });
+    }
   }
 
   /**
-   * Extracts the table number from the position string.
-   *
-   * @param {string} position
-   * @returns {number}
+   * Formats the given call into a string.
+   * @param {{side: tichu.Position, call: tichu.Call}} call
+   * @returns {?string}
    */
-  function getTableFromPosition(position) {
-    return parseInt(position.substring(0, position.length - 1));
-  }
-
-  /**
-   * Extracts and normalizes the side from the position string.
-   *
-   * @param {string} position
-   * @returns {string}
-   */
-  function getSideFromPosition(position) {
-    return position.substring(position.length - 1);
-  }
-
-  /**
-   * Turns the call object into a formatted list suitable for display.
-   *
-   * @param {?tichu.Calls=} calls
-   * @returns {string}
-   */
-  function formatCallsToString(calls) {
-    if (!calls) {
+  function formatCall(call) {
+    if (!call) {
       return null;
     }
-    return ["north", "south", "east", "west"].filter(function(side) {
-      return !!calls[side];
-    }).map(function(side) {
-      return side.substring(0, 1).toUpperCase() + "(" + calls[side] + ")";
-    }).join(" / ");
+    return call.side[0].toUpperCase() + "(" + call.call + ")";
   }
 
   /**
@@ -95,7 +107,7 @@
     if (!score) {
       return null;
     }
-    return getSideFromPosition(position) === "E" ? score.ew_score : score.ns_score;
+    return position === tichu.PairPosition.EAST_WEST ? score.eastWestScore : score.northSouthScore;
   }
 
   /**
@@ -108,56 +120,29 @@
     if (!score) {
       return null;
     }
-    return getSideFromPosition(position) === "E" ? score.ns_score : score.ew_score;
+    return position === tichu.PairPosition.EAST_WEST ? score.northSouthScore : score.eastWestScore;
   }
 
   /**
    * Asynchronously loads the movement specified by the tournament and pair.
    *
-   * @param {!angular.$q} $q
+   * @param {TichuMovementService} movementService
    * @param {string} tournamentId
    * @param {number} pairNo
    * @param {?string=} playerCode
-   * @returns {angular.$q.Promise<{tournamentId: string, pairNo: number, playerCode: ?string, movement: !tichu.Movement}>}
+   * @returns {angular.$q.Promise<{pairCode: ?string, failure: ({redirectToLogin: boolean, error: string, detail: string}|undefined), movement: (tichu.Movement|undefined)}>}
    */
-  function loadMovement($q, tournamentId, pairNo, playerCode) {
-    return $q.when({
-      tournamentId: tournamentId,
-      pairNo: pairNo,
-      playerCode: playerCode || null,
-      movement: {
-          name: "Tournament " + tournamentId,
-          players: [{
-            name: "Player " + pairNo + ".1" + playerCode,
-            email: "first" + pairNo + "@email.com"
-          }, {
-            name: "Player " + pairNo + ".2" + playerCode,
-            email: "second" + pairNo + "@email.com"
-          }],
-          "movement": [{
-            "round": 1,
-            "position": "3N",
-            "opponent": 2,
-            "hands": [3, 4, 5],
-            "relay_table": true,
-            "score" : {
-              "calls": {
-                "north": "T",
-                "east": "GT",
-                "west": "",
-                "south": ""
-              },
-              "ns_score": 150,
-              "ew_score": -150,
-              "notes": "I am a note"
-            }},
-            {
-              "round": 2,
-              "position": "1E",
-              "opponent": 4,
-              "hands": [7, 8, 9]
-            }]
-        }
+  function loadMovement(movementService, tournamentId, pairNo, playerCode) {
+    return movementService.getMovement(tournamentId, pairNo, playerCode).then(function(movement) {
+      return {
+        pairCode: playerCode,
+        movement: movement
+      };
+    }).catch(function(failure) {
+      return {
+        pairCode: playerCode,
+        failure: failure
+      }
     });
   }
 
@@ -174,9 +159,9 @@
           controller: "MovementDetailController",
           controllerAs: "movementDetailController",
           resolve: {
-            "movementData": /** @ngInject */ function($q, $route) {
+            "loadResults": /** @ngInject */ function(TichuMovementService, $route) {
               return loadMovement(
-                  $q,
+                  TichuMovementService,
                   $route.current.params["tournamentId"],
                   parseInt($route.current.params["pairNo"]),
                   $route.current.params["playerCode"] || null);
@@ -185,17 +170,11 @@
         });
   }
 
-  angular.module("tichu-movement-detail", ["ng", "ngRoute", "ngMaterial"])
+  angular.module("tichu-movement-detail", ["ng", "ngRoute", "ngMaterial", "tichu-movement-service"])
       .controller("MovementDetailController", MovementDetailController)
       .config(mapRoute)
-      .filter("tichuMovementGetTableFromPosition", function() {
-        return getTableFromPosition;
-      })
-      .filter("tichuMovementGetSideFromPosition", function() {
-        return getSideFromPosition;
-      })
-      .filter("tichuMovementFormatCalls", function() {
-        return formatCallsToString;
+      .filter("tichuMovementFormatCall", function() {
+        return formatCall;
       })
       .filter("tichuMovementGetMyScore", function() {
         return getMyScore;

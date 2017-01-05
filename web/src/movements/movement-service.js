@@ -92,7 +92,7 @@
             detail: "The movement... wasn't."
           });
         }
-      }, ServiceHelpers.handleErrorIn($q, path)).finally(function afterResolution() {
+      }, ServiceHelpers.handleErrorIn($q, path, true)).finally(function afterResolution() {
         self._movementPromiseCache.remove(movementPromiseCacheKey);
       }));
     }

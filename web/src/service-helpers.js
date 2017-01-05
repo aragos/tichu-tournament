@@ -34,16 +34,18 @@ ServiceHelpers.assertType = function assertType(context, value, type, allowNullO
  * Creates an error handler for the standard API error structure.
  * @param {angular.$q} $q The promise service to reject with.
  * @param {string} path The API path that was called and failed.
+ * @param {boolean=} accept403 Whether 403 should be treated as needing redirect to login.
  * @returns {Function} A response handler.
  */
-ServiceHelpers.handleErrorIn = function handleErrorIn($q, path) {
+ServiceHelpers.handleErrorIn = function handleErrorIn($q, path, accept403) {
+  accept403 = accept403 || false;
   return function onError(response) {
     var rejection = {};
     if (typeof response.status === 'number') {
       console.log(
           "Got error calling " + path + " (" + response.status + " " + response.statusText + "):\n"
           + JSON.stringify(response.data));
-      rejection.redirectToLogin = (response.status === 401);
+      rejection.redirectToLogin = (response.status === 401) || (accept403 && response.status === 403);
       if (typeof response.data === 'object' && response.data.error && response.data.detail) {
         rejection.error = response.data.error;
         rejection.detail = response.data.detail;
