@@ -39,8 +39,8 @@
   HomeController.prototype.loadCode = function loadCode() {
     this.loading = true;
     this.$location
-        .path("/tournaments/which-generated-" + this.code + "/movement/1")
-        .search({playerCode: this.code});
+        .path("/tournaments/which-generated-" + this.code.toUpperCase() + "/movement/1")
+        .search({playerCode: this.code.toUpperCase()});
   };
 
   /**
