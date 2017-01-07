@@ -46,28 +46,30 @@
         if (results.length === 1) {
           return results[0];
         } else if (results.length === 0) {
-          return $q.reject({
-            redirectToLogin: false,
-            error: "No tournament found!",
-            detail: "Check the pair code the tournament director gave you and try again."
-          });
+          var notEnoughTournaments = new tichu.RpcError();
+          notEnoughTournaments.redirectToLogin = false;
+          notEnoughTournaments.error = "No tournament found!";
+          notEnoughTournaments.detail =
+              "Check the pair code the tournament director gave you and try again.";
+          return $q.reject(notEnoughTournaments);
         } else {
-          return $q.reject({
-            redirectToLogin: false,
-            error: "Bad luck!",
-            detail: "What are the odds?! There are multiple tournaments that your pair code could be for..."
-          });
+          var tooManyTournaments = new tichu.RpcError();
+          tooManyTournaments.redirectToLogin = false;
+          tooManyTournaments.error = "Bad luck!";
+          tooManyTournaments.detail =
+              "What are the odds?! There are multiple tournaments that your pair code could be for...";
+          return $q.reject(tooManyTournaments);
         }
       } catch (ex) {
         console.log(
             "Malformed response from " + path + " (" + response.status + " " + response.statusText + "):\n"
             + ex + "\n\n"
             + JSON.stringify(response.data));
-        return $q.reject({
-          redirectToLogin: false,
-          error: "Invalid response from server",
-          detail: "The pair information... wasn't."
-        });
+        var invalidData = new tichu.RpcError();
+        invalidData.redirectToLogin = false;
+        invalidData.error = "Invalid response from server";
+        invalidData.detail = "The server sent confusing data about the pair code.";
+        return $q.reject(invalidData);
       }
     }, ServiceHelpers.handleErrorIn($q, path));
   };

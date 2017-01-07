@@ -9,7 +9,7 @@
    * @param {angular.$window} $window
    * @param {angular.$location} $location
    * @param {$route} $route
-   * @param {!{pairCode: ?string, failure: ({redirectToLogin: boolean, error: string, detail: string}|undefined), movement: (tichu.Movement|undefined)}} loadResults
+   * @param {!{pairCode: ?string, failure: (tichu.RpcError|undefined), movement: (tichu.Movement|undefined)}} loadResults
    * @ngInject
    */
   function MovementDetailController($scope, $mdDialog, $window, $location, $route, loadResults) {
@@ -38,7 +38,7 @@
 
     /**
      * The error experienced while loading, if any.
-     * @type {{redirectToLogin: boolean, error: string, detail: string}}
+     * @type {tichu.RpcError}
      * @export
      */
     this.failure = loadResults.failure;
@@ -130,7 +130,7 @@
    * @param {string} tournamentId
    * @param {number} pairNo
    * @param {?string=} playerCode
-   * @returns {angular.$q.Promise<{pairCode: ?string, failure: ({redirectToLogin: boolean, error: string, detail: string}|undefined), movement: (tichu.Movement|undefined)}>}
+   * @returns {angular.$q.Promise<{pairCode: ?string, failure: (tichu.RpcError|undefined), movement: (tichu.Movement|undefined)}>}
    */
   function loadMovement(movementService, tournamentId, pairNo, playerCode) {
     return movementService.getMovement(tournamentId, pairNo, playerCode).then(function(movement) {

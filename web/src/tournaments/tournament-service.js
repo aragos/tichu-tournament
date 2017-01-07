@@ -92,11 +92,11 @@
               "Malformed response from /api/tournaments (" + response.status + " " + response.statusText + "):\n"
               + ex + "\n\n"
               + JSON.stringify(response.data));
-          return $q.reject({
-            redirectToLogin: false,
-            error: "Invalid response from server",
-            detail: "The list of tournaments... wasn't."
-          });
+          var rejection = new tichu.RpcError();
+          rejection.redirectToLogin = false;
+          rejection.error = "Invalid response from server";
+          rejection.detail = "The server sent confusing data for the list of tournaments.";
+          return $q.reject(rejection);
         }
       }, ServiceHelpers.handleErrorIn($q, "/api/tournaments")).finally(function afterResolution() {
         self._tournamentListPromise = null;
@@ -158,11 +158,11 @@
               "Malformed response from " + path + " (" + response.status + " " + response.statusText + "):\n"
               + ex + "\n\n"
               + JSON.stringify(response.data));
-          return $q.reject({
-            redirectToLogin: false,
-            error: "Invalid response from server",
-            detail: "The tournament... wasn't."
-          });
+          var rejection = new tichu.RpcError();
+          rejection.redirectToLogin = false;
+          rejection.error = "Invalid response from server";
+          rejection.detail = "The server sent confusing data for the tournament.";
+          return $q.reject(rejection);
         }
       }, ServiceHelpers.handleErrorIn($q, path)).finally(function afterResolution() {
         self._tournamentPromises.remove(id);

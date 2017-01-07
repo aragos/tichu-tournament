@@ -312,3 +312,25 @@ tichu.Movement = function Movement(tournamentId, pair) {
    */
   this.rounds = [];
 };
+
+/**
+ * Model for errors discovered in the process of contacting the server.
+ * @constructor
+ */
+tichu.RpcError = function RpcError() {
+  /**
+   * Whether the error results from the user not being logged in.
+   * @type {boolean}
+   */
+  this.redirectToLogin = false;
+  /**
+   * The main error text, containing a concise user-readable description of the problem.
+   * @type {string}
+   */
+  this.error = "Server Error";
+  /**
+   * The error detail text, containing a more detailed user-readable description of the problem.
+   * @type {string}
+   */
+  this.error = "An unexpected error occurred.";
+};

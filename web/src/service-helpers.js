@@ -35,12 +35,12 @@ ServiceHelpers.assertType = function assertType(context, value, type, allowNullO
  * @param {angular.$q} $q The promise service to reject with.
  * @param {string} path The API path that was called and failed.
  * @param {boolean=} accept403 Whether 403 should be treated as needing redirect to login.
- * @returns {Function} A response handler.
+ * @returns {function(response:*):angular.$q.Promise<tichu.RpcError>} A response handler.
  */
 ServiceHelpers.handleErrorIn = function handleErrorIn($q, path, accept403) {
   accept403 = accept403 || false;
   return function onError(response) {
-    var rejection = {};
+    var rejection = new tichu.RpcError();
     if (typeof response.status === 'number') {
       console.log(
           "Got error calling " + path + " (" + response.status + " " + response.statusText + "):\n"
@@ -57,7 +57,7 @@ ServiceHelpers.handleErrorIn = function handleErrorIn($q, path, accept403) {
       console.log(response);
       rejection.redirectToLogin = false;
       rejection.error = "Client Error";
-      rejection.detail = "Something went wrong when talking to the server...";
+      rejection.detail = "Something unexpectedly went wrong when talking to the server...";
     }
     return $q.reject(rejection);
   }
