@@ -6,10 +6,11 @@
    * @constructor
    * @name TichuCodeService
    * @param {angular.$http} $http
+   * @param {angular.$log} $log
    * @param {angular.$q} $q
    * @ngInject
    */
-  function TichuCodeService($http, $q) {
+  function TichuCodeService($http, $log, $q) {
     /**
      * The HTTP request service injected at creation.
      *
@@ -17,6 +18,14 @@
      * @private
      */
     this._$http = $http;
+
+    /**
+     * The log service injected at creation.
+     *
+     * @type {angular.$log}
+     * @private
+     */
+    this._$log = $log;
 
     /**
      * The Q promise service injected at creation.
@@ -35,6 +44,7 @@
    */
   TichuCodeService.prototype.getMovementForCode = function getMovementForCode(pairCode) {
     var $q = this._$q;
+    var $log = this._$log;
     var self = this;
     var path = "/api/tournaments/pairno/" + encodeURIComponent(pairCode);
     return this._$http({
@@ -61,7 +71,7 @@
           return $q.reject(tooManyTournaments);
         }
       } catch (ex) {
-        console.log(
+        $log.error(
             "Malformed response from " + path + " (" + response.status + " " + response.statusText + "):\n"
             + ex + "\n\n"
             + JSON.stringify(response.data));
@@ -71,7 +81,7 @@
         invalidData.detail = "The server sent confusing data about the pair code.";
         return $q.reject(invalidData);
       }
-    }, ServiceHelpers.handleErrorIn($q, path));
+    }, ServiceHelpers.handleErrorIn($q, $log, path));
   };
 
   /**

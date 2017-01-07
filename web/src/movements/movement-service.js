@@ -7,12 +7,13 @@
    * @name TichuMovementService
    * @param {angular.$http} $http
    * @param {angular.$q} $q
+   * @param {angular.$log} $log
    * @param {angular.$cacheFactory} $cacheFactory
    * @param {TichuTournamentStore} TichuTournamentStore
    * @param {TichuMovementStore} TichuMovementStore
    * @ngInject
    */
-  function TichuMovementService($http, $q, $cacheFactory, TichuTournamentStore, TichuMovementStore) {
+  function TichuMovementService($http, $q, $log, $cacheFactory, TichuTournamentStore, TichuMovementStore) {
     /**
      * The HTTP request service injected at creation.
      *
@@ -28,6 +29,14 @@
      * @private
      */
     this._$q = $q;
+
+    /**
+     * The log service injected at creation.
+     *
+     * @private
+     * @type {angular.$log}
+     */
+    this._$log = $log;
 
     /**
      * The cache of Tournament-related objects.
@@ -64,6 +73,7 @@
    */
   TichuMovementService.prototype.getMovement = function getMovement(tournamentId, pairNo, pairCode) {
     var $q = this._$q;
+    var $log = this._$log;
     if (this._movementStore.hasMovement(tournamentId, pairNo)) {
       return $q.when(this._movementStore.getOrCreateMovement(tournamentId, pairNo));
     }
@@ -82,7 +92,7 @@
         try {
           return self._parseMovement(tournamentId, pairNo, response.data);
         } catch (ex) {
-          console.log(
+          $log.error(
               "Malformed response from " + path + " (" + response.status + " " + response.statusText + "):\n"
               + ex + "\n\n"
               + JSON.stringify(response.data));
@@ -92,7 +102,7 @@
           rejection.detail = "The server sent confusing data for the movement.";
           return $q.reject(rejection);
         }
-      }, ServiceHelpers.handleErrorIn($q, path, true)).finally(function afterResolution() {
+      }, ServiceHelpers.handleErrorIn($q, $log, path, true)).finally(function afterResolution() {
         self._movementPromiseCache.remove(movementPromiseCacheKey);
       }));
     }
