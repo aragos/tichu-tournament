@@ -17,17 +17,6 @@ indexes:
     direction: desc
 
 - kind: PlayerPair
-  properties:
-  - name: id
-  - name: pair_no
-
-- kind: PlayerPair
-  ancestor: yes
-  properties:
-  - name: id
-  - name: pair_no
-
-- kind: PlayerPair
   ancestor: yes
   properties:
   - name: pair_no
