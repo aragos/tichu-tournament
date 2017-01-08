@@ -62,8 +62,14 @@ class XlxsResultHandler(webapp2.RequestHandler):
     for player_pair in PlayerPair.query(ancestor=tourney.key).fetch():
       if player_pair.players:
         player_list = player_pair.player_list()
-        name_list[player_pair.pair_no - 1] = (player_list[0].get("name"),
-                                              player_list[1].get("name"))
+        if not player_list:
+          continue
+        elif len(player_list) == 1:
+          name_list[player_pair.pair_no - 1] = (player_list[0].get("name"),
+                                                None)
+        else:
+          name_list[player_pair.pair_no - 1] = (player_list[0].get("name"),
+                                                player_list[1].get("name"))
       else:
         name_list[player_pair.pair_no - 1] = (None, None)
     return name_list
