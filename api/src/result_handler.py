@@ -42,7 +42,8 @@ class XlxsResultHandler(webapp2.RequestHandler):
         users.get_current_user(), tourney):
       return
     boards = ReadJSONInput(tourney.GetScoredHandList())
-    summaries = Calculate(boards, GetMaxRounds(boards))
+    max_rounds = GetMaxRounds(boards)
+    summaries = Calculate(boards, max_rounds)
     mp_summaries = summaries
     ap_summaries = summaries
     boards.sort(key=lambda bs : bs._board_no, reverse = False)
