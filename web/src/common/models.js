@@ -229,9 +229,23 @@ tichu.HandScore = function HandScore() {
 /**
  * Structure containing information about a single hand, including its score (if any).
  * @constructor
+ * @param {number} northSouthPair The north/south pair playing this hand.
+ * @param {number} eastWestPair The east/west pair playing this hand.
  * @param {number} handNo The number of the hand.
  */
-tichu.Hand = function Hand(handNo) {
+tichu.Hand = function Hand(northSouthPair, eastWestPair, handNo) {
+  /**
+   * The north/south pair playing this hand.
+   * @type {number}
+   */
+  this.northSouthPair = northSouthPair;
+
+  /**
+   * The east/west pair playing this hand.
+   * @type {number}
+   */
+  this.eastWestPair = eastWestPair;
+
   /**
    * The hand number, indicating the board that will be played.
    * @type {number}

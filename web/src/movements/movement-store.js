@@ -101,7 +101,7 @@
     var cacheKey = this._getHandCacheKey(id, nsPair, ewPair, handNo);
     var hand = this._handCache.get(cacheKey);
     if (!hand) {
-      hand = new tichu.Hand(handNo);
+      hand = new tichu.Hand(nsPair, ewPair, handNo);
       this._handCache.put(cacheKey, hand);
     }
     return hand;

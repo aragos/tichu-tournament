@@ -1,0 +1,142 @@
+<md-dialog>
+    <form name="scoreForm" ng-cloak>
+        <md-toolbar>
+            <div class="md-toolbar-tools">
+                <md-button class="md-icon-button"
+                           ng-if="!scoreDetailController.usedPairCode"
+                           ng-click="scoreDetailController.cancel()">
+                    <md-icon>history</md-icon>
+                </md-button>
+                <h2>
+                    Board #{{ scoreDetailController.hand.handNo }}
+                </h2>
+                <span flex></span>
+                <md-button class="md-icon-button"
+                           ng-if="!scoreDetailController.usedPairCode && !scoreDetailController.deleting && scoreDetailController.hand.score"
+                           ng-click="scoreDetailController.deleting = true">
+                    <md-icon>delete</md-icon>
+                </md-button>
+                <md-button class="md-icon-button" ng-click="scoreDetailController.cancel()">
+                    <md-icon>close</md-icon>
+                </md-button>
+            </div>
+        </md-toolbar>
+
+        <md-dialog-content>
+            <div class="md-dialog-content"
+                 ng-if="scoreDetailController.deleting"
+                 layout="column"
+                 layout-align="center center"
+                 flex>
+                <span>This hand's score will be deleted.</span>
+            </div>
+            <div class="md-dialog-content" layout="column" ng-if="!scoreDetailController.deleting">
+                <div layout="row">
+                    <div layout="column" style="width:10em;" flex="50" flex-order="{{ scoreDetailController.position === 'E' ? 2 : 1 }}">
+                        <h3 style="text-align: center;margin-top: 0">
+                            Pair #{{scoreDetailController.hand.northSouthPair}}
+                        </h3>
+                        <md-input-container class="md-block">
+                            <label for="northSouthScore">North/South</label>
+                            <input id="northSouthScore"
+                                   type="number"
+                                   name="northSouthScore"
+                                   ng-model="scoreDetailController.score.northSouthScore"
+                                   min="-425"
+                                   max="400"
+                                   step="5"
+                                   md-no-asterisk
+                                   required />
+                            <div ng-messages="scoreForm.northSouthScore.$error">
+                                <div ng-message="required">Enter a score.</div>
+                                <div ng-message="min">Too low!</div>
+                                <div ng-message="max">Too high!</div>
+                                <div ng-message="step">Not divisible by 5!</div>
+                            </div>
+                        </md-input-container>
+                        <md-input-container>
+                            <label for="northCall">North</label>
+                            <md-select id="northCall" ng-model="scoreDetailController.score.calls.north">
+                                <md-option value="" md-option-empty>No call</md-option>
+                                <md-option value="T">Tichu</md-option>
+                                <md-option value="GT">Grand Tichu</md-option>
+                            </md-select>
+                        </md-input-container>
+                        <md-input-container>
+                            <label for="southCall">South</label>
+                            <md-select id="southCall" ng-model="scoreDetailController.score.calls.south">
+                                <md-option value="" md-option-empty>No call</md-option>
+                                <md-option value="T">Tichu</md-option>
+                                <md-option value="GT">Grand Tichu</md-option>
+                            </md-select>
+                        </md-input-container>
+                    </div>
+                    <div layout="column" style="width:10em;" flex="50" flex-order="{{ scoreDetailController.position === 'E' ? 1 : 2 }}">
+                        <h3 style="text-align: center; margin-top: 0;">
+                            Pair #{{scoreDetailController.hand.eastWestPair}}
+                        </h3>
+                        <md-input-container class="md-block">
+                            <label for="eastWestScore">East/West</label>
+                            <input id="eastWestScore"
+                                   type="number"
+                                   name="eastWestScore"
+                                   ng-model="scoreDetailController.score.eastWestScore"
+                                   min="-425"
+                                   max="400"
+                                   step="5"
+                                   md-no-asterisk
+                                   required/>
+                            <div ng-messages="scoreForm.eastWestScore.$error">
+                                <div ng-message="required">Enter a score.</div>
+                                <div ng-message="min">Too low!</div>
+                                <div ng-message="max">Too high!</div>
+                                <div ng-message="step">Not divisible by 5!</div>
+                            </div>
+                        </md-input-container>
+                        <md-input-container>
+                            <label for="eastCall">East</label>
+                            <md-select id="eastCall" ng-model="scoreDetailController.score.calls.east">
+                                <md-option value="" md-option-empty>No call</md-option>
+                                <md-option value="T">Tichu</md-option>
+                                <md-option value="GT">Grand Tichu</md-option>
+                            </md-select>
+                        </md-input-container>
+                        <md-input-container>
+                            <label for="westCall">West</label>
+                            <md-select id="westCall" ng-model="scoreDetailController.score.calls.west">
+                                <md-option value="" md-option-empty>No call</md-option>
+                                <md-option value="T">Tichu</md-option>
+                                <md-option value="GT">Grand Tichu</md-option>
+                            </md-select>
+                        </md-input-container>
+                    </div>
+                </div>
+                <md-input-container class="md-block" flex>
+                    <label for="scoringNotes">Notes</label>
+                    <textarea id="scoringNotes"
+                              name="scoringNotes"
+                              ng-model="scoreDetailController.score.notes">
+                    </textarea>
+                </md-input-container>
+            </div>
+        </md-dialog-content>
+
+        <md-dialog-actions layout="row">
+            <span flex></span>
+            <md-button ng-click="scoreDetailController.deleting ? scoreDetailController.deleting = false : scoreDetailController.cancel()">
+                Cancel
+            </md-button>
+            <md-button ng-class="{'md-warn': scoreDetailController.deleting}"
+                       ng-click="scoreDetailController.save()"
+                       ng-disabled="scoreForm.$invalid || (!scoreDetailController.deleting && scoreDetailController.hand.score && scoreForm.$pristine)">
+                <span ng-if="!scoreDetailController.deleting && scoreDetailController.hand.score">
+                    Update Score
+                </span>
+                <span ng-if="!scoreDetailController.deleting && !scoreDetailController.hand.score">
+                    Record Score
+                </span>
+                <span ng-if="scoreDetailController.deleting">Delete Score</span>
+            </md-button>
+        </md-dialog-actions>
+    </form>
+</md-dialog>
