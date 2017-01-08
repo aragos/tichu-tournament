@@ -227,6 +227,23 @@ tichu.HandScore = function HandScore() {
 };
 
 /**
+ * Returns an object representing this HandScore for purposes of JSON serialization.
+ * @returns {Object}
+ */
+tichu.HandScore.prototype.toJSON = function toJSON() {
+  var calls = {};
+  this.calls.forEach(function (call) {
+    calls[call.side] = call.call;
+  });
+  return {
+    "ns_score": this.northSouthScore,
+    "ew_score": this.eastWestScore,
+    "notes": this.notes,
+    "calls": calls
+  }
+};
+
+/**
  * Structure containing information about a single hand, including its score (if any).
  * @constructor
  * @param {number} northSouthPair The north/south pair playing this hand.

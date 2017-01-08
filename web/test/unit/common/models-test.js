@@ -75,4 +75,41 @@ describe("models", function() {
       });
     });
   });
+  describe("HandScore", function() {
+    describe("toJson", function() {
+      function getJSON(value) {
+        return JSON.parse(JSON.stringify(value));
+      }
+
+      it("forwards the northSouthScore to ns_score", function() {
+        var score = new tichu.HandScore();
+        score.northSouthScore = 100;
+        expect(getJSON(score)["ns_score"]).toBe(100);
+      });
+
+      it("forwards the eastWestScore to ew_score", function() {
+        var score = new tichu.HandScore();
+        score.eastWestScore = 100;
+        expect(getJSON(score)["ew_score"]).toBe(100);
+      });
+
+      it("forwards the notes to notes", function() {
+        var score = new tichu.HandScore();
+        score.notes = "something is very wrong here";
+        expect(getJSON(score)["notes"]).toBe("something is very wrong here");
+      });
+
+      it("transforms an empty calls array into an empty calls object", function() {
+        var score = new tichu.HandScore();
+        expect(getJSON(score)["calls"]).toEqual({});
+      });
+
+      it("transforms elements in the call array into fields on the calls object", function() {
+        var score = new tichu.HandScore();
+        score.calls.push({side: tichu.Position.NORTH, call: tichu.Call.GRAND_TICHU});
+        score.calls.push({side: tichu.Position.EAST, call: tichu.Call.TICHU});
+        expect(getJSON(score)["calls"]).toEqual({"north": "GT", "east": "T"});
+      });
+    });
+  });
 });

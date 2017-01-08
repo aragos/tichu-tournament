@@ -128,15 +128,16 @@
       controllerAs: 'scoreDetailController',
       templateUrl: 'src/movements/score-detail.html',
       locals: {
-        hand: hand,
-        usedPairCode: this.playerCode !== null,
-        position: round.position
+        loadResults: {
+          hand: hand,
+          pairCode: this.playerCode,
+          position: round.position,
+          tournamentId: this.movement.tournamentId.id
+        }
       },
       clickOutsideToClose: false,
       escapeToClose: false,
       fullscreen: true
-    }).then(function(result) {
-      hand.score = result;
     }).catch(function(rejection) {
       if (!rejection) {
         /* The dialog was canceled or auto-hidden. That's okay. */

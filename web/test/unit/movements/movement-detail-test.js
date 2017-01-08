@@ -123,12 +123,13 @@ describe("tichu-movement-detail module", function() {
 
       expect($mdDialog.show).toHaveBeenCalled();
       var settings = $mdDialog.show.calls.mostRecent().args[0];
-      expect(settings.locals.position).toBe("E");
-      expect(settings.locals.hand).toBe(hand);
-      expect(settings.locals.usedPairCode).toBe(false);
+      expect(settings.locals.loadResults.tournamentId).toBe("123456789");
+      expect(settings.locals.loadResults.position).toBe(tichu.PairPosition.EAST_WEST);
+      expect(settings.locals.loadResults.hand).toBe(hand);
+      expect(settings.locals.loadResults.pairCode).toBe(null);
     });
 
-    it("sends usedPairCode with editHand if a pair code was set", function() {
+    it("sends pairCode with editHand if a pair code was set", function() {
       var tournamentHeader = new tichu.TournamentHeader("123456789");
       tournamentHeader.name = "my tournament";
       var pair = new tichu.TournamentPair(7);
@@ -145,8 +146,7 @@ describe("tichu-movement-detail module", function() {
 
       expect($mdDialog.show).toHaveBeenCalled();
       var settings = $mdDialog.show.calls.mostRecent().args[0];
-      expect(settings.locals.hand).toBe(hand);
-      expect(settings.locals.usedPairCode).toBe(true);
+      expect(settings.locals.loadResults.pairCode).toBe('APER');
     });
 
     it("displays a dialog in case of error", function() {

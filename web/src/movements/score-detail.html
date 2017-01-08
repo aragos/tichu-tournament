@@ -1,9 +1,41 @@
 <md-dialog>
-    <form name="scoreForm" ng-cloak>
+    <md-dialog-content ng-if="scoreDetailController.saveError">
+        <div class="md-dialog-content">
+            <h3>{{ scoreDetailController.saveError.error }}</h3>
+            <p>{{ scoreDetailController.saveError.detail }}</p>
+        </div>
+    </md-dialog-content>
+    <md-dialog-actions layout="row" layout-align="end" ng-if="scoreDetailController.saveError">
+        <md-button ng-click="scoreDetailController.cancel()">
+            Never mind
+        </md-button>
+        <md-button ng-click="scoreDetailController.login()"
+                   ng-if="scoreDetailController.saveError.redirectToLogin && !scoreDetailController.pairCode">
+            Log me in
+        </md-button>
+        <md-button ng-click="scoreDetailController.goHome()"
+                   ng-if="scoreDetailController.saveError.redirectToLogin && scoreDetailController.pairCode">
+            Try a different code
+        </md-button>
+        <md-button ng-click="scoreDetailController.tryAgain()"
+                   ng-if="!scoreDetailController.saveError.redirectToLogin">
+            Try again
+        </md-button>
+    </md-dialog-actions>
+    <md-dialog-content ng-if="scoreDetailController.saving">
+        <div class="md-dialog-content"
+             layout="column"
+             layout-align="space-around center">
+            <h3 ng-if="!scoreDetailController.deleting">Saving score...</h3>
+            <h3 ng-if="scoreDetailController.deleting">Deleting score...</h3>
+            <md-progress-circular flex></md-progress-circular>
+        </div>
+    </md-dialog-content>
+    <form name="scoreForm" ng-if="!scoreDetailController.saving && !scoreDetailController.saveError">
         <md-toolbar>
             <div class="md-toolbar-tools">
                 <md-button class="md-icon-button"
-                           ng-if="!scoreDetailController.usedPairCode"
+                           ng-if="!scoreDetailController.pairCode"
                            ng-click="scoreDetailController.cancel()">
                     <md-icon>history</md-icon>
                 </md-button>
@@ -12,7 +44,7 @@
                 </h2>
                 <span flex></span>
                 <md-button class="md-icon-button"
-                           ng-if="!scoreDetailController.usedPairCode && !scoreDetailController.deleting && scoreDetailController.hand.score"
+                           ng-if="!scoreDetailController.pairCode && !scoreDetailController.deleting && scoreDetailController.hand.score"
                            ng-click="scoreDetailController.deleting = true">
                     <md-icon>delete</md-icon>
                 </md-button>
@@ -121,8 +153,7 @@
             </div>
         </md-dialog-content>
 
-        <md-dialog-actions layout="row">
-            <span flex></span>
+        <md-dialog-actions layout="row" layout-align="end center">
             <md-button ng-click="scoreDetailController.deleting ? scoreDetailController.deleting = false : scoreDetailController.cancel()">
                 Cancel
             </md-button>
@@ -133,7 +164,7 @@
                     Update Score
                 </span>
                 <span ng-if="!scoreDetailController.deleting && !scoreDetailController.hand.score">
-                    Record Score
+                    Submit Score
                 </span>
                 <span ng-if="scoreDetailController.deleting">Delete Score</span>
             </md-button>
