@@ -40,13 +40,13 @@
                                 {{hand.score | tichuMovementGetOpponentsScore:round.position}}
                             </p>
                             <p ng-if="!hand.score">Click to score hand</p>
-                            <p ng-if="hand.score && hand.score.calls">
+                            <p ng-if="hand.score && hand.score.calls.length">
                                 <span ng-repeat="call in hand.score.calls">
                                     {{ call | tichuMovementFormatCall}}
                                     <span ng-if="!$last"> / </span>
                                 </span>
                             </p>
-                            <p ng-if="hand.score && !hand.score.calls">
+                            <p ng-if="hand.score && !hand.score.calls.length">
                                 No calls
                             </p>
                         </div>
