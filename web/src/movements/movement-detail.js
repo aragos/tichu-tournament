@@ -6,13 +6,14 @@
    * @constructor
    * @param {!angular.Scope} $scope
    * @param {$mdDialog} $mdDialog
+   * @param {$log} $log
    * @param {angular.$window} $window
    * @param {angular.$location} $location
    * @param {$route} $route
-   * @param {!{pairCode: ?string, failure: ({redirectToLogin: boolean, error: string, detail: string}|undefined), movement: (tichu.Movement|undefined)}} loadResults
+   * @param {!{pairCode: ?string, failure: (tichu.RpcError|undefined), movement: (tichu.Movement|undefined)}} loadResults
    * @ngInject
    */
-  function MovementDetailController($scope, $mdDialog, $window, $location, $route, loadResults) {
+  function MovementDetailController($scope, $mdDialog, $log, $window, $location, $route, loadResults) {
     $scope.appController.setPageHeader({
       header: loadResults.failure
           ? "Movement Error"
@@ -38,12 +39,34 @@
 
     /**
      * The error experienced while loading, if any.
-     * @type {{redirectToLogin: boolean, error: string, detail: string}}
+     * @type {tichu.RpcError}
      * @export
      */
     this.failure = loadResults.failure;
 
+    /**
+     * The dialog service injected at creation.
+     * @type {$mdDialog}
+     * @private
+     */
+    this._$mdDialog = $mdDialog;
+
+    /**
+     * The logging service injected at creation.
+     * @type {$log}
+     * @private
+     */
+    this._$log = $log;
+
+    /**
+     * Whether a dialog is currently visible.
+     * @type {boolean}
+     * @private
+     */
+    this._showingDialog = false;
+
     if (this.failure) {
+      var self = this;
       var hasPlayerCode = !!this.playerCode;
       var redirectToLogin = this.failure.redirectToLogin;
       var dialog = $mdDialog.confirm()
@@ -77,6 +100,8 @@
         if (!autoHidden) {
           $location.url("/home");
         }
+      }).finally(function () {
+        self._showingDialog = false;
       });
 
       $scope.$on("$destroy", function () {
@@ -84,6 +109,45 @@
       });
     }
   }
+
+  /**
+   * Launches a dialog to edit the given hand.
+   * @param {tichu.MovementRound} round
+   * @param {tichu.Hand} hand
+   */
+  MovementDetailController.prototype.editHand = function editHand(round, hand) {
+    if (this._showingDialog) {
+      return;
+    }
+    this._showingDialog = true;
+    var $mdDialog = this._$mdDialog;
+    var self = this;
+    var $q = this._$q;
+    $mdDialog.show({
+      controller: 'ScoreDetailController',
+      controllerAs: 'scoreDetailController',
+      templateUrl: 'src/movements/score-detail.html',
+      locals: {
+        loadResults: {
+          hand: hand,
+          pairCode: this.playerCode,
+          position: round.position,
+          tournamentId: this.movement.tournamentId.id
+        }
+      },
+      clickOutsideToClose: false,
+      escapeToClose: false,
+      fullscreen: true
+    }).catch(function(rejection) {
+      if (!rejection) {
+        /* The dialog was canceled or auto-hidden. That's okay. */
+        return;
+      }
+      $log.error("Something went wrong while showing the score detail: " + rejection);
+    }).finally(function() {
+      self._showingDialog = false;
+    })
+  };
 
   /**
    * Formats the given call into a string.
@@ -130,7 +194,7 @@
    * @param {string} tournamentId
    * @param {number} pairNo
    * @param {?string=} playerCode
-   * @returns {angular.$q.Promise<{pairCode: ?string, failure: ({redirectToLogin: boolean, error: string, detail: string}|undefined), movement: (tichu.Movement|undefined)}>}
+   * @returns {angular.$q.Promise<{pairCode: ?string, failure: (tichu.RpcError|undefined), movement: (tichu.Movement|undefined)}>}
    */
   function loadMovement(movementService, tournamentId, pairNo, playerCode) {
     return movementService.getMovement(tournamentId, pairNo, playerCode).then(function(movement) {
@@ -170,7 +234,8 @@
         });
   }
 
-  angular.module("tichu-movement-detail", ["ng", "ngRoute", "ngMaterial", "tichu-movement-service"])
+  angular.module("tichu-movement-detail",
+          ["ng", "ngRoute", "ngMaterial", "tichu-movement-service", "tichu-score-detail"])
       .controller("MovementDetailController", MovementDetailController)
       .config(mapRoute)
       .filter("tichuMovementFormatCall", function() {

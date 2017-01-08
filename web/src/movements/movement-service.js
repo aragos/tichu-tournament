@@ -7,12 +7,13 @@
    * @name TichuMovementService
    * @param {angular.$http} $http
    * @param {angular.$q} $q
+   * @param {angular.$log} $log
    * @param {angular.$cacheFactory} $cacheFactory
    * @param {TichuTournamentStore} TichuTournamentStore
    * @param {TichuMovementStore} TichuMovementStore
    * @ngInject
    */
-  function TichuMovementService($http, $q, $cacheFactory, TichuTournamentStore, TichuMovementStore) {
+  function TichuMovementService($http, $q, $log, $cacheFactory, TichuTournamentStore, TichuMovementStore) {
     /**
      * The HTTP request service injected at creation.
      *
@@ -28,6 +29,14 @@
      * @private
      */
     this._$q = $q;
+
+    /**
+     * The log service injected at creation.
+     *
+     * @private
+     * @type {angular.$log}
+     */
+    this._$log = $log;
 
     /**
      * The cache of Tournament-related objects.
@@ -64,6 +73,7 @@
    */
   TichuMovementService.prototype.getMovement = function getMovement(tournamentId, pairNo, pairCode) {
     var $q = this._$q;
+    var $log = this._$log;
     if (this._movementStore.hasMovement(tournamentId, pairNo)) {
       return $q.when(this._movementStore.getOrCreateMovement(tournamentId, pairNo));
     }
@@ -82,21 +92,73 @@
         try {
           return self._parseMovement(tournamentId, pairNo, response.data);
         } catch (ex) {
-          console.log(
+          $log.error(
               "Malformed response from " + path + " (" + response.status + " " + response.statusText + "):\n"
               + ex + "\n\n"
               + JSON.stringify(response.data));
-          return $q.reject({
-            redirectToLogin: false,
-            error: "Invalid response from server",
-            detail: "The movement... wasn't."
-          });
+          var rejection = new tichu.RpcError();
+          rejection.redirectToLogin = false;
+          rejection.error = "Invalid response from server";
+          rejection.detail = "The server sent confusing data for the movement.";
+          return $q.reject(rejection);
         }
-      }, ServiceHelpers.handleErrorIn($q, path, true)).finally(function afterResolution() {
+      }, ServiceHelpers.handleErrorIn($q, $log, path, true)).finally(function afterResolution() {
         self._movementPromiseCache.remove(movementPromiseCacheKey);
       }));
     }
     return this._movementPromiseCache.get(movementPromiseCacheKey);
+  };
+
+  /**
+   * Records or updates a score for the given hand.
+   * @param {string} tournamentId The tournament ID for the hand being saved.
+   * @param {number} nsPair The north-south pair who played the hand being saved.
+   * @param {number} ewPair The east-west pair who played the hand being saved.
+   * @param {number} handNo The board number of the hand being saved.
+   * @param {tichu.HandScore} score The score to be sent to the server.
+   * @param {string=} pairCode The pair code used for authentication. (optional).
+   */
+  TichuMovementService.prototype.recordScore = function recordScore(tournamentId, nsPair, ewPair, handNo, score, pairCode) {
+    var $q = this._$q;
+    var $log = this._$log;
+    var path = "/api/tournaments/" + encodeURIComponent(tournamentId)
+        + "/hands/" + encodeURIComponent(handNo.toString())
+        + "/" + encodeURIComponent(nsPair.toString())
+        + "/" + encodeURIComponent(ewPair.toString());
+    var self = this;
+    return this._$http({
+      method: 'PUT',
+      url: path,
+      data: score,
+      headers: pairCode ? {'X-tichu-pair-code': pairCode} : {}
+    }).then(function onSuccess() {
+      self._movementStore.getOrCreateHand(tournamentId, nsPair, ewPair, handNo).score = score;
+    }, ServiceHelpers.handleErrorIn($q, $log, path, true));
+  };
+
+  /**
+   * Deletes the score for the given hand.
+   * @param {string} tournamentId The tournament ID for the hand being saved.
+   * @param {number} nsPair The north-south pair who played the hand being saved.
+   * @param {number} ewPair The east-west pair who played the hand being saved.
+   * @param {number} handNo The board number of the hand being saved.
+   * @param {string=} pairCode The pair code used for authentication. (optional).
+   */
+  TichuMovementService.prototype.clearScore = function clearScore(tournamentId, nsPair, ewPair, handNo, pairCode) {
+    var $q = this._$q;
+    var $log = this._$log;
+    var path = "/api/tournaments/" + encodeURIComponent(tournamentId)
+        + "/hands/" + encodeURIComponent(handNo.toString())
+        + "/" + encodeURIComponent(nsPair.toString())
+        + "/" + encodeURIComponent(ewPair.toString());
+    var self = this;
+    return this._$http({
+      method: 'DELETE',
+      url: path,
+      headers: pairCode ? {'X-tichu-pair-code': pairCode} : {}
+    }).then(function onSuccess() {
+      self._movementStore.getOrCreateHand(tournamentId, nsPair, ewPair, handNo).score = null;
+    }, ServiceHelpers.handleErrorIn($q, $log, path, true));
   };
 
   /**

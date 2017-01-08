@@ -58,14 +58,14 @@ describe("movement-service module", function() {
       });
 
       it("does not send the X-tichu-pair-code header if only two parameters are given", function() {
-        $httpBackend.expectGET('/api/tournaments/123456/movement/10', undefined, function(headers) {
+        $httpBackend.expectGET('/api/tournaments/123456/movement/10', function(headers) {
           return !headers.hasOwnProperty('X-tichu-pair-code');
         }).respond(200, "This doesn't have to parse");
         runPromise(service.getMovement("123456", 10), {flushHttp: true});
       });
 
       it("sends the X-tichu-pair-code header iff a third parameter is supplied", function() {
-        $httpBackend.expectGET('/api/tournaments/8675309/movement/3', undefined, function(headers) {
+        $httpBackend.expectGET('/api/tournaments/8675309/movement/3', function(headers) {
           return headers['X-tichu-pair-code'] === "PARE";
         }).respond(200, "Whatever boo");
         runPromise(service.getMovement("8675309", 3, "PARE"), {flushHttp: true});
@@ -192,6 +192,16 @@ describe("movement-service module", function() {
             .respond(401, {
               "error": "log yo butt in",
               "detail": "seriously don't be ridic"
+            });
+        var result = runPromise(service.getMovement("2348", 7), {flushHttp: true, expectFailure: true});
+        expect(result.redirectToLogin).toBe(true);
+      });
+
+      it("sets redirectToLogin on the rejection for a 403", function() {
+        $httpBackend.expectGET('/api/tournaments/2348/movement/7')
+            .respond(403, {
+              "error": "nice try",
+              "detail": "I know that's not the right code"
             });
         var result = runPromise(service.getMovement("2348", 7), {flushHttp: true, expectFailure: true});
         expect(result.redirectToLogin).toBe(true);
@@ -373,6 +383,287 @@ describe("movement-service module", function() {
           expect(movement.pair.players[0].name).toBe("definitely not the same player");
           expect(movement.pair.players[0].email).toBe("stillnottelling@duh.example");
         });
+      });
+    });
+
+    describe("recordScore", function() {
+      it("uses the first four parameters as tournament ID, pair numbers, and board", function() {
+        $httpBackend.expectPUT('/api/tournaments/999000/hands/6/2/4')
+            .respond(200, "");
+        runPromise(service.recordScore("999000", 2, 4, 6, new tichu.HandScore()), {flushHttp: true});
+      });
+
+      it("does not send the X-tichu-pair-code header if only five parameters are given", function() {
+        $httpBackend.expectPUT('/api/tournaments/123456/hands/1/7/3', undefined, function(headers) {
+          return !headers.hasOwnProperty('X-tichu-pair-code');
+        }).respond(200, "");
+        runPromise(service.recordScore("123456", 7, 3, 1, new tichu.HandScore()), {flushHttp: true});
+      });
+
+      it("sends the X-tichu-pair-code header iff a sixth parameter is supplied", function() {
+        $httpBackend.expectPUT('/api/tournaments/8675309/hands/8/3/6', undefined, function(headers) {
+          return headers['X-tichu-pair-code'] === "PARE";
+        }).respond(200, "");
+        runPromise(
+            service.recordScore("8675309", 3, 6, 8, new tichu.HandScore(), "PARE"),
+            {flushHttp: true});
+      });
+
+      it("serializes the HandScore to JSON as the request body", function() {
+        $httpBackend.expectPUT('/api/tournaments/1337/hands/2/2/2', {
+          "calls": {
+            "north": "T",
+            "east": "GT"
+          },
+          "ns_score": 150,
+          "ew_score": -150,
+          "notes": "hahahahahaha what a fool"
+        }).respond(200, "");
+        var score = new tichu.HandScore();
+        score.calls.push({side: tichu.Position.NORTH, call: tichu.Call.TICHU});
+        score.calls.push({side: tichu.Position.EAST, call: tichu.Call.GRAND_TICHU});
+        score.northSouthScore = 150;
+        score.eastWestScore = -150;
+        score.notes = "hahahahahaha what a fool";
+        runPromise(
+            service.recordScore("1337", 2, 2, 2, score),
+            {flushHttp: true});
+      });
+
+      it("resolves the promise on success", function() {
+        $httpBackend.expectPUT('/api/tournaments/123456/hands/6/2/4').respond(200, "");
+        runPromise(
+            service.recordScore("123456", 2, 4, 6, new tichu.HandScore()),
+            {flushHttp: true, expectSuccess: true});
+      });
+
+      it("rejects the promise in case of an error", function() {
+        $httpBackend.expectPUT('/api/tournaments/898989/hands/89/8/9')
+            .respond(500, {
+              "error": "your hand smells",
+              "detail": "and your face smells too"
+            });
+        var result = runPromise(
+            service.recordScore("898989", 8, 9, 89, new tichu.HandScore()),
+            {flushHttp: true, expectFailure: true});
+        expect(result.redirectToLogin).toBe(false);
+        expect(result.error).toBe("your hand smells");
+        expect(result.detail).toBe("and your face smells too");
+      });
+
+      it("sets redirectToLogin on the rejection for a 401", function() {
+        $httpBackend.expectPUT('/api/tournaments/2348/hands/7/7/7')
+            .respond(401, {
+              "error": "log yo butt in",
+              "detail": "seriously don't be ridic"
+            });
+        var result = runPromise(
+            service.recordScore("2348", 7, 7, 7, new tichu.HandScore()),
+            {flushHttp: true, expectFailure: true});
+        expect(result.redirectToLogin).toBe(true);
+      });
+
+      it("sets redirectToLogin on the rejection for a 403", function() {
+        $httpBackend.expectPUT('/api/tournaments/2348/hands/7/7/7')
+            .respond(403, {
+              "error": "log yo butt in",
+              "detail": "seriously don't be ridic"
+            });
+        var result = runPromise(
+            service.recordScore("2348", 7, 7, 7, new tichu.HandScore()),
+            {flushHttp: true, expectFailure: true});
+        expect(result.redirectToLogin).toBe(true);
+      });
+
+      it("sets the score on the shared hand in associated movements to the input on success", function() {
+        $httpBackend.expectGET('/api/tournaments/6969/movement/9')
+            .respond(200, {
+              "name": "a tournament",
+              "players": [],
+              "movement": [{
+                "round": 1,
+                "position": "1E",
+                "opponent": 6,
+                "relay_table": false,
+                "hands": [{"hand_no": 8}]
+              }]
+            });
+
+        var movement = runPromise(
+            service.getMovement("6969", 9),
+            {flushHttp: true, expectSuccess:true});
+        movement.rounds[0].hands[0].score = new tichu.HandScore();
+
+        $httpBackend.expectPUT('/api/tournaments/6969/hands/8/6/9').respond(200, "");
+
+        var handScore = new tichu.HandScore();
+        var result = runPromise(
+            service.recordScore("6969", 6, 9, 8, handScore),
+            {flushHttp: true, expectSuccess: true});
+
+        expect(movement.rounds[0].hands[0].score).toBe(handScore);
+      });
+
+      it("does not set the score on the shared hand in associated movements to the input on failure", function() {
+        $httpBackend.expectGET('/api/tournaments/6969/movement/9')
+            .respond(200, {
+              "name": "a tournament",
+              "players": [],
+              "movement": [{
+                "round": 1,
+                "position": "1N",
+                "opponent": 6,
+                "relay_table": false,
+                "hands": [{"hand_no": 8}]
+              }]
+            });
+
+        var movement = runPromise(
+            service.getMovement("6969", 9),
+            {flushHttp: true, expectSuccess:true});
+        var originalScore = new tichu.HandScore();
+        movement.rounds[0].hands[0].score = originalScore;
+
+        $httpBackend.expectPUT('/api/tournaments/6969/hands/8/6/9').respond(400, {
+          error: "booo",
+          detail: "your hand smells"
+        });
+
+        var handScore = new tichu.HandScore();
+        runPromise(
+            service.recordScore("6969", 6, 9, 8, handScore),
+            {flushHttp: true, expectFailure: true});
+
+        expect(movement.rounds[0].hands[0].score).toBe(originalScore);
+      });
+    });
+
+    describe("clearScore", function() {
+      it("uses the first four parameters as tournament ID, pair numbers, and board", function() {
+        $httpBackend.expectDELETE('/api/tournaments/999000/hands/6/2/4')
+            .respond(200, "");
+        runPromise(service.clearScore("999000", 2, 4, 6), {flushHttp: true});
+      });
+
+      it("does not send the X-tichu-pair-code header if only four parameters are given", function() {
+        $httpBackend.expectDELETE('/api/tournaments/123456/hands/1/7/3', function(headers) {
+          return !headers.hasOwnProperty('X-tichu-pair-code');
+        }).respond(200, "");
+        runPromise(service.clearScore("123456", 7, 3, 1), {flushHttp: true});
+      });
+
+      it("sends the X-tichu-pair-code header iff a fifth parameter is supplied", function() {
+        $httpBackend.expectDELETE('/api/tournaments/8675309/hands/8/3/6', function(headers) {
+          return headers['X-tichu-pair-code'] === "PARE";
+        }).respond(200, "");
+        runPromise(
+            service.clearScore("8675309", 3, 6, 8, "PARE"),
+            {flushHttp: true});
+      });
+
+      it("resolves the promise on success", function() {
+        $httpBackend.expectDELETE('/api/tournaments/123456/hands/6/2/4').respond(200, "");
+        runPromise(
+            service.clearScore("123456", 2, 4, 6),
+            {flushHttp: true, expectSuccess: true});
+      });
+
+      it("rejects the promise in case of an error", function() {
+        $httpBackend.expectDELETE('/api/tournaments/898989/hands/89/8/9')
+            .respond(500, {
+              "error": "your hand smells",
+              "detail": "and your face smells too"
+            });
+        var result = runPromise(
+            service.clearScore("898989", 8, 9, 89),
+            {flushHttp: true, expectFailure: true});
+        expect(result.redirectToLogin).toBe(false);
+        expect(result.error).toBe("your hand smells");
+        expect(result.detail).toBe("and your face smells too");
+      });
+
+      it("sets redirectToLogin on the rejection for a 401", function() {
+        $httpBackend.expectDELETE('/api/tournaments/2348/hands/7/7/7')
+            .respond(401, {
+              "error": "log yo butt in",
+              "detail": "seriously don't be ridic"
+            });
+        var result = runPromise(
+            service.clearScore("2348", 7, 7, 7),
+            {flushHttp: true, expectFailure: true});
+        expect(result.redirectToLogin).toBe(true);
+      });
+
+      it("sets redirectToLogin on the rejection for a 403", function() {
+        $httpBackend.expectDELETE('/api/tournaments/2348/hands/7/7/7')
+            .respond(403, {
+              "error": "log yo butt in",
+              "detail": "seriously don't be ridic"
+            });
+        var result = runPromise(
+            service.clearScore("2348", 7, 7, 7),
+            {flushHttp: true, expectFailure: true});
+        expect(result.redirectToLogin).toBe(true);
+      });
+
+      it("clears the score on the shared hand in associated movements on success", function() {
+        $httpBackend.expectGET('/api/tournaments/6969/movement/9')
+            .respond(200, {
+              "name": "a tournament",
+              "players": [],
+              "movement": [{
+                "round": 1,
+                "position": "1E",
+                "opponent": 6,
+                "relay_table": false,
+                "hands": [{"hand_no": 8}]
+              }]
+            });
+
+        var movement = runPromise(
+            service.getMovement("6969", 9),
+            {flushHttp: true, expectSuccess:true});
+        movement.rounds[0].hands[0].score = new tichu.HandScore();
+
+        $httpBackend.expectDELETE('/api/tournaments/6969/hands/8/6/9').respond(200, "");
+
+        runPromise(
+            service.clearScore("6969", 6, 9, 8),
+            {flushHttp: true, expectSuccess: true});
+
+        expect(movement.rounds[0].hands[0].score).toBeNull();
+      });
+
+      it("does not clear the score on the shared hand in associated movements on failure", function() {
+        $httpBackend.expectGET('/api/tournaments/6969/movement/9')
+            .respond(200, {
+              "name": "a tournament",
+              "players": [],
+              "movement": [{
+                "round": 1,
+                "position": "1N",
+                "opponent": 6,
+                "relay_table": false,
+                "hands": [{"hand_no": 8}]
+              }]
+            });
+
+        var movement = runPromise(
+            service.getMovement("6969", 9),
+            {flushHttp: true, expectSuccess:true});
+        var originalScore = new tichu.HandScore();
+        movement.rounds[0].hands[0].score = originalScore;
+
+        $httpBackend.expectDELETE('/api/tournaments/6969/hands/8/6/9').respond(400, {
+          error: "booo",
+          detail: "your hand smells"
+        });
+
+        runPromise(
+            service.clearScore("6969", 6, 9, 8),
+            {flushHttp: true, expectFailure: true});
+
+        expect(movement.rounds[0].hands[0].score).toBe(originalScore);
       });
     });
   });

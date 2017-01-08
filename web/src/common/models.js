@@ -227,11 +227,42 @@ tichu.HandScore = function HandScore() {
 };
 
 /**
+ * Returns an object representing this HandScore for purposes of JSON serialization.
+ * @returns {Object}
+ */
+tichu.HandScore.prototype.toJSON = function toJSON() {
+  var calls = {};
+  this.calls.forEach(function (call) {
+    calls[call.side] = call.call;
+  });
+  return {
+    "ns_score": this.northSouthScore,
+    "ew_score": this.eastWestScore,
+    "notes": this.notes,
+    "calls": calls
+  }
+};
+
+/**
  * Structure containing information about a single hand, including its score (if any).
  * @constructor
+ * @param {number} northSouthPair The north/south pair playing this hand.
+ * @param {number} eastWestPair The east/west pair playing this hand.
  * @param {number} handNo The number of the hand.
  */
-tichu.Hand = function Hand(handNo) {
+tichu.Hand = function Hand(northSouthPair, eastWestPair, handNo) {
+  /**
+   * The north/south pair playing this hand.
+   * @type {number}
+   */
+  this.northSouthPair = northSouthPair;
+
+  /**
+   * The east/west pair playing this hand.
+   * @type {number}
+   */
+  this.eastWestPair = eastWestPair;
+
   /**
    * The hand number, indicating the board that will be played.
    * @type {number}
@@ -311,4 +342,26 @@ tichu.Movement = function Movement(tournamentId, pair) {
    * @type {tichu.MovementRound[]}
    */
   this.rounds = [];
+};
+
+/**
+ * Model for errors discovered in the process of contacting the server.
+ * @constructor
+ */
+tichu.RpcError = function RpcError() {
+  /**
+   * Whether the error results from the user not being logged in.
+   * @type {boolean}
+   */
+  this.redirectToLogin = false;
+  /**
+   * The main error text, containing a concise user-readable description of the problem.
+   * @type {string}
+   */
+  this.error = "Server Error";
+  /**
+   * The error detail text, containing a more detailed user-readable description of the problem.
+   * @type {string}
+   */
+  this.error = "An unexpected error occurred.";
 };

@@ -9,7 +9,7 @@
    * @param {angular.$window} $window
    * @param {angular.$location} $location
    * @param {$route} $route
-   * @param {{failure: {redirectToLogin: boolean, error: string, detail: string}, tournament: Tournament}} loadResults
+   * @param {!{failure: ?tichu.RpcError, tournament: ?tichu.Tournament}} loadResults
    * @ngInject
    */
   function TournamentDetailController($scope, $mdDialog, $window, $location, $route, loadResults) {
@@ -23,7 +23,7 @@
     /**
      * The tournament being displayed to the user.
      *
-     * @type {!tichu.Tournament}
+     * @type {tichu.Tournament}
      * @export
      */
     this.tournament = loadResults.tournament;
@@ -31,7 +31,7 @@
     /**
      * The details about the failure, if there was one.
      *
-     * @type {{redirectToLogin: boolean, error: string, detail: string}}
+     * @type {tichu.RpcError}
      */
     this.failure = loadResults.failure;
 
@@ -73,7 +73,7 @@
    *
    * @param {TichuTournamentService} tournamentService
    * @param {string} id
-   * @return {!angular.$q.Promise}
+   * @return {!angular.$q.Promise<!{failure: ?tichu.RpcError, tournament: ?tichu.Tournament}>}
    */
   function loadTournament(tournamentService, id) {
     return tournamentService.getTournament(id).then(function(result) {

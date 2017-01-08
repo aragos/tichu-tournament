@@ -38,8 +38,10 @@ describe("movement-store module", function() {
     });
 
     describe("getOrCreateHand", function() {
-      it("creates a new hand with the hand number given", function() {
+      it("creates a new hand with the hand number and pairs given", function() {
         var hand = store.getOrCreateHand("12345", 1, 2, 3);
+        expect(hand.northSouthPair).toBe(1);
+        expect(hand.eastWestPair).toBe(2);
         expect(hand.handNo).toBe(3);
       });
 

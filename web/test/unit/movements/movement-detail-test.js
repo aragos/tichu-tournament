@@ -106,6 +106,49 @@ describe("tichu-movement-detail module", function() {
       expect(movementDetailController.movement).toBe(movement);
     });
 
+    it("exposes an editHand method which opens a dialog and sends the hand", function() {
+      var tournamentHeader = new tichu.TournamentHeader("123456789");
+      tournamentHeader.name = "my tournament";
+      var pair = new tichu.TournamentPair(7);
+      var movement = new tichu.Movement(tournamentHeader, pair);
+      var controller = loadController({
+        pairCode: null,
+        movement: movement
+      });
+
+      var round = new tichu.MovementRound();
+      round.position = tichu.PairPosition.EAST_WEST;
+      var hand = new tichu.Hand(1, 2, 3);
+      controller.editHand(round, hand);
+
+      expect($mdDialog.show).toHaveBeenCalled();
+      var settings = $mdDialog.show.calls.mostRecent().args[0];
+      expect(settings.locals.loadResults.tournamentId).toBe("123456789");
+      expect(settings.locals.loadResults.position).toBe(tichu.PairPosition.EAST_WEST);
+      expect(settings.locals.loadResults.hand).toBe(hand);
+      expect(settings.locals.loadResults.pairCode).toBe(null);
+    });
+
+    it("sends pairCode with editHand if a pair code was set", function() {
+      var tournamentHeader = new tichu.TournamentHeader("123456789");
+      tournamentHeader.name = "my tournament";
+      var pair = new tichu.TournamentPair(7);
+      var movement = new tichu.Movement(tournamentHeader, pair);
+      var controller = loadController({
+        pairCode: "APER",
+        movement: movement
+      });
+
+      var round = new tichu.MovementRound();
+      round.position = tichu.PairPosition.EAST_WEST;
+      var hand = new tichu.Hand(1, 2, 3);
+      controller.editHand(round, hand);
+
+      expect($mdDialog.show).toHaveBeenCalled();
+      var settings = $mdDialog.show.calls.mostRecent().args[0];
+      expect(settings.locals.loadResults.pairCode).toBe('APER');
+    });
+
     it("displays a dialog in case of error", function() {
       loadController({
         pairCode: null,

@@ -16,7 +16,8 @@
                    ng-disabled="homeController.loading"
                    required
                    md-maxlength="4"
-                   ng-pattern="/[A-Za-z]{4}/" />
+                   ng-pattern="/[A-Za-z]{4}/"
+                   style="text-transform: uppercase"/>
             <div ng-messages="playerForm.playerCode.$error" role="alert">
                 <div ng-message-exp="['required', 'pattern', 'md-maxlength']">
                     Enter a 4-letter player code.

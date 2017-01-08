@@ -9,7 +9,7 @@
    * @param {!$route} $route
    * @param {!angular.$location} $location
    * @param {!$mdDialog} $mdDialog
-   * @param {!{failure: {redirectToLogin: boolean, error: string, detail: string}, tournaments: !tichu.TournamentHeader[]}} loadResults
+   * @param {!{failure: ?tichu.RpcError, tournaments: ?tichu.TournamentHeader[]}} loadResults
    * @ngInject
    */
   function TournamentListController($scope, $window, $route, $location, $mdDialog, loadResults) {
@@ -22,7 +22,7 @@
     /**
      * List of tournaments to be displayed to the user.
      *
-     * @type {!tichu.TournamentHeader[]}
+     * @type {?tichu.TournamentHeader[]}
      * @export
      */
     this.tournaments = loadResults.tournaments;
@@ -30,7 +30,7 @@
     /**
      * The details about the failure, if there was one.
      *
-     * @type {{redirectToLogin: boolean, error: string, detail: string}}
+     * @type {?tichu.RpcError}
      */
     this.failure = loadResults.failure;
 
@@ -71,7 +71,7 @@
    * Asynchronously loads the list of tournaments.
    *
    * @param {TichuTournamentService} tournamentService
-   * @return {!angular.$q.Promise}
+   * @return {!angular.$q.Promise<!{failure: ?tichu.RpcError, tournaments: ?tichu.TournamentHeader[]}>}
    */
   function loadTournamentList(tournamentService) {
     return tournamentService.getTournaments().then(function(result) {

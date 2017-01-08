@@ -13,12 +13,13 @@
    * @constructor
    * @name TichuTournamentService
    * @param {angular.$http} $http
+   * @param {angular.$log} $log
    * @param {angular.$q} $q
    * @param {angular.$cacheFactory} $cacheFactory
    * @param {TichuTournamentStore} TichuTournamentStore
    * @ngInject
    */
-  function TichuTournamentService($http, $q, $cacheFactory, TichuTournamentStore) {
+  function TichuTournamentService($http, $log, $q, $cacheFactory, TichuTournamentStore) {
     /**
      * The HTTP request service injected at creation.
      *
@@ -26,6 +27,13 @@
      * @private
      */
     this._$http = $http;
+
+    /**
+     * The log service injected at creation.
+     * @type {angular.$log}
+     * @private
+     */
+    this._$log = $log;
 
     /**
      * The Q promise service injected at creation.
@@ -75,6 +83,7 @@
    */
   TichuTournamentService.prototype.getTournaments = function getTournaments() {
     var $q = this._$q;
+    var $log = this._$log;
     if (this._tournamentList !== null) {
       return $q.when(this._tournamentList);
     }
@@ -88,17 +97,17 @@
           self._tournamentList = self._parseTournamentList(response.data);
           return self._tournamentList;
         } catch (ex) {
-          console.log(
+          $log.error(
               "Malformed response from /api/tournaments (" + response.status + " " + response.statusText + "):\n"
               + ex + "\n\n"
               + JSON.stringify(response.data));
-          return $q.reject({
-            redirectToLogin: false,
-            error: "Invalid response from server",
-            detail: "The list of tournaments... wasn't."
-          });
+          var rejection = new tichu.RpcError();
+          rejection.redirectToLogin = false;
+          rejection.error = "Invalid response from server";
+          rejection.detail = "The server sent confusing data for the list of tournaments.";
+          return $q.reject(rejection);
         }
-      }, ServiceHelpers.handleErrorIn($q, "/api/tournaments")).finally(function afterResolution() {
+      }, ServiceHelpers.handleErrorIn($q, $log, "/api/tournaments")).finally(function afterResolution() {
         self._tournamentListPromise = null;
       });
     }
@@ -141,6 +150,7 @@
    */
   TichuTournamentService.prototype.getTournament = function getTournament(id) {
     var $q = this._$q;
+    var $log = this._$log;
     if (this._tournamentStore.hasTournament(id)) {
       return $q.when(this._tournamentStore.getOrCreateTournament(id));
     }
@@ -154,17 +164,17 @@
         try {
           return self._parseTournament(id, response.data);
         } catch (ex) {
-          console.log(
+          $log.error(
               "Malformed response from " + path + " (" + response.status + " " + response.statusText + "):\n"
               + ex + "\n\n"
               + JSON.stringify(response.data));
-          return $q.reject({
-            redirectToLogin: false,
-            error: "Invalid response from server",
-            detail: "The tournament... wasn't."
-          });
+          var rejection = new tichu.RpcError();
+          rejection.redirectToLogin = false;
+          rejection.error = "Invalid response from server";
+          rejection.detail = "The server sent confusing data for the tournament.";
+          return $q.reject(rejection);
         }
-      }, ServiceHelpers.handleErrorIn($q, path)).finally(function afterResolution() {
+      }, ServiceHelpers.handleErrorIn($q, $log, path)).finally(function afterResolution() {
         self._tournamentPromises.remove(id);
       }));
     }

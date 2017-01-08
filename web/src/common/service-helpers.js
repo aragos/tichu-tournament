@@ -15,6 +15,7 @@ ServiceHelpers = window.ServiceHelpers || {};
  * @returns {T} the original value
  */
 ServiceHelpers.assertType = function assertType(context, value, type, allowNullOrUndefined) {
+  var actualType;
   if (value === null || value === undefined) {
     if (allowNullOrUndefined) {
       return value;
@@ -22,8 +23,15 @@ ServiceHelpers.assertType = function assertType(context, value, type, allowNullO
       actualType = '' + value;
     }
   } else {
-    actualType = angular.isArray(value) ? 'array' : typeof value;
+    actualType = typeof value;
   }
+
+  if (actualType === 'object' && angular.isArray(value)) {
+    actualType = 'array';
+  } else if (actualType === 'number' && isNaN(value)) {
+    actualType = 'NaN';
+  }
+
   if (actualType !== type) {
     throw new Error(context + " was " + actualType + ", not " + type);
   }
@@ -33,16 +41,17 @@ ServiceHelpers.assertType = function assertType(context, value, type, allowNullO
 /**
  * Creates an error handler for the standard API error structure.
  * @param {angular.$q} $q The promise service to reject with.
+ * @param {angular.$log} $log The log service to record errors with.
  * @param {string} path The API path that was called and failed.
  * @param {boolean=} accept403 Whether 403 should be treated as needing redirect to login.
- * @returns {Function} A response handler.
+ * @returns {function(response:*):angular.$q.Promise<tichu.RpcError>} A response handler.
  */
-ServiceHelpers.handleErrorIn = function handleErrorIn($q, path, accept403) {
+ServiceHelpers.handleErrorIn = function handleErrorIn($q, $log, path, accept403) {
   accept403 = accept403 || false;
   return function onError(response) {
-    var rejection = {};
+    var rejection = new tichu.RpcError();
     if (typeof response.status === 'number') {
-      console.log(
+      $log.error(
           "Got error calling " + path + " (" + response.status + " " + response.statusText + "):\n"
           + JSON.stringify(response.data));
       rejection.redirectToLogin = (response.status === 401) || (accept403 && response.status === 403);
@@ -54,10 +63,10 @@ ServiceHelpers.handleErrorIn = function handleErrorIn($q, path, accept403) {
         rejection.detail = response.data;
       }
     } else {
-      console.log(response);
+      $log.error(response);
       rejection.redirectToLogin = false;
       rejection.error = "Client Error";
-      rejection.detail = "Something went wrong when talking to the server...";
+      rejection.detail = "Something unexpectedly went wrong when talking to the server...";
     }
     return $q.reject(rejection);
   }
