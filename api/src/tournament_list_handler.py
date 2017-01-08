@@ -1,6 +1,7 @@
 import webapp2
 import json
 
+from generic_handler import GenericHandler
 from google.appengine.api import users
 from google.appengine.ext import ndb
 from handler_utils import BuildMovementAndMaybeSetStatus
@@ -11,7 +12,7 @@ from models import Tournament
 from models import PlayerPair
 
 
-class TourneyListHandler(webapp2.RequestHandler):
+class TourneyListHandler(GenericHandler):
   def get(self):
     user = users.get_current_user()
     if not CheckUserLoggedInAndMaybeReturnStatus(self.response, user):

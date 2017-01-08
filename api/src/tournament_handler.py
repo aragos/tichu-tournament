@@ -1,6 +1,7 @@
 import webapp2
 import json
 
+from generic_handler import GenericHandler
 from google.appengine.api import users
 from google.appengine.ext import ndb
 from handler_utils import BuildMovementAndMaybeSetStatus
@@ -13,7 +14,7 @@ from models import HandScore
 from models import Tournament
 from models import PlayerPair
 
-class TourneyHandler(webapp2.RequestHandler):
+class TourneyHandler(GenericHandler):
   ''' Handles reuqests to /api/tournament/:id. Responsible for all things
       related to any one specific tournament.
   '''

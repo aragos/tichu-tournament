@@ -1,6 +1,7 @@
 import webapp2
 import json
 
+from generic_handler import GenericHandler
 from google.appengine.api import users
 from handler_utils import CheckValidHandPlayersCombinationAndMaybeSetStatus
 from handler_utils import CheckUserOwnsTournamentAndMaybeReturnStatus
@@ -9,7 +10,7 @@ from handler_utils import GetTourneyWithIdAndMaybeReturnStatus
 from models import ChangeLog
 from models import HandScore
 
-class ChangeLogHandler(webapp2.RequestHandler):
+class ChangeLogHandler(GenericHandler):
   ''' Handles requests to /api/tournament/:id/hands/changelog/:hand_no/:ns_pair/:ew_pair.
       Returnes the complete change log for a hand for users with access.
   '''

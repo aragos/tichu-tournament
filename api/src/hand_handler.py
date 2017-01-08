@@ -1,10 +1,7 @@
 import webapp2
 import json
 
-from python.calculator import HandResult
-from python.calculator import Calls
-from python.calculator import InvalidCallError
-from python.calculator import InvalidScoreError
+from generic_handler import GenericHandler
 from google.appengine.api import users
 from google.appengine.ext import ndb
 from handler_utils import CheckUserOwnsTournamentAndMaybeReturnStatus
@@ -15,9 +12,13 @@ from handler_utils import SetErrorStatus
 from models import HandScore
 from models import PlayerPair
 from models import Tournament
+from python.calculator import HandResult
+from python.calculator import Calls
+from python.calculator import InvalidCallError
+from python.calculator import InvalidScoreError
 
 
-class HandHandler(webapp2.RequestHandler):
+class HandHandler(GenericHandler):
   ''' Class to handle requests to 
       /api/tournaments/:id/hands/:hand_no/:ns_pair/:ew_pair
   '''

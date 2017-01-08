@@ -1,6 +1,7 @@
 import webapp2
 import json
 
+from generic_handler import GenericHandler
 from google.appengine.api import users
 from google.appengine.ext import ndb
 from handler_utils import is_int
@@ -13,7 +14,7 @@ from models import Tournament
 from movements import Movement
 
 
-class MovementHandler(webapp2.RequestHandler):
+class MovementHandler(GenericHandler):
   ''' Class to handle requests to /api/tournaments/:id/movement/:pair_no '''
 
   def get(self, id, pair_no):
