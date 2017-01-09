@@ -35,7 +35,7 @@ class MovementHandler(GenericHandler):
 
     player_pair = PlayerPair.GetByPairNo(tourney, int(pair_no))
     if not player_pair:
-      SetErrorStatus(self.response, 404, "Invalid Request"
+      SetErrorStatus(self.response, 404, "Invalid Request",
                      "Player pair {} not in tournament".format(pair_no))
       return
 

@@ -32,17 +32,15 @@ class Tournament(ndb.Model):
       no_pairs: the total number of pairs in this tournament. Exactly this many
         PlayerPairs are created.
     '''
-    if not player_list:
-      return
-
     pair_dict = {}
-    for player in player_list : 
-      pair_no = player['pair_no']
-      del player['pair_no']
-      if pair_dict.get(pair_no):
-        pair_dict[pair_no].append(player)
-      else:
-        pair_dict[pair_no]= [player]
+    if player_list:
+      for player in player_list : 
+        pair_no = player['pair_no']
+        del player['pair_no']
+        if pair_dict.get(pair_no):
+          pair_dict[pair_no].append(player)
+        else:
+          pair_dict[pair_no]= [player]
 
     player_list = PlayerPair.query(ancestor=self.key).fetch()
 
