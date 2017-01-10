@@ -72,6 +72,7 @@ class Movement:
                            "pairs with {} hands per round").format(
                                no_pairs, no_hands_per_round))
     self.pair_dict = json.loads(json_data)
+    self._CalculateUnplayedHands()
 
   def GetMovement(self, pair_no):
     ''' Construct a dictionary for this movement.
@@ -88,6 +89,14 @@ class Movement:
           }
     '''
     return self.pair_dict[str(pair_no)]
+    
+  def GetUnplayedHands(self, pair_no):
+    ''' Construct hands that this pair can prepare.
+
+    Returns:
+      A list of hands that pair will not play and can prepair.
+    '''
+    return self.unplayed_hands.get(str(pair_no), [])
 
   @staticmethod
   def NumBoardsPerRoundFromTotal(no_pairs, total_boards):
@@ -131,3 +140,23 @@ class Movement:
       return (3, 7)
     else:
       return (0, 0)
+      
+  def _CalculateUnplayedHands(self):
+    ''' Get the list, for each pair, of hands that the pair does not play. 
+
+    Side effects:
+     Sets attribute unplayed_hands. Dict from string representation of pair
+       number to the list of hands not played by that pair.
+    '''
+    total_boards = 0
+    seen_hands = {}
+    self.unplayed_hands = {}
+    for team, rounds in self.pair_dict.items():
+      for round in rounds:
+        total_boards = max(max(round["hands"]), total_boards)
+        seen_hands[team] = seen_hands.get(team, set()).union(round["hands"])
+    for team, hand_list in seen_hands.items():
+      for hand in range(1, total_boards + 1):
+        if hand not in hand_list:
+          self.unplayed_hands.setdefault(team, []).append(hand)
+      
