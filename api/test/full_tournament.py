@@ -1,22 +1,47 @@
 import requests
 import json
 
-TOURNEY_ID = 4925812092436480
+PROD_TOURNEY_ID = 5649391675244544
+TOURNEY_ID = 5649391675244544
 
-PAIR_IDS = [
-    "HJYW", 
-    "RIUB", 
-    "ATMM", 
-    "TBSL", 
-    "HCBJ", 
-    "JFHL", 
-    "ARKB", 
-    "QMXV", 
-    "XJIR", 
-    "XUFB"
+
+PAIR_IDS = "pair_ids": [
+    "KEZI", 
+    "NWQO", 
+    "RHDE", 
+    "SAOU", 
+    "QOAG", 
+    "EJRV", 
+    "ESQB", 
+    "JAQS", 
+    "IIBC", 
+    "RLKQ"
+  ]
+
+PROD_PAIR_IDS = [
+    "VYOE", 
+    "ZXWP", 
+    "FVCX", 
+    "ELYX", 
+    "EWBR", 
+    "TWBJ", 
+    "BBDX", 
+    "CMPC", 
+    "BYDP", 
+    "BLPM"
   ]
   
 
+
+def GetMovements(pair_no):
+  headers = {
+    "Content-Type": "application/json",
+    'X-tichu-pair-code' : PAIR_IDS[pair_no - 1]
+  }
+  r = requests.get("https://tichu-tournament.appspot.com/api/tournaments/{}/movement/{}".format(
+      TOURNEY_ID, pair_no),
+      headers=headers)
+  r.raise_for_status()
 
 def PutHand(hand_no, ns_pair, ew_pair, calls, ns_score, ew_score):
   headers = {
@@ -34,7 +59,7 @@ def PutHand(hand_no, ns_pair, ew_pair, calls, ns_score, ew_score):
     "ew_score" : ew_score
   }
 
-  r = requests.put("http://localhost:8080/api/tournaments/{}/hands/{}/{}/{}".format(
+  r = requests.put("http://tichu-tournament.appspot.com/api/tournaments/{}/hands/{}/{}/{}".format(
       TOURNEY_ID, hand_no, ns_pair, ew_pair),
       headers=headers,
       data=json.dumps(info_dict))
@@ -93,7 +118,7 @@ PutHand(13, 6, 1, ["", '', '', 'GT' ], 50, -150)
 PutHand(13, 8, 9, ["T", '', '', 'GT' ], 160, -160)
 PutHand(13, 2, 10, ["", '', '', 'GT' ], 85, 215)
 PutHand(14, 4, 3, ["T", '', '', '' ], 140, 60)
-PutHand(14, 6, 1, ["", '', 'T', '' ], 25, -125)
+PutHand(14, 6, 1, ["", '', 'GT', '' ], 25, -125)
 PutHand(14, 8, 9, ["T", '', '', '' ], 105, 95)
 PutHand(14, 2, 10, ["", '', 'T', '' ], 5, 195)
 PutHand(15, 2, 7, ["", 'GT', '', '' ], 400, 0)
@@ -104,3 +129,7 @@ PutHand(16, 2, 7, ["", 'GT', '', '' ], 275, 25)
 PutHand(16, 1, 9, ["", '', 'T', '' ], 80, -80)
 PutHand(16, 4, 5, ["", 'GT', '', '' ], 275, 25)
 PutHand(16, 3, 10, ["", '', 'T', '' ], 40, 160)
+
+for j in range (20):
+  for i in range(1, 11):
+    GetMovements(i)
