@@ -13,6 +13,7 @@ class MovementTest(unittest.TestCase):
     self.checkHandsPlayedRightNumberOfTimes(movement, 10, 3)
     self.checkTableConsistency(movement, 10, 3)
     self.checkPrepareHands(movement, 10, 24)
+    self.checkNumRounds(movement, 10, 7)
 
   def testConsistentOpponents_ten_two(self):
     movement = movements.Movement(10, 2, 7)
@@ -21,6 +22,7 @@ class MovementTest(unittest.TestCase):
     self.checkHandsPlayedRightNumberOfTimes(movement, 10, 2)
     self.checkTableConsistency(movement, 10, 2)
     self.checkPrepareHands(movement, 10, 16)
+    self.checkNumRounds(movement, 10, 7)
 
   def testConsistentOpponents_nine_two_eight(self):
     movement = movements.Movement(9, 2, 8)
@@ -93,6 +95,7 @@ class MovementTest(unittest.TestCase):
     self.checkHandsPlayedRightNumberOfTimes(movement, 11, 2)
     self.checkTableConsistency(movement, 11, 2)
     self.checkPrepareHands(movement, 11, 14)
+    self.checkNumRounds(movement, 11, 7)
 
   def testConsistentOpponents_eleven_three_seven(self):
     movement = movements.Movement(11, 3, 7)
@@ -101,7 +104,8 @@ class MovementTest(unittest.TestCase):
     self.checkHandsPlayedRightNumberOfTimes(movement, 11, 3)
     self.checkTableConsistency(movement, 11, 3)
     self.checkPrepareHands(movement, 11, 21)
-    
+    self.checkNumRounds(movement, 11, 7)
+
   def testConsistentOpponents_eleven_two_seven_max_six(self):
     movement = movements.Movement(11, 2, 6)
     self.checkConsistentSchedule(movement, 11, 2)
@@ -109,6 +113,7 @@ class MovementTest(unittest.TestCase):
     self.checkHandsPlayedRightNumberOfTimes(movement, 11, 2)
     self.checkTableConsistency(movement, 11, 2)
     self.checkPrepareHands(movement, 11, 16)
+    self.checkNumRounds(movement, 11, 7)
 
   def testConsistentOpponents_eleven_three_seven_max_six(self):
     movement = movements.Movement(11, 3, 6)
@@ -117,6 +122,7 @@ class MovementTest(unittest.TestCase):
     self.checkHandsPlayedRightNumberOfTimes(movement, 11, 3)
     self.checkTableConsistency(movement, 11, 3)
     self.checkPrepareHands(movement, 11, 24)
+    self.checkNumRounds(movement, 11, 7)
 
   def checkConsistentSchedule(self, movement, num_pairs, num_hands_per_round):
     for i in range(num_pairs):
@@ -125,6 +131,8 @@ class MovementTest(unittest.TestCase):
       rounds_played = set()
       for round in movement.GetMovement(i + 1):
         self.assertIsNotNone(round)
+        if not round.get('hands'):
+          continue
         opp = round.get('opponent')
         self.assertIsNotNone(opp)
         self.assertFalse(opp in opponents_played,
@@ -162,8 +170,10 @@ class MovementTest(unittest.TestCase):
   def checkConsistentOpponents(self, movement, num_pairs, num_hands_per_round):
     for i in range(num_pairs):
       for round in movement.GetMovement(i + 1):
-        round_no = round.get('round')
         hands = round.get('hands')
+        if not hands:
+          continue
+        round_no = round.get('round')
         opp = round.get('opponent')
         opp_movement = movement.GetMovement(opp)
         position = round.get('position')
@@ -201,6 +211,8 @@ class MovementTest(unittest.TestCase):
       for round in movement.GetMovement(i + 1):
         round_no = round.get('round')
         hands = round.get('hands')
+        if not hands:
+          continue
         if round.get('relay_table'):
           for hand in hands:
             if not relay_hands.get(round_no):
@@ -243,6 +255,8 @@ class MovementTest(unittest.TestCase):
     positions = {}
     for i in range(num_pairs):
       for round in movement.GetMovement(i + 1):
+        if not round.get('position'):
+          continue
         round_no = round.get('round')
         position = round.get('position')[0]
         if not positions.get(position):
@@ -256,6 +270,20 @@ class MovementTest(unittest.TestCase):
                          msg=("Table {} hosts a weird number of teams ({}) in " + 
                              "round {}.").format(t, n, r))
 
+  def checkNumRounds(self, movement, num_pairs, total_rounds):
+    for i in range(num_pairs):
+      self.assertEqual(total_rounds, len(movement.GetMovement(i + 1)),
+                       msg=("Pair {} has a wrong total number of rounds. " + 
+                            "Expected {}, was {}").format(
+                                i + 1, total_rounds,
+                                len(movement.GetMovement(i + 1))))
+      round_counter = 1
+      for round in movement.GetMovement(i + 1):
+        self.assertEqual(round_counter, round.get("round"),
+                       msg=("Pair {}'s {}th round, has number {}. ").format(
+                                i + 1, round_counter, round.get("round")))
+        round_counter += 1
+
   def _handPreparedBySomeone(self, hand_no, movement, num_pairs):
     for j in range(num_pairs):
       if hand_no in movement.GetSuggestedHandPrep(j + 1):
@@ -267,6 +295,8 @@ class MovementTest(unittest.TestCase):
       prepare_list = movement.GetUnplayedHands(i + 1)
       for round in movement.GetMovement(i + 1):
         hands = round.get('hands')
+        if not hands:
+          continue
         for j in prepare_list:
           self.assertFalse(j in hands, 
                            msg=("Pair {} prepares hand {} that it also plays " + 

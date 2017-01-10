@@ -448,12 +448,14 @@ Optional. Necessary only for non-tournament owners.
     * `email`: String. Email for the player that can be used to identify user posting hand
       results. Optional.
 * `movement`: List of objects. The generated movement that records all hands that this team
-  plays along with associated opponents and position to be played from.
-    * `round`: Integer. The round number during which this hand is to be played.
+  plays along with associated opponents and position to be played from. An object for each
+  round in the tournament will be included. If the pair requested did not play in the round
+  only the `round` field will be populated.
+    * `round`: Integer. The round number during which this hand is to be played. Required.
     * `position`: String. Position for this team. Two character string starting with the 
-       table number and ending with either 'N' for North/South or 'E' for East/West.
+       table number and ending with either 'N' for North/South or 'E' for East/West. Optional.
     * `hands`: List of integers. Set of hand numbers to be played by this team/opponent
-       combination.
+       combination. Optional.
         * `score`: Object. If the hand has already been scored contains relevant information
           about the score. Optional.
           * `calls`: Object. Calls made by players. May have entries for `north`, `east`, `west`, `south`.
