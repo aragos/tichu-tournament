@@ -31,6 +31,7 @@ class MovementTest(unittest.TestCase):
     self.checkHandsPlayedRightNumberOfTimes(movement, 9, 2)
     self.checkTableConsistency(movement, 9, 2)
     self.checkPrepareHands(movement, 9, 18)
+    self.checkNumRounds(movement, 9, 9)
 
   def testConsistentOpponents_nine_three_eight(self):
     movement = movements.Movement(9, 3, 8)
@@ -39,6 +40,7 @@ class MovementTest(unittest.TestCase):
     self.checkHandsPlayedRightNumberOfTimes(movement, 9, 3)
     self.checkTableConsistency(movement, 9, 3)
     self.checkPrepareHands(movement, 9, 27)
+    self.checkNumRounds(movement, 9, 9)
     
   def testConsistentOpponents_nine_two_seven(self):
     movement = movements.Movement(9, 2, 7)
@@ -47,6 +49,7 @@ class MovementTest(unittest.TestCase):
     self.checkHandsPlayedRightNumberOfTimes(movement, 9, 2)
     self.checkTableConsistency(movement, 9, 2)
     self.checkPrepareHands(movement, 9, 14)
+    self.checkNumRounds(movement, 9, 7)
 
   def testConsistentOpponents_nine_three_seven(self):
     movement = movements.Movement(9, 3, 7)
@@ -55,6 +58,7 @@ class MovementTest(unittest.TestCase):
     self.checkHandsPlayedRightNumberOfTimes(movement, 9, 3)
     self.checkTableConsistency(movement, 9, 3)
     self.checkPrepareHands(movement, 9, 21)
+    self.checkNumRounds(movement, 9, 7)
  
   def testConsistentOpponents_eight_two_six(self):
     movement = movements.Movement(8, 2, 6)
@@ -63,6 +67,7 @@ class MovementTest(unittest.TestCase):
     self.checkHandsPlayedRightNumberOfTimes(movement, 8, 2)
     self.checkTableConsistency(movement, 8, 2)
     self.checkPrepareHands(movement, 8, 16)
+    self.checkNumRounds(movement, 8, 6)
 
   def testConsistentOpponents_eight_three_six(self):
     movement = movements.Movement(8, 3, 6)
@@ -71,6 +76,7 @@ class MovementTest(unittest.TestCase):
     self.checkHandsPlayedRightNumberOfTimes(movement, 8, 3)
     self.checkTableConsistency(movement, 8, 3)
     self.checkPrepareHands(movement, 8, 24)
+    self.checkNumRounds(movement, 8, 6)
  
   def testConsistentOpponents_seven_two_seven(self):
     movement = movements.Movement(7, 2, 7)
@@ -79,6 +85,7 @@ class MovementTest(unittest.TestCase):
     self.checkHandsPlayedRightNumberOfTimes(movement, 7, 2)
     self.checkTableConsistency(movement, 7, 2)
     self.checkPrepareHands(movement, 7, 14)
+    self.checkNumRounds(movement, 7, 7)
  
   def testConsistentOpponents_seven_three_seven(self):
     movement = movements.Movement(7, 3, 7)
@@ -87,6 +94,7 @@ class MovementTest(unittest.TestCase):
     self.checkHandsPlayedRightNumberOfTimes(movement, 7, 3)
     self.checkTableConsistency(movement, 7, 3)
     self.checkPrepareHands(movement, 7, 21)
+    self.checkNumRounds(movement, 7, 7)
     
   def testConsistentOpponents_eleven_two_seven(self):
     movement = movements.Movement(11, 2, 7)
