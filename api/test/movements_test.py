@@ -258,7 +258,7 @@ class MovementTest(unittest.TestCase):
 
   def _handPreparedBySomeone(self, hand_no, movement, num_pairs):
     for j in range(num_pairs):
-      if hand_no in movement.GetUnplayedHands(j + 1):
+      if hand_no in movement.GetSuggestedHandPrep(j + 1):
         return True
     return False
 
@@ -274,3 +274,5 @@ class MovementTest(unittest.TestCase):
     for i in range(num_boards):
       self.assertTrue(self._handPreparedBySomeone(i + 1, movement, num_pairs),
                       msg="Hand number {} not prepared by anyone".format(i + 1))
+                      
+    

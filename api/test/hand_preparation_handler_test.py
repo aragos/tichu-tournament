@@ -2,7 +2,6 @@ import json
 import unittest
 import webtest
 import os
-import time
 
 from google.appengine.ext import testbed
 
@@ -57,6 +56,10 @@ class AppTest(unittest.TestCase):
       self.assertEqual(movement.GetUnplayedHands(i),
                        response["unplayed_hands"][i - 1]["hands"])
       self.assertEqual(i, response["unplayed_hands"][i - 1]["pair_no"])
+    for i in range(1, 8):
+      self.assertEqual(movement.GetUnplayedHands(i),
+                       response["preparation"][i - 1]["hands"])
+      self.assertEqual(i, response["preparation"][i - 1]["pair_no"])
 
   def loginUser(self, email='user@example.com', id='123', is_admin=False):
     self.testbed.setup_env(
