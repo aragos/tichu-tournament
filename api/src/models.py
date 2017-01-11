@@ -19,6 +19,22 @@ class Tournament(ndb.Model):
   no_boards = ndb.IntegerProperty()
   no_pairs = ndb.IntegerProperty()
 
+  @classmethod
+  def Create(cls, boards, **kwargs):
+    '''Creates a new tournament with the given properties and populates its
+       boards.
+
+    Args:
+      boards: list of board objects to persist with this tournament.
+    '''
+    tournament = cls(**kwargs)
+    i = 0
+    for board in boards:
+      i+=1
+      Board(board_number=i,
+            board=board.ToJson(),
+            parent=tournament)
+
   def PutPlayers(self, player_list, no_pairs):
     ''' Create a new PlayerPair Entity corresponding to each player pair for 
         pair numbers 1 ... no_pairs saving any useful information from 
@@ -320,3 +336,17 @@ class ChangeLog(ndb.Model):
     return { 'changed_by' : self.changed_by,
              'change' : json.loads(self.change),
              'timestamp_sec' :  self.key.id() }
+
+
+class Board(ndb.Model):
+  '''Record of a single board with a parent tournament.
+
+  Child of a tournament, keyed by board number.
+
+  Attributes:
+    board_number: Integer. Identifier of board within its parent tournament.
+    board: json object describing the board (cards, positions, first eight).
+  '''
+
+  board_number = ndb.IntegerProperty()
+  board = ndb.JsonProperty()
