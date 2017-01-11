@@ -14,9 +14,11 @@
   <link rel="stylesheet" href="bower_components/angular-material-data-table/dist/md-data-table.css">
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
 </head>
-<body layout="row" ng-cloak>
-
-  <div flex layout="column" tabIndex="-1" role="main" class="md-whiteframe-z2">
+<body class="layout-column" layout="column">
+  <div flex layout="column" layout-align="center center" class="flex layout-column layout-align-center-center" ng-if="false">
+    <h2>Loading...</h2>
+  </div>
+  <div ng-cloak flex layout="column" tabIndex="-1" role="main" class="md-whiteframe-z2">
 
     <md-toolbar ng-if="appController.showHeader && (appController.header || appController.backPath)"
                 layout="row"
