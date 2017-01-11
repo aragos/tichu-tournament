@@ -10,7 +10,7 @@ from handler_utils import is_int
 from handler_utils import SetErrorStatus
 from models import Tournament
 from models import PlayerPair
-
+from python import handgenerator
 
 class TourneyListHandler(GenericHandler):
   def get(self):
@@ -45,10 +45,11 @@ class TourneyListHandler(GenericHandler):
                                                            player_list):
       return
 
-    tourney = Tournament(owner_id=user.user_id(),
-                         name = name, 
-                         no_pairs=no_pairs,
-                         no_boards=no_boards)
+    tourney = Tournament.Create(owner_id=user.user_id(),
+                                name = name,
+                                no_pairs=no_pairs,
+                                no_boards=no_boards,
+                                boards=handgenerator.GenerateBoards(35))
     tourney_key = tourney.put()
     tourney.PutPlayers(player_list, no_pairs)
     self.response.set_status(201)
