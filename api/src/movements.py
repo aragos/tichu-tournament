@@ -72,22 +72,40 @@ class Movement:
                            "pairs with {} hands per round").format(
                                no_pairs, no_hands_per_round))
     self.pair_dict = json.loads(json_data)
+    self._CalculateUnplayedHands()
+    self._CalculateSuggestedPrep()
 
   def GetMovement(self, pair_no):
     ''' Construct a dictionary for this movement.
 
-        Returns: 
-          Dictionary from pair number to movement pair movement where pair 
-          movement is a list of dicts describing a round as below.
-          {
-             "round": 1
-             "position": "3N"
-             "opponent": 2
-             "hands": [3, 4, 5]
-             "relay_table": True
-          }
+    Returns: 
+      Dictionary from pair number to movement pair movement where pair 
+      movement is a list of dicts describing a round as below.
+      {
+         "round": 1
+         "position": "3N"
+         "opponent": 2
+         "hands": [3, 4, 5]
+         "relay_table": True
+      }
     '''
     return self.pair_dict[str(pair_no)]
+    
+  def GetUnplayedHands(self, pair_no):
+    ''' Construct hands that this pair will not play.
+
+    Returns:
+      A list of hands that pair will not play and can prepair.
+    '''
+    return self.unplayed_hands.get(str(pair_no), [])
+    
+  def GetSuggestedHandPrep(self, pair_no):
+    ''' Construct hands that this pair can prepare.
+
+    Returns:
+      A list of hands that pair should prepair.
+    '''
+    return self.suggested_prep.get(str(pair_no), [])
 
   @staticmethod
   def NumBoardsPerRoundFromTotal(no_pairs, total_boards):
@@ -131,3 +149,46 @@ class Movement:
       return (3, 7)
     else:
       return (0, 0)
+      
+  def _CalculateUnplayedHands(self):
+    ''' Get the list, for each pair, of hands that the pair does not play. 
+
+    Side effects:
+     Sets attribute unplayed_hands. Dict from string representation of pair
+       number to the list of hands not played by that pair.
+    '''
+    self.total_boards = 0
+    seen_hands = {}
+    self.unplayed_hands = {}
+    for team, rounds in self.pair_dict.items():
+      for round in rounds:
+        self.total_boards = max(max(round["hands"]), self.total_boards)
+        seen_hands[team] = seen_hands.get(team, set()).union(round["hands"])
+    for team, hand_list in seen_hands.items():
+      for hand in range(1, self.total_boards + 1):
+        if hand not in hand_list:
+          self.unplayed_hands.setdefault(team, []).append(hand)
+          
+  def _CalculateSuggestedPrep(self):
+    ''' Get the list, for each pair, of hands that we suggest the pair prepares. 
+
+    Not guaranteed to be optimal, but tries to spread out the burden as much
+    as possible. Each hand in the movement is guaranteed to be in someone's 
+    list.
+
+    Side effects:
+     Sets attribute suggested_prep. Dict from string representation of pair
+       number to the list of hands the pair should prepare.
+    '''
+    max_unplayed_hands =  max([len(x) for x in self.unplayed_hands.values()])
+    hands = set()
+    self.suggested_prep = {}
+    for i in range(max_unplayed_hands):
+      for team in range (1, len(self.pair_dict) + 1):
+        unplayed_hands = self.GetUnplayedHands(team)
+        for j in range (i, len(unplayed_hands)):
+          hand = unplayed_hands[j]
+          if not hand in hands:
+            hands.add(hand)
+            self.suggested_prep.setdefault(str(team), []).append(hand)
+            break

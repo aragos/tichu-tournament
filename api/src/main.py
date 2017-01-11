@@ -5,6 +5,7 @@ from auth_handler import LoginHandler
 from auth_handler import LogoutHandler
 from change_log_handler import ChangeLogHandler
 from hand_handler import HandHandler
+from hand_preparation_handler import HandPreparationHandler
 from movement_handler import MovementHandler
 from pair_id_handler import PairIdHandler
 from pair_id_handler import TourneyPairIdHandler
@@ -21,6 +22,7 @@ app = webapp2.WSGIApplication([
     ('/api/tournaments/?', TourneyListHandler),
     ('/api/tournaments/pairno/([^/]+)/?', PairIdHandler),
     ('/api/tournaments/([^/]+)/?', TourneyHandler),
+    ('/api/tournaments/([^/]+)/handprep/?', HandPreparationHandler),
     ('/api/tournaments/([^/]+)/hands/([^/]+)/([^/]+)/([^/]+)/?', HandHandler),
     ('/api/tournaments/([^/]+)/hands/changelog/([^/]+)/([^/]+)/([^/]+)/?', ChangeLogHandler),
     ('/api/tournaments/([^/]+)/pairids/([^/]+)/?', TourneyPairIdHandler),

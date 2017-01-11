@@ -1,0 +1,88 @@
+<div flex layout="column" layout-align="center center">
+    <h3>You can download the results as an Excel file.</h3>
+    <md-button ng-href="/api/tournaments/{{tournamentResultsController.tournament.id}}/xlsresults"
+               download="{{tournamentResultsController.tournament.name}} Results.xlsx"
+               target="_blank">
+        Download
+    </md-button>
+</div>
+<!--
+<md-tabs flex="noshrink">
+    <md-tab label="Pair Rankings" layout="column">
+        <md-card flex="noshrink">
+            <md-table-container>
+                <table md-table>
+                    <thead md-head
+                           md-order="tournamentResultsController.pairRankingOrder">
+                        <tr md-row>
+                            <th md-column md-numeric><span>Rank</span></th>
+                            <th md-column><span>Pair</span></th>
+                            <th md-column md-numeric md-order-by="mps" md-desc><span>MPs</span></th>
+                            <th md-column md-numeric md-order-by="rps" md-desc><span>RPs</span></th>
+                            <th md-column md-numeric md-order-by="aps" md-desc><span>APs</span></th>
+                        </tr>
+                    </thead>
+                    <tbody md-body>
+                        <tr md-row
+                            ng-repeat="summary in tournamentResultsController.pairSummaries | orderBy:tournamentResultsController.pairRankingOrder">
+                            <td md-cell>{{ tournamentResultsController.pairRankingOrder[0] === "-" ? $index + 1 : tournamentResultsController.pairSummaries.length - $index }}</td>
+                            <td md-cell>Pair #{{summary.pair.pairNo}}</td>
+                            <td md-cell>{{summary.mps | number:2}}</td>
+                            <td md-cell>{{summary.rps | number:2}}</td>
+                            <td md-cell>{{summary.aps | number:1}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </md-table-container>
+        </md-card>
+    </md-tab>
+    <md-tab label="Board Results" layout="column">
+        <md-card flex="noshrink" ng-repeat="board in tournamentResultsController.pairSummaries">
+            <md-toolbar class="md-table-toolbar md-default">
+                <div class="md-toolbar-tools">
+                    <span>Board #{{ $index + 1 }}</span>
+                </div>
+            </md-toolbar>
+            <md-table-container>
+                <table md-table>
+                    <thead md-head
+                           md-order="tournamentResultsController.boardResultsOrder">
+                        <tr md-row>
+                            <th md-column md-numeric md-order-by="ns_pair"><span>N/S Pair</span></th>
+                            <th md-column md-numeric md-order-by="ew_pair"><span>E/W Pair</span></th>
+                            <th md-column><span>Calls</span></th>
+                            <th md-column md-numeric md-order-by="ns_score" md-desc><span>N/S Score</span></th>
+                            <th md-column md-numeric md-order-by="ew_score" md-desc><span>E/W Score</span></th>
+                            <th md-column md-numeric md-order-by="ns_mps" md-desc><span>N/S MPs</span></th>
+                            <th md-column md-numeric md-order-by="ew_mps" md-desc><span>E/W MPs</span></th>
+                            <th md-column md-numeric md-order-by="ns_rps" md-desc><span>N/S RPs</span></th>
+                            <th md-column md-numeric md-order-by="ew_rps" md-desc><span>E/W RPs</span></th>
+                            <th md-column md-numeric md-order-by="ns_aps" md-desc><span>N/S APs</span></th>
+                            <th md-column md-numeric md-order-by="ew_aps" md-desc><span>E/W APs</span></th>
+                        </tr>
+                    </thead>
+                    <tbody md-body>
+                        <tr md-row
+                            ng-repeat="summary in tournamentResultsController.pairSummaries | orderBy:tournamentResultsController.pairRankingOrder">
+                            <td md-cell>{{summary.ns_pair | number:0}}</td>
+                            <td md-cell>{{summary.ew_pair | number:0}}</td>
+                            <td md-cell></td>
+                            <td md-cell>{{summary.ns_score | number:0}}</td>
+                            <td md-cell>{{summary.ew_score | number:0}}</td>
+                            <td md-cell>{{summary.ns_mps | number:2}}</td>
+                            <td md-cell>{{summary.ew_mps | number:2}}</td>
+                            <td md-cell>{{summary.ns_rps | number:2}}</td>
+                            <td md-cell>{{summary.ew_rps | number:2}}</td>
+                            <td md-cell>{{summary.ns_aps | number:1}}</td>
+                            <td md-cell>{{summary.ew_aps | number:1}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </md-table-container>
+        </md-card>
+    </md-tab>
+    <md-tab label="Pair Results" layout="column">
+
+    </md-tab>
+</md-tabs>
+-->

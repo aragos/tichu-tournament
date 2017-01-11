@@ -149,11 +149,11 @@ class HandResult:
               self._ns_score % 5 != 0 or 
               self._ew_score % 5 != 0):
             return False
-             
+
         ns_tichu_factor, ew_tichu_factor = 0, 0
         first_out = out_order[0]
         ns_team, ew_team = ("N", "S"), ("E", "W")
-        
+
         # Add on factors for making/not making Tichu.
         for player in ns_team:
             ns_tichu_factor += self._TichuBonus(first_out, player) 
@@ -163,12 +163,17 @@ class HandResult:
         # Get bounds for legal scores of each team.
         ns_bounds, ew_bounds = \
             self._TeamBounds(ns_team, ew_team, out_order[0:2])
+        one_two = sum(ns_bounds) == 400 or sum(ew_bounds) == 400
         ns_bounds = [x + ns_tichu_factor for x in ns_bounds]
         ew_bounds = [x + ew_tichu_factor for x in ew_bounds]
         
         if (self._ns_score not in range(ns_bounds[0], ns_bounds[1] + 1) or
             self._ew_score not in range(ew_bounds[0], ew_bounds[1] + 1)):
             return False
+        elif ((not one_two) and 
+              (self._ew_score + self._ns_score - 
+                   ns_tichu_factor - ew_tichu_factor != 100)):
+          return False
         return True
 
 class BoardScoreLine:

@@ -23,8 +23,7 @@ def ReadJSONInput(hand_list):
     hr_list = board_no_to_hr_list.setdefault(board_no, [])
     hr_list.append(HandResult(board_no, ns_pair, ew_pair,
                               hand["ns_score"], hand["ew_score"],
-                              Calls(calls["north"], calls["south"],
-                                    calls["east"], calls["west"])))
+                              Calls.FromDict(calls)))
   board_list = []
   for k, v in board_no_to_hr_list.items():
     board_list.append(Board(k, v))

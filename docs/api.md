@@ -221,6 +221,56 @@ Deletes a tournament owned by the currently logged in director.
 * **404**: No tournament with the given ID exists.
 * **500**: Server failed to locate or delete the tournament for any other reason.
 
+### Read hand preparation info (GET /api/tournaments/:id/handprep)
+
+**Requires authentication and ownership of the given tournament.** 
+Retrieves information about which teams should prepare which hands in the tournament.
+
+#### Request
+
+* `id`: String. An opaque, unique ID returned from `GET /tournaments` or `POST /tournaments`.
+
+#### Status codes
+
+* **200**: The hand preparation information was successfully retrieved.
+* **401**: User is not logged in.
+* **403**: User is logged in, but does not own the given tournament.
+* **404**: No tournament with the given ID exists.
+* **500**: Server failed to determine information for any other reason.
+
+#### Response
+
+    {
+        "unplayed_hands": [
+            {
+                "pair_no": 1
+                "hands": [1, 2, 5, 6]
+            },
+            {
+                "pair_no": 2
+                "hands": [1, 2, 5, 6]
+            },
+        ]
+        "preparation": [
+            {
+                "pair_no": 1
+                "hands": [1, 2]
+            },
+            {
+                "pair_no": 2
+                "hands": [5, 6]
+            },
+        ]
+    }
+
+* `unplayed_hands`: List of objects. Comprehensive information about which hands
+  will not be played by each team. Required.
+    * `pair_no`: Integer. The pair that has not played hands in this object. Required.
+    * `hands`: List of Integers. List of all hands this pair will not play. Required.
+* `preparation`: List of objects. Suggested set of hands each pair should prepare. Required.
+    * `pair_no`: Integer. The pair that should prepare hands in this object. Required.
+    * `hands`: List of Integers. List of all hands this pair should prepare. Required.
+
 ### Fetch the pair identifiers (GET /api/tournaments/:id/pairids)
 
 **Requires authentication and ownership of the given tournament.**

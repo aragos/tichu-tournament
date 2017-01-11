@@ -112,7 +112,7 @@ class AppTest(unittest.TestCase):
     # First hand put in by the director
     params = {'calls': { 'north': "T" }, 
               'ns_score': 75,
-              'ew_score': 25,
+              'ew_score': 125,
               'notes': 'I am a note'}
     response = self.testapp.put_json("/api/tournaments/{}/hands/1/2/3".format(id),
                                      params)
@@ -156,7 +156,7 @@ class AppTest(unittest.TestCase):
     first_score_change = first_change_log['change']
     self.assertEqual( { 'north': "T" }, first_score_change['calls'])
     self.assertEqual(75, first_score_change['ns_score'])
-    self.assertEqual(25,first_score_change['ew_score'])
+    self.assertEqual(125,first_score_change['ew_score'])
     self.assertEqual('I am a note', first_score_change['notes'])
     self.assertEqual(0, first_change_log['changed_by'])
     

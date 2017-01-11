@@ -1,8 +1,10 @@
 import webapp2
 import json
 
+from generic_handler import GenericHandler
 from google.appengine.api import users
 from google.appengine.ext import ndb
+from handler_utils import BuildMovementAndMaybeSetStatus
 from handler_utils import CheckUserOwnsTournamentAndMaybeReturnStatus
 from handler_utils import GetTourneyWithIdAndMaybeReturnStatus
 from handler_utils import is_int
@@ -12,8 +14,8 @@ from models import HandScore
 from models import Tournament
 from models import PlayerPair
 
-class PairIdHandler(webapp2.RequestHandler):
-  ''' Handles reuqests to /api/tournament/pairno/:pair_id. Responsible for
+class PairIdHandler(GenericHandler):
+  ''' Handles requests to /api/tournament/pairno/:pair_id. Responsible for
       identifying the tournament/pair combination corresponding to an 
       opaque secret pair_id code.
   '''
@@ -22,7 +24,7 @@ class PairIdHandler(webapp2.RequestHandler):
     ''' Returns tournament and pair number information this pair_id.
 
         Args: 
-          pair_id: Opque secret ID used to look up information for the user.
+          pair_id: Opaque secret ID used to look up information for the user.
     ''' 
     player_pairs = PlayerPair._query(ndb.GenericProperty('id') == 
         pair_id).fetch(projection=[PlayerPair.pair_no])
@@ -40,8 +42,8 @@ class PairIdHandler(webapp2.RequestHandler):
     self.response.out.write(json.dumps(info_dict, indent=2))
 
 
-class TourneyPairIdHandler(webapp2.RequestHandler):
-  ''' Handles reuqests to /api/tournament/:id/pairids/:pair_no. Responsible for
+class TourneyPairIdHandler(GenericHandler):
+  ''' Handles requests to /api/tournament/:id/pairids/:pair_no. Responsible for
       finding the opaque ID generated for this pair, unique to this tournament.
   '''
   def get(self, id, pair_no):
@@ -76,7 +78,7 @@ class TourneyPairIdHandler(webapp2.RequestHandler):
     self.response.out.write(json.dumps({'pair_id' : player_pairs[0].id}, indent=2))
 
 
-class TourneyPairIdsHandler(webapp2.RequestHandler):
+class TourneyPairIdsHandler(GenericHandler):
   ''' Handles requests to /api/tournament/:id/pairids. Responsible for
       finding the opaque IDs generated for all pairs in this tournament.
   '''
@@ -96,6 +98,7 @@ class TourneyPairIdsHandler(webapp2.RequestHandler):
     if not CheckUserOwnsTournamentAndMaybeReturnStatus(self.response,
         users.get_current_user(), tourney):
       return
+
     player_pairs = PlayerPair._query(ancestor=tourney.key).fetch(
         projection=[PlayerPair.id, PlayerPair.pair_no])
     player_pairs.sort(key = lambda p : p.pair_no)
@@ -103,6 +106,7 @@ class TourneyPairIdsHandler(webapp2.RequestHandler):
       SetErrorStatus(self.response, 500, "Corrupted Data",
                      "Could not find any players for this tournament. " + 
                          "Consider resetting tournament info.")
+
     self.response.headers['Content-Type'] = 'application/json'
     self.response.set_status(200)
     self.response.out.write(

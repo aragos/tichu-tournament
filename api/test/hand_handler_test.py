@@ -139,7 +139,6 @@ class AppTest(unittest.TestCase):
   def testPut_invalid_scoring(self):
     self.loginUser()
     id = self.AddBasicTournament()
-    self.logoutUser()
     params = {'calls': {}, 'ns_score': 75, 'ew_score': 20}
     response = self.testapp.put_json("/api/tournaments/{}/hands/1/2/3".format(id),
                                      params, expect_errors=True)
@@ -153,6 +152,10 @@ class AppTest(unittest.TestCase):
                                      params, expect_errors=True)
     self.assertEqual(response.status_int, 400)
     params = {'calls': {'north': "T" }, 'ns_score': -30, 'ew_score': 130}
+    response = self.testapp.put_json("/api/tournaments/{}/hands/1/2/3".format(id),
+                                     params, expect_errors=True)
+    self.assertEqual(response.status_int, 400)
+    params = {'ns_score': 0, 'ew_score': 0}
     response = self.testapp.put_json("/api/tournaments/{}/hands/1/2/3".format(id),
                                      params, expect_errors=True)
     self.assertEqual(response.status_int, 400)
@@ -210,7 +213,7 @@ class AppTest(unittest.TestCase):
     id = self.AddBasicTournament()
     params = {'calls': { 'north': "T" }, 
               'ns_score': 75,
-              'ew_score': 25,
+              'ew_score': 125,
               'notes': 'I am a note'}
     response = self.testapp.put_json("/api/tournaments/{}/hands/1/2/3".format(id),
                                      params)
@@ -222,7 +225,7 @@ class AppTest(unittest.TestCase):
     self.assertEqual(1, len(hand_list))
     self.assertEqual( { 'north': "T" }, hand_list[0]['calls'])
     self.assertEqual(75, hand_list[0]['ns_score'])
-    self.assertEqual(25, hand_list[0]['ew_score'])
+    self.assertEqual(125, hand_list[0]['ew_score'])
     self.assertEqual('I am a note', hand_list[0]['notes'])
     self.assertEqual(1, hand_list[0]['board_no'])
     self.assertEqual(2, hand_list[0]['ns_pair']) 
