@@ -140,7 +140,7 @@ describe("movement-service module", function() {
                       "ns_score": 15,
                       "ew_score": 85
                     }
-                  }
+                  },
                 ]
               }, {
                 "round": 2,
@@ -148,6 +148,8 @@ describe("movement-service module", function() {
                 "opponent": 7,
                 "relay_table": false,
                 "hands": [{"hand_no": 5}]
+              }, {
+                "round": 3
               }]
             });
         var result = runPromise(service.getMovement("6969", 6), {flushHttp: true, expectSuccess: true});
@@ -157,11 +159,12 @@ describe("movement-service module", function() {
         expect(result.pair.players.length).toBe(2);
         expect(result.pair.players[0].name).toBe("The Firstest");
         expect(result.pair.players[1].email).toBe("garbage@hotmail.example");
-        expect(result.rounds.length).toBe(2);
+        expect(result.rounds.length).toBe(3);
         expect(result.rounds[0].roundNo).toBe(1);
         expect(result.rounds[0].table).toBe("1");
         expect(result.rounds[0].position).toBe(tichu.PairPosition.EAST_WEST);
         expect(result.rounds[0].opponent).toBe(9);
+        expect(result.rounds[0].isSitOut).toBe(false);
         expect(result.rounds[0].isRelayTable).toBe(true);
         expect(result.rounds[0].hands.length).toBe(2);
         expect(result.rounds[0].hands[0].score).toBeDefined();
@@ -173,6 +176,7 @@ describe("movement-service module", function() {
         expect(result.rounds[0].hands[0].score.notes).toBe("I am a note");
         expect(result.rounds[0].hands[1].score.calls.length).toBe(0);
         expect(result.rounds[0].hands[1].score.notes).toBeNull();
+        expect(result.rounds[2].isSitOut).toBe(true);
       });
 
       it("rejects the promise in case of an error", function() {
