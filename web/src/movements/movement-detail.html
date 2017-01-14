@@ -9,17 +9,16 @@
         <md-card flex="noshrink" ng-repeat="round in movementDetailController.movement.rounds">
             <md-card-header style="padding-bottom: 0">
                 <md-card-header-text>
-                    <span class="md-title">Round {{round.roundNo}}</span>
-                    <span class="md-subhead" ng-if="!round.isSitOut">
-                        vs. Pair #{{round.opponent}}
-                        at table #{{round.table}}
+                    <span class="md-title">
+                        Round {{round.roundNo}}<span ng-if="!round.isSitOut">, Table #{{round.table}},
                         <span ng-switch="round.position">
-                            (
                             <span ng-switch-when="N">North/South</span>
                             <span ng-switch-when="E">East/West</span>
                             <span ng-switch-default>{{ round.position }}</span>
-                            )
-                        </span>
+                        </span></span>
+                    </span>
+                    <span class="md-subhead" ng-if="!round.isSitOut">
+                        vs. Pair #{{round.opponent}}
                     </span>
                 </md-card-header-text>
             </md-card-header>
