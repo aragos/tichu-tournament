@@ -176,3 +176,5 @@ crashlytics-build.properties
 
 ### Karma coverage
 /web/coverage/
+
+!/web/bower_components/**
