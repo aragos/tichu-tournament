@@ -1,6 +1,7 @@
 import webapp2
 import json
 
+from generic_handler import GenericHandler
 from python.calculator import Calculate
 from python.calculator import GetMaxRounds
 from google.appengine.api import users
@@ -15,7 +16,7 @@ from models import PlayerPair
 from models import Tournament
 
 
-class ResultHandler(webapp2.RequestHandler):
+class ResultHandler(GenericHandler):
   def get(self, id):
     tourney = GetTourneyWithIdAndMaybeReturnStatus(self.response, id)
     if not tourney:
@@ -32,7 +33,7 @@ class ResultHandler(webapp2.RequestHandler):
     self.response.out.write(OutputJSON(hand_list, summaries))
 
 
-class XlxsResultHandler(webapp2.RequestHandler):
+class XlxsResultHandler(GenericHandler):
   def get(self, id):
     tourney = GetTourneyWithIdAndMaybeReturnStatus(self.response, id)
     if not tourney:
