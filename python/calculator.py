@@ -452,6 +452,8 @@ def OrderBy(boards, rank_by = "MP"):
     
 def GetMaxRounds(board_list):
   """ Gets the maximum number of rounds any team has played in the tournament. """
+  if not board_list:
+    return 0
   board_counts = {}
   for bs in board_list:
     for bsl in bs.ScoreBoard():
