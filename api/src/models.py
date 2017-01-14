@@ -1,6 +1,7 @@
 import datetime
 import json
 import random
+from python import boardgenerator
 
 from google.appengine.ext import ndb
 
@@ -20,20 +21,25 @@ class Tournament(ndb.Model):
   no_pairs = ndb.IntegerProperty()
 
   @classmethod
-  def Create(cls, boards, **kwargs):
-    '''Creates a new tournament with the given properties and populates its
-       boards.
+  def CreateAndPersist(cls, boards, **kwargs):
+    '''Creates and persists a new tournament with the given properties and
+      populates its boards.
 
     Args:
-      boards: list of board objects to persist with this tournament.
+      boards: List of handgenerator board objects to persist with this
+          tournament.
     '''
     tournament = cls(**kwargs)
+    tournament.put()
     i = 0
     for board in boards:
       i+=1
-      Board(board_number=i,
-            board=board.ToJson(),
-            parent=tournament)
+      board = Board(board_number=i,
+                    board=board.ToJson(),
+                    parent=tournament.key)
+      board.put()
+
+    return tournament
 
   def PutPlayers(self, player_list, no_pairs):
     ''' Create a new PlayerPair Entity corresponding to each player pair for 
@@ -158,6 +164,17 @@ class Tournament(ndb.Model):
            'ew_score': hand_score.ew_score,
            'notes': hand_score.notes})
     return hand_list
+
+  def GetBoards(self):
+    """Returns this tournaments boards.
+
+    Returns: List of boardgenerator board objects sorted by id.
+    """
+    boards = []
+    for board in Board.query(ancestor=self.key).fetch():
+      boards.append(boardgenerator.Board.FromJson(board))
+
+    return sorted(boards, key=lambda x: x.id)
 
 
 class PlayerPair(ndb.Model):

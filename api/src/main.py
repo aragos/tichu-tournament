@@ -1,5 +1,6 @@
 import webapp2
 
+from api.src.board_handler import PdfBoardHandler
 from auth_handler import AuthHandler
 from auth_handler import LoginHandler
 from auth_handler import LogoutHandler
@@ -30,4 +31,5 @@ app = webapp2.WSGIApplication([
     ('/api/tournaments/([^/]+)/movement/([^/]+)/?', MovementHandler),
     ('/api/tournaments/([^/]+)/results/?', ResultHandler),
     ('/api/tournaments/([^/]+)/xlsresults/?', XlxsResultHandler),
+    ('/api/tournaments/([^/]+)/pdfboards/?', PdfBoardHandler),
 ], debug=True)

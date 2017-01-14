@@ -10,7 +10,7 @@ from handler_utils import is_int
 from handler_utils import SetErrorStatus
 from models import Tournament
 from models import PlayerPair
-from python import handgenerator
+from python import boardgenerator
 
 class TourneyListHandler(GenericHandler):
   def get(self):
@@ -45,16 +45,15 @@ class TourneyListHandler(GenericHandler):
                                                            player_list):
       return
 
-    tourney = Tournament.Create(owner_id=user.user_id(),
-                                name = name,
-                                no_pairs=no_pairs,
-                                no_boards=no_boards,
-                                boards=handgenerator.GenerateBoards(35))
-    tourney_key = tourney.put()
+    tourney = Tournament.CreateAndPersist(owner_id=user.user_id(),
+                                          name = name,
+                                          no_pairs=no_pairs,
+                                          no_boards=no_boards,
+                                          boards=boardgenerator.GenerateBoards(35))
     tourney.PutPlayers(player_list, no_pairs)
     self.response.set_status(201)
     self.response.headers['Content-Type'] = 'application/json'
-    self.response.out.write(json.dumps({"id": str(tourney_key.id())}))
+    self.response.out.write(json.dumps({"id": str(tourney.key.id())}))
 
 
   def _ParseRequestInfoAndMaybeSetStatus(self):
