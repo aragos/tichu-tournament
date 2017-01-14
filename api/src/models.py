@@ -143,6 +143,21 @@ class Tournament(ndb.Model):
            'notes': hand_score.notes})
     return hand_list
 
+  def ScoredHands(self):
+    ''' Find all hands already scored in the tournament.
+
+    Return: 
+      A list of tuples (hand no, north/south team, east/west team) of all hands
+      scores in this tournament.
+    A less expensive and quicker method than GetScoredHandList(self).
+    '''
+    ret = []
+    hands = HandScore.query(HandScore.deleted == False,
+                            ancestor=self.key).fetch(keys_only=True)
+    for hand in hands:
+      ret.append(HandScore.DescriptionFromKeyId(hand.id()))
+    return ret
+
 
 class PlayerPair(ndb.Model):
   ''' Model for all the information about a player pair in a specific tournament.
@@ -243,6 +258,20 @@ class HandScore(ndb.Model):
       string to be used as id for a HandPair
     '''
     return str(hand_no) + ":" + str(ns_pair) + ":" + str(ew_pair)
+  
+  @classmethod
+  def DescriptionFromKeyId(self, id):
+    ''' Parse a key id into a tuple describing the hand.
+
+    Args:
+      id: String. Key id for the hand to be parsed. Must have format returned by
+        CreateKeyId.
+
+    Returns:
+      Tuple with members (hand_no, ns_pair, ew_pair).
+    '''
+    split = id.split(":")
+    return (int(split[0]), int(split[1]), int(split[2]))
 
   @classmethod
   def GetByHandParams(cls, parent_tourney, hand_no, ns_pair, ew_pair):

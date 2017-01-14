@@ -5,6 +5,7 @@ from generic_handler import GenericHandler
 from python.calculator import Calculate
 from python.calculator import GetMaxRounds
 from google.appengine.api import users
+from handler_utils import BuildMovementAndMaybeSetStatus
 from handler_utils import CheckUserOwnsTournamentAndMaybeReturnStatus
 from handler_utils import GetTourneyWithIdAndMaybeReturnStatus
 from handler_utils import SetErrorStatus
@@ -14,6 +15,57 @@ from python.xlsxio import WriteResultsToXlsx
 from python.xlsxio import OutputWorkbookAsBytesIO
 from models import PlayerPair
 from models import Tournament
+
+class CompleteScoringHandler(GenericHandler):
+  ''' Handles calls to /api/tournament/:id/unscoredHands '''
+  
+  def get(self, id):
+    tourney = GetTourneyWithIdAndMaybeReturnStatus(self.response, id)
+    if not tourney:
+      return
+
+    if not CheckUserOwnsTournamentAndMaybeReturnStatus(self.response,
+        users.get_current_user(), tourney):
+      return
+    
+    movement = BuildMovementAndMaybeSetStatus(
+        self.response, tourney.no_pairs, tourney.no_boards)
+    if not movement:
+      return
+    scored_hands = self._TuplesToDict(tourney.ScoredHands())
+    unscored_hands = []
+    for i in xrange(1, tourney.no_pairs + 1):
+      for round in movement.GetMovement(i):
+        hands = round.get('hands')
+        if not hands:
+          continue
+        for hand in hands:
+          position = round.get('position')
+          opponent = round.get('opponent')
+          if hand not in scored_hands.get(i, []):
+            if position[1] == 'N':
+              unscored_hands.append({"hand" : hand, "ns_pair": i,
+                                     "ew_pair" : opponent})
+
+    self.response.headers['Content-Type'] = 'application/json'
+    self.response.set_status(200)
+    self.response.out.write(json.dumps({"unscored_hands" : unscored_hands},
+                                       indent=2))
+
+  def _TuplesToDict(self, hands):
+    ''' Take tuples representing each hand and dump them into a per-pair dict.
+
+    Args:
+      hands: list of tuples (hand, ns_pair, ew_pair).
+
+    Returns:
+      Dictionary from user to list of hand numbers already played.
+    '''
+    ret = {}
+    for hand in hands:
+      ret.setdefault(hand[1], []).append(hand[0])
+      ret.setdefault(hand[2], []).append(hand[0])
+    return ret
 
 
 class ResultHandler(GenericHandler):

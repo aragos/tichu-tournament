@@ -90,7 +90,7 @@ class Movement:
       }
     '''
     return self.pair_dict[str(pair_no)]
-    
+
   def GetUnplayedHands(self, pair_no):
     ''' Construct hands that this pair will not play.
 

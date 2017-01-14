@@ -42,7 +42,7 @@ class HandHandler(GenericHandler):
       return
 
     hand_score = HandScore.GetByHandParams(tourney, board_no, ns_pair, ew_pair)
-    if hand_score and not hand_score.deleted:
+    if hand_score:
       self.response.set_status(200)
       return 
     self.response.set_status(204)

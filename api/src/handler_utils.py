@@ -2,7 +2,6 @@ import json
 
 from google.appengine.ext import ndb
 from models import Tournament
-from models import HandScore
 from movements import Movement
 
 
