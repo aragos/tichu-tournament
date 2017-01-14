@@ -1,6 +1,7 @@
 import datetime
 import json
 import random
+from python import boardgenerator
 
 from google.appengine.ext import ndb
 
@@ -18,6 +19,27 @@ class Tournament(ndb.Model):
   name = ndb.StringProperty()
   no_boards = ndb.IntegerProperty()
   no_pairs = ndb.IntegerProperty()
+
+  @classmethod
+  def CreateAndPersist(cls, boards, **kwargs):
+    '''Creates and persists a new tournament with the given properties and
+      populates its boards.
+
+    Args:
+      boards: List of handgenerator board objects to persist with this
+          tournament.
+    '''
+    tournament = cls(**kwargs)
+    tournament.put()
+    i = 0
+    for board in boards:
+      i+=1
+      board = Board(board_number=i,
+                    board=board.ToJson(),
+                    parent=tournament.key)
+      board.put()
+
+    return tournament
 
   def PutPlayers(self, player_list, no_pairs):
     ''' Create a new PlayerPair Entity corresponding to each player pair for 
@@ -146,7 +168,7 @@ class Tournament(ndb.Model):
   def ScoredHands(self):
     ''' Find all hands already scored in the tournament.
 
-    Return: 
+    Return:
       A list of tuples (hand no, north/south team, east/west team) of all hands
       scores in this tournament.
     A less expensive and quicker method than GetScoredHandList(self).
@@ -157,6 +179,17 @@ class Tournament(ndb.Model):
     for hand in hands:
       ret.append(HandScore.DescriptionFromKeyId(hand.id()))
     return ret
+
+  def GetBoards(self):
+    """Returns this tournaments boards.
+
+    Returns: List of boardgenerator board objects sorted by id.
+    """
+    boards = []
+    for board in Board.query(ancestor=self.key).fetch():
+      boards.append(boardgenerator.Board.FromJson(board))
+
+    return sorted(boards, key=lambda x: x.id)
 
 
 class PlayerPair(ndb.Model):
@@ -258,7 +291,7 @@ class HandScore(ndb.Model):
       string to be used as id for a HandPair
     '''
     return str(hand_no) + ":" + str(ns_pair) + ":" + str(ew_pair)
-  
+
   @classmethod
   def DescriptionFromKeyId(self, id):
     ''' Parse a key id into a tuple describing the hand.
@@ -347,3 +380,17 @@ class ChangeLog(ndb.Model):
     return { 'changed_by' : self.changed_by,
              'change' : json.loads(self.change),
              'timestamp_sec' :  self.key.id() }
+
+
+class Board(ndb.Model):
+  '''Record of a single board with a parent tournament.
+
+  Child of a tournament, keyed by board number.
+
+  Attributes:
+    board_number: Integer. Identifier of board within its parent tournament.
+    board: json object describing the board (cards, positions, first eight).
+  '''
+
+  board_number = ndb.IntegerProperty()
+  board = ndb.JsonProperty()
