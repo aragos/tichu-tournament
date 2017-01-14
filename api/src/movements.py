@@ -162,6 +162,8 @@ class Movement:
     self.unplayed_hands = {}
     for team, rounds in self.pair_dict.items():
       for round in rounds:
+        if not round.get("hands"):
+          continue
         self.total_boards = max(max(round["hands"]), self.total_boards)
         seen_hands[team] = seen_hands.get(team, set()).union(round["hands"])
     for team, hand_list in seen_hands.items():

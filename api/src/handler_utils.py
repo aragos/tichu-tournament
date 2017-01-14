@@ -112,6 +112,8 @@ def CheckValidMatchupForMovementAndMaybeSetStatus(response, movement, board_no,
   detail = ("NS pair {} and EW pairs {} do not play board {} against each " + 
            "other in this tournament format").format(ns_pair, ew_pair, board_no)
   for round in movement.GetMovement(ns_pair):
+    if not round.get('opponent'):
+      continue
     if round['opponent'] != ew_pair:
       continue
     if round['position'][1] != "N":

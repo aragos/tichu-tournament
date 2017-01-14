@@ -11,11 +11,14 @@
   </title>
   <link rel="stylesheet" href="bower_components/angular/angular-csp.css">
   <link rel="stylesheet" href="bower_components/angular-material/angular-material.css">
+  <link rel="stylesheet" href="bower_components/angular-material-data-table/dist/md-data-table.css">
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
 </head>
-<body layout="row" ng-cloak>
-
-  <div flex layout="column" tabIndex="-1" role="main" class="md-whiteframe-z2">
+<body class="layout-column" layout="column">
+  <div flex layout="column" layout-align="center center" class="flex layout-column layout-align-center-center" ng-if="false">
+    <h2>Loading...</h2>
+  </div>
+  <div ng-cloak flex layout="column" tabIndex="-1" role="main" class="md-whiteframe-z2">
 
     <md-toolbar ng-if="appController.showHeader && (appController.header || appController.backPath)"
                 layout="row"
@@ -38,6 +41,7 @@
   <script src="bower_components/angular-aria/angular-aria.js"></script>
   <script src="bower_components/angular-messages/angular-messages.js"></script>
   <script src="bower_components/angular-material/angular-material.js"></script>
+  <script src="bower_components/angular-material-data-table/dist/md-data-table.js"></script>
   <script src="bower_components/angular-route/angular-route.js"></script>
   <script src="src/common/models.js"></script>
   <script src="src/common/service-helpers.js"></script>
@@ -50,6 +54,7 @@
   <script src="src/movements/score-detail.js"></script>
   <script src="src/tournaments/tournament-detail.js"></script>
   <script src="src/tournaments/tournament-list.js"></script>
+  <script src="src/tournaments/tournament-results.js"></script>
   <script src="src/tournaments/tournament-service.js"></script>
   <script src="src/tournaments/tournament-store.js"></script>
 </body>

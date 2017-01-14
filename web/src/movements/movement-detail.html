@@ -9,23 +9,31 @@
         <md-card flex="noshrink" ng-repeat="round in movementDetailController.movement.rounds">
             <md-card-header style="padding-bottom: 0">
                 <md-card-header-text>
-                    <span class="md-title">Round {{round.roundNo}}</span>
-                    <span class="md-subhead">
-                        vs. Pair #{{round.opponent}}
-                        at table #{{round.table}}
+                    <span class="md-title">
+                        Round {{round.roundNo}}<span ng-if="!round.isSitOut">, Table #{{round.table}},
                         <span ng-switch="round.position">
-                            (
                             <span ng-switch-when="N">North/South</span>
                             <span ng-switch-when="E">East/West</span>
                             <span ng-switch-default>{{ round.position }}</span>
-                            )
-                        </span>
+                        </span></span>
+                    </span>
+                    <span class="md-subhead" ng-if="!round.isSitOut">
+                        vs. Pair #{{round.opponent}}
                     </span>
                 </md-card-header-text>
             </md-card-header>
-            <md-card-content layout="column" style="padding-top: 0">
+            <md-card-content layout="column" style="padding-top: 0" >
                 <md-list style="padding-bottom: 0">
                     <md-list-item class="md-2-line"
+                                  ng-if="round.isSitOut">
+                        <md-icon class="md-avatar-icon">assignment_late</md-icon>
+                        <div class="md-list-item-text" layout="column">
+                            <h3>Sit Out</h3>
+                            <p>This pair does not play this round.</p>
+                        </div>
+                    </md-list-item>
+                    <md-list-item class="md-2-line"
+                                  ng-if="!round.isSitOut"
                                   ng-repeat="hand in round.hands"
                                   ng-click="movementDetailController.editHand(round, hand)">
                         <md-icon class="md-avatar-icon"

@@ -51,7 +51,7 @@ class AppTest(unittest.TestCase):
     response_dict = json.loads(response.body)
     self.assertEqual([], response_dict['players'])
     self.assertEqual('name', response_dict['name'])
-    self.assertEqual(6, len(response_dict['movement']))
+    self.assertEqual(7, len(response_dict['movement']))
 
 
   def testGetMovement_right_header(self):
@@ -69,7 +69,7 @@ class AppTest(unittest.TestCase):
     self.assertEqual([{"email": "My email", "name": "My name"}],
                      response_dict['players'])
     self.assertEqual('name', response_dict['name'])
-    self.assertEqual(6, len(response_dict['movement']))
+    self.assertEqual(7, len(response_dict['movement']))
 
   def testGetMovement_scores(self):
     self.loginUser()
@@ -131,7 +131,7 @@ class AppTest(unittest.TestCase):
     response_dict = json.loads(response.body)
     self.assertEqual([], response_dict['players'])
     self.assertEqual('name', response_dict['name'])
-    self.assertEqual(6, len(response_dict['movement']))
+    self.assertEqual(7, len(response_dict['movement']))
     expected_hands = [
         {"hand_no" : 13, "score"  : { "ns_score" : 20, "calls" : {}, "ew_score" : 80 }},
         {"hand_no" : 14, "score"  : { "ns_score" : 10, "calls" : {}, "ew_score" : 90 }}, 
@@ -150,7 +150,7 @@ class AppTest(unittest.TestCase):
     self.assertEqual([{"email": "My email", "name": "My name"}],
                      response_dict['players'])
     self.assertEqual('name', response_dict['name'])
-    self.assertEqual(6, len(response_dict['movement']))
+    self.assertEqual(7, len(response_dict['movement']))
     expected_hands = [
         {"hand_no" : 13, "score"  : { "calls" : {}, "ns_score" : 20, "ew_score" : 80 }},
         {"hand_no" : 14}, {"hand_no" : 15}]
@@ -189,7 +189,7 @@ class AppTest(unittest.TestCase):
     response_dict = json.loads(response.body)
     self.assertEqual([], response_dict['players'])
     self.assertEqual('name', response_dict['name'])
-    self.assertEqual(6, len(response_dict['movement']))
+    self.assertEqual(7, len(response_dict['movement']))
     self.assertScoresNotPresent(response_dict['movement'],
                                 Set([1, 2, 3, 4, 5, 6, 7]), "Team 5")
                                 
@@ -202,7 +202,7 @@ class AppTest(unittest.TestCase):
     response_dict = json.loads(response.body)
     self.assertEqual([], response_dict['players'])
     self.assertEqual('name', response_dict['name'])
-    self.assertEqual(6, len(response_dict['movement']))
+    self.assertEqual(7, len(response_dict['movement']))
     expected_hands = [
         {"hand_no" : 13, "score"  : { "calls" : {}, "ns_score" : 125, "ew_score" : -25 }},
         {"hand_no" : 14}, {"hand_no" : 15}]
@@ -224,7 +224,7 @@ class AppTest(unittest.TestCase):
     response_dict = json.loads(response.body)
     self.assertEqual([], response_dict['players'])
     self.assertEqual('name', response_dict['name'])
-    self.assertEqual(6, len(response_dict['movement']))
+    self.assertEqual(7, len(response_dict['movement']))
     expected_hands = [
         {"hand_no" : 13, "score"  : {"calls" : {'south' : "T"}, "ns_score" : 120, "ew_score" : 80 }},
         {"hand_no" : 14}, {"hand_no" : 15}]
@@ -243,7 +243,7 @@ class AppTest(unittest.TestCase):
     self.assertEqual([{"email": "My email", "name": "My name"}],
                      response_dict['players'])
     self.assertEqual('name', response_dict['name'])
-    self.assertEqual(6, len(response_dict['movement']))
+    self.assertEqual(7, len(response_dict['movement']))
     expected_hands = [
         {"hand_no" : 13, "score"  : {"calls" : {'south' : "T"}, "ns_score" : 120, "ew_score" : 80 }},
         {"hand_no" : 14}, {"hand_no" : 15}]

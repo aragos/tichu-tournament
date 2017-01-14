@@ -1,10 +1,16 @@
 { "1": [{ 
+      "round" : 1 
+    },
+    { 
       "position" : "5E",
       "round" : 2, 
       "opponent" : 9,
       "hands" : [13, 14, 15],
       "relay_table" : true
     }, 
+    { 
+      "round" : 3 
+    },
     { 
       "position" : "4E",
       "round" : 4, 
@@ -39,6 +45,9 @@
       "opponent" : 10,
       "hands" : [16, 17, 18],
       "relay_table" : false 
+    },
+    { 
+      "round" : 2 
     },
     {
       "position" : "5N",
@@ -116,6 +125,9 @@
       "opponent" : 9, 
       "hands" : [16, 17, 18],
       "relay_table" : true 
+    },
+    { 
+      "round" : 7 
     }],
 "4" : [{
       "position" : "2N",
@@ -158,6 +170,9 @@
       "opponent" : 1, 
       "hands" : [22, 23, 24],
       "relay_table" : false 
+    },
+    { 
+      "round" : 7 
     }],
 "5" : [{
       "position" : "4E",
@@ -173,6 +188,9 @@
       "hands" : [1, 2, 3],
       "relay_table" : false
     }, 
+    { 
+      "round" : 3 
+    },
     { 
       "position" : "1N", 
       "round" : 4, 
@@ -230,6 +248,9 @@
       "relay_table" : false 
     },
     { 
+      "round" : 5 
+    },
+    { 
       "position" : "4N",
       "round" : 6, 
       "opponent" : 2, 
@@ -264,6 +285,9 @@
       "hands" : [7, 8, 9],
       "relay_table" : false 
     }, 
+    { 
+      "round" : 4 
+    },
     { 
       "position" : "3N",
       "round" : 5, 
@@ -319,6 +343,12 @@
       "opponent" : 7, 
       "hands" : [4, 5, 6],
       "relay_table" : true
+    },
+    { 
+      "round" : 6
+    },
+    { 
+      "round" : 7 
     }],
 "9" : [{
       "position" : "3E",
@@ -334,6 +364,9 @@
       "hands" : [13, 14, 15],
       "relay_table" : true
     }, 
+    { 
+      "round" : 3 
+    },
     { 
       "position" : "3N",
       "round" : 4, 
@@ -398,6 +431,9 @@
       "relay_table" : false
     },
     { 
+      "round" : 6 
+    },
+    { 
       "position" : "1N",
       "round" : 7, 
       "opponent" : 6, 
@@ -438,6 +474,9 @@
       "opponent" : 5, 
       "hands" : [22, 23, 24],
       "relay_table" : false
+    },
+    { 
+      "round" : 6 
     },
     { 
       "position" : "3E",

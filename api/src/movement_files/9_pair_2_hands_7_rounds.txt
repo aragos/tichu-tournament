@@ -39,6 +39,9 @@
       "opponent" : 4, 
       "hands" : [13, 14],
       "relay_table" : false 
+    },
+    {
+      "round" : 7
     }],
 "2" : [{
       "position" : "3N",
@@ -53,6 +56,9 @@
       "opponent" : 9,
       "hands" : [3, 4],
       "relay_table" : false
+    },
+    {
+      "round" : 3
     }, 
     { 
       "position" : "2E", 
@@ -88,6 +94,9 @@
       "opponent" : 2,
       "hands" : [7, 8],
       "relay_table" : false 
+    },
+    {
+      "round" : 2
     },
     { 
       "position" : "1E", 
@@ -173,7 +182,9 @@
       "hands" : [9, 10],
       "relay_table" : false
     }],
-"5" : [
+"5" : [{
+      "round" : 1
+    },
     {
       "position" : "2N",
       "round" : 2, 
@@ -243,6 +254,9 @@
       "opponent" : 3,
       "hands" : [1, 2],
       "relay_table" : true 
+    },
+    {
+      "round" : 5
     }, 
     { 
       "position" : "1E",
@@ -278,6 +292,9 @@
       "opponent" : 8,
       "hands" : [1, 2],
       "relay_table" : false 
+    },
+    {
+      "round" : 4
     }, 
     { 
       "position" : "1N",
@@ -334,6 +351,9 @@
       "opponent" : 3, 
       "hands" : [11, 12],
       "relay_table" : false
+    },
+    {
+      "round" : 6
     },
     { 
       "position" : "3N",

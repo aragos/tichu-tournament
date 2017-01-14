@@ -98,7 +98,9 @@ class MovementHandler(GenericHandler):
             }
         } 
     '''
-    hand_nos = round['hands']
+    hand_nos = round.get('hands')
+    if not hand_nos:
+      return
     del round['hands']
     for h in hand_nos:  
       if round['position'][1] == "N":

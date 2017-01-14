@@ -288,6 +288,12 @@ tichu.MovementRound = function MovementRound() {
   this.roundNo = 0;
 
   /**
+   * Whether this round is a sit-out round, meaning the other properties are useless.
+   * @type {boolean}
+   */
+  this.isSitOut = false;
+
+  /**
    * The table number.
    * @type {string}
    */

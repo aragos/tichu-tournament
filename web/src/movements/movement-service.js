@@ -244,6 +244,16 @@
     ServiceHelpers.assertType(context , movementRound, "object");
     var round = new tichu.MovementRound();
     round.roundNo = ServiceHelpers.assertType(context + " round", movementRound['round'], "number");
+    if (movementRound['opponent'] === null || movementRound['opponent'] === undefined) {
+      round.isSitOut = true;
+      return round;
+    } else {
+      round.isSitOut = false;
+    }
+    round.opponent = ServiceHelpers.assertType(context + " opponent", movementRound['opponent'], 'number');
+    if (round.opponent <= 0 || Math.floor(round.opponent) !== round.opponent) {
+      throw new Error(context + " opponent was not a positive integer");
+    }
     var position = ServiceHelpers.assertType(context + " position", movementRound['position'], "string");
     if (position.length <= 1) {
       throw new Error(context + " position was too short")
@@ -252,10 +262,6 @@
     round.table = position.substring(0, position.length - 1);
     if (!tichu.isValidPairPosition(round.side)) {
       throw new Error(context + " position didn't end in a valid side");
-    }
-    round.opponent = ServiceHelpers.assertType(context + " opponent", movementRound['opponent'], 'number');
-    if (round.opponent <= 0 || Math.floor(round.opponent) !== round.opponent) {
-      throw new Error(context + " opponent was not a positive integer");
     }
     round.isRelayTable = !!ServiceHelpers.assertType(
         context + " relay table", movementRound['relay_table'], "boolean");
