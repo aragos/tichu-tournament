@@ -2,20 +2,20 @@ import requests
 import json
 
 PROD_TOURNEY_ID = 5649391675244544
-TOURNEY_ID = 5649391675244544
+TOURNEY_ID = 5629499534213120
 
 
 PAIR_IDS = "pair_ids": [
-    "KEZI", 
-    "NWQO", 
-    "RHDE", 
-    "SAOU", 
-    "QOAG", 
-    "EJRV", 
-    "ESQB", 
-    "JAQS", 
-    "IIBC", 
-    "RLKQ"
+    "CUTQ", 
+    "OBRH", 
+    "XJTW", 
+    "YOTH", 
+    "CEET", 
+    "RBJS", 
+    "LIRD", 
+    "ADMC", 
+    "TIQU", 
+    "OHWX"
   ]
 
 PROD_PAIR_IDS = [
@@ -31,6 +31,9 @@ PROD_PAIR_IDS = [
     "BLPM"
   ]
   
+URL = "https://http://localhost:8080"
+
+PROD_URL = "https://tichu-tournament.appspot.com"
 
 
 def GetMovements(pair_no):
@@ -38,7 +41,7 @@ def GetMovements(pair_no):
     "Content-Type": "application/json",
     'X-tichu-pair-code' : PAIR_IDS[pair_no - 1]
   }
-  r = requests.get("https://tichu-tournament.appspot.com/api/tournaments/{}/movement/{}".format(
+  r = requests.get(URL + "/api/tournaments/{}/movement/{}".format(
       TOURNEY_ID, pair_no),
       headers=headers)
   r.raise_for_status()
