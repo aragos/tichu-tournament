@@ -211,7 +211,7 @@ describe("movement-service module", function() {
         expect(result.redirectToLogin).toBe(true);
       });
 
-      it("does not make a second call even if a request comes in while waiting for the server the first time", function() {
+      it("does not make a second call even if a request with refresh set comes in while waiting for the server the first time", function() {
         $httpBackend.expectGET('/api/tournaments/6606/movement/6')
             .respond(200, {
               "name": "a tournament",
@@ -219,7 +219,7 @@ describe("movement-service module", function() {
               "movement": []
             });
         var firstPromise = service.getMovement("6606", 6);
-        var secondPromise = service.getMovement("6606", 6);
+        var secondPromise = service.getMovement("6606", 6, null, true);
         var firstResult = runPromise(firstPromise, {flushHttp: true, expectSuccess: true});
         var secondResult = runPromise(secondPromise, {flushHttp: false, expectSuccess: true});
         expect(secondResult).toBe(firstResult);
@@ -245,6 +245,26 @@ describe("movement-service module", function() {
         var firstResult = runPromise(firstPromise, {flushHttp: true, expectSuccess: true});
         var secondResult = runPromise(secondPromise, {flushHttp: false, expectSuccess: true});
         expect(secondResult).toBe(firstResult);
+      });
+
+      it("does make a second call if a request with refresh comes after resolving", function() {
+        $httpBackend.expectGET('/api/tournaments/6606/movement/6').respond(200, {
+          "name": "a tournament",
+          "players": [],
+          "movement": []
+        });
+        var firstPromise = service.getMovement("6606", 6, null);
+        var firstResult = runPromise(firstPromise, {flushHttp: true, expectSuccess: true});
+
+        $httpBackend.expectGET('/api/tournaments/6606/movement/6').respond(200, {
+          "name": "a different tournament",
+          "players": [],
+          "movement": []
+        });
+        var secondPromise = service.getMovement("6606", 6, null, true);
+        var secondResult = runPromise(secondPromise, {flushHttp: true, expectSuccess: true});
+        expect(secondResult).toBe(firstResult);
+        expect(firstResult.tournamentId.name).toBe("a different tournament");
       });
 
       it("reuses and updates the same Hand object for opposite sides of the same hand", function() {

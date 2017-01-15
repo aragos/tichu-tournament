@@ -9,13 +9,24 @@ describe("tichu-movement-detail module", function() {
     var $controller;
     var $route;
     var $mdDialog;
+    var $mdToast;
     var $location;
     var $window;
     var dialogDeferred;
+    var fakeMovementService;
+    var movementDeferred;
 
     beforeEach(module(function($provide) {
       $window = {location: {href: "/tournaments/123456/movement/7"}};
       $provide.value("$window", $window);
+      $provide.factory("TichuMovementService", function($q) {
+        movementDeferred = $q.defer();
+        return {
+          getMovement: jasmine.createSpy("getMovement").and.callFake(function() {
+            return movementDeferred.promise;
+          })
+        }
+      });
     }));
 
     beforeEach(inject(function(/** angular.Scope */ _$rootScope_,
@@ -23,7 +34,9 @@ describe("tichu-movement-detail module", function() {
                                /** angular.$controller */ _$controller_,
                                /** $route */ _$route_,
                                /** angular.$location */ _$location_,
-                               /** $mdDialog */ _$mdDialog_) {
+                               /** $mdToast */ _$mdToast_,
+                               /** $mdDialog */ _$mdDialog_,
+                               TichuMovementService) {
       $rootScope = _$rootScope_;
       var appScope = $rootScope.$new(false);
       appScope.appController = {
@@ -36,7 +49,10 @@ describe("tichu-movement-detail module", function() {
       $route = _$route_;
       $location = _$location_;
       $mdDialog = _$mdDialog_;
+      $mdToast = _$mdToast_;
+      fakeMovementService = TichuMovementService;
       spyOn($route, "reload");
+      spyOn($mdToast, "showSimple");
       spyOn($mdDialog, "show").and.callFake(function (presets) {
         dialogDeferred = $q.defer();
         return dialogDeferred.promise;
@@ -159,6 +175,78 @@ describe("tichu-movement-detail module", function() {
         }
       });
       expect($mdDialog.show).toHaveBeenCalled();
+    });
+
+    it("sets a refresh function which completes when the refresh promise does", function() {
+      var tournamentHeader = new tichu.TournamentHeader("123456789");
+      tournamentHeader.name = "my tournament";
+      var pair = new tichu.TournamentPair(7);
+      var movement = new tichu.Movement(tournamentHeader, pair);
+      loadController({
+        pairCode: "APES",
+        movement: movement
+      });
+
+      var promise = header.refresh.call(null);
+      var result = null;
+      promise.then(function() {
+        result = true;
+      }).catch(function(failure) {
+        result = {promiseRejectedWith: failure};
+      });
+      expect(fakeMovementService.getMovement).toHaveBeenCalledWith("123456789", 7, "APES", true);
+      expect(result).toBe(null);
+
+      movementDeferred.resolve(movement);
+      $rootScope.$apply();
+      expect(result).toBe(true);
+      expect($mdToast.showSimple).toHaveBeenCalled();
+    });
+
+    it("sets a refresh function which rejects when the refresh promise does", function() {
+      var tournamentHeader = new tichu.TournamentHeader("123456789");
+      tournamentHeader.name = "my tournament";
+      var pair = new tichu.TournamentPair(7);
+      var movement = new tichu.Movement(tournamentHeader, pair);
+      loadController({
+        pairCode: null,
+        movement: movement
+      });
+
+      var promise = header.refresh.call(null);
+      var result = null;
+      promise.then(function(success) {
+        result = {promiseResolvedWith: success};
+      }).catch(function() {
+        result = false;
+      });
+
+      var error = new tichu.RpcError();
+      error.error = "boom";
+      error.detail = "an explosion happened";
+      error.redirectToLogin = false;
+      movementDeferred.reject(error);
+      $rootScope.$apply();
+      expect(result).toBe(false);
+      expect($mdToast.showSimple).toHaveBeenCalled();
+    });
+
+    it("skips toasting if the scope is dead when refresh is called", function() {
+      var tournamentHeader = new tichu.TournamentHeader("123456789");
+      tournamentHeader.name = "my tournament";
+      var pair = new tichu.TournamentPair(7);
+      var movement = new tichu.Movement(tournamentHeader, pair);
+      loadController({
+        pairCode: null,
+        movement: movement
+      });
+
+      var promise = header.refresh.call(null);
+      scope.$destroy();
+
+      movementDeferred.resolve();
+      $rootScope.$apply();
+      expect($mdToast.showSimple).not.toHaveBeenCalled();
     });
 
     it("reloads the page when the dialog is OK'd", function() {
