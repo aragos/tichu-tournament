@@ -6,6 +6,9 @@
    * @constructor
    * @param {!angular.Scope} $scope
    * @param {$mdDialog} $mdDialog
+   * @param {$mdToast} $mdToast
+   * @param {TichuMovementService} TichuMovementService
+   * @param {angular.$q} $q
    * @param {$log} $log
    * @param {angular.$window} $window
    * @param {angular.$location} $location
@@ -13,13 +16,14 @@
    * @param {!{pairCode: ?string, failure: (tichu.RpcError|undefined), movement: (tichu.Movement|undefined)}} loadResults
    * @ngInject
    */
-  function MovementDetailController($scope, $mdDialog, $log, $window, $location, $route, loadResults) {
+  function MovementDetailController($scope, $mdDialog, $mdToast, TichuMovementService, $q, $log, $window, $location, $route, loadResults) {
     $scope.appController.setPageHeader({
       header: loadResults.failure
           ? "Movement Error"
           : "Pair #" + loadResults.movement.pair.pairNo + " - " + loadResults.movement.tournamentId.name,
       backPath: (loadResults.pairCode || loadResults.failure) ? "/home" : "/tournaments/" + loadResults.movement.tournamentId.id,
-      showHeader: true
+      showHeader: true,
+      refresh: loadResults.failure ? null : this._refresh.bind(this)
     });
 
     /**
@@ -52,6 +56,20 @@
     this._$mdDialog = $mdDialog;
 
     /**
+     * The toast service injected at creation.
+     * @type {$mdToast}
+     * @private
+     */
+    this._$mdToast = $mdToast;
+
+    /**
+     * The promise service injected at creation.
+     * @type {angular.$q}
+     * @private
+     */
+    this._$q = $q;
+
+    /**
      * The logging service injected at creation.
      * @type {$log}
      * @private
@@ -65,8 +83,22 @@
      */
     this._showingDialog = false;
 
+    /**
+     * The movement service used to refresh the movement.
+     * @type {TichuMovementService}
+     * @private
+     */
+    this._movementService = TichuMovementService;
+
+    /**
+     * Whether this page has already exited.
+     * @type {boolean}
+     * @private
+     */
+    this._destroyed = false;
+
+    var self = this;
     if (this.failure) {
-      var self = this;
       var hasPlayerCode = !!this.playerCode;
       var redirectToLogin = this.failure.redirectToLogin;
       var dialog = $mdDialog.confirm()
@@ -103,9 +135,13 @@
       }).finally(function () {
         self._showingDialog = false;
       });
-
       $scope.$on("$destroy", function () {
+        self._destroyed = true;
         $mdDialog.cancel(true);
+      });
+    } else {
+      $scope.$on("$destroy", function () {
+        self._destroyed = true;
       });
     }
   }
@@ -147,6 +183,26 @@
     }).finally(function() {
       self._showingDialog = false;
     })
+  };
+
+  /**
+   * Updates the movement with the latest data from the server.
+   */
+  MovementDetailController.prototype._refresh = function refresh() {
+    var $mdToast = this._$mdToast;
+    var $q = this._$q;
+    var self = this;
+    return this._movementService.getMovement(
+        this.movement.tournamentId.id, this.movement.pair.pairNo, this.playerCode, true).then(function() {
+      if (!self._destroyed) {
+        $mdToast.showSimple("Refreshed!");
+      }
+    }).catch(function(/** tichu.RpcError */ error) {
+      if (!self._destroyed) {
+        $mdToast.showSimple("Failed to refresh: " + error.error);
+      }
+      return $q.reject(error);
+    });
   };
 
   /**

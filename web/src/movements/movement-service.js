@@ -68,18 +68,19 @@
    *
    * @param {string} tournamentId The tournament ID to get a movement from.
    * @param {number} pairNo The pair number whose movement should be retrieved.
-   * @param {string=} pairCode If present, the pair code to authenticate with.
+   * @param {?string=} pairCode If present, the pair code to authenticate with.
+   * @param {boolean=} refresh If true, ignores cached results.
    * @returns {angular.$q.Promise<tichu.Movement>}
    */
-  TichuMovementService.prototype.getMovement = function getMovement(tournamentId, pairNo, pairCode) {
+  TichuMovementService.prototype.getMovement = function getMovement(tournamentId, pairNo, pairCode, refresh) {
     var $q = this._$q;
     var $log = this._$log;
-    if (this._movementStore.hasMovement(tournamentId, pairNo)) {
+    if (!refresh && this._movementStore.hasMovement(tournamentId, pairNo)) {
       return $q.when(this._movementStore.getOrCreateMovement(tournamentId, pairNo));
     }
     var movementPromiseCacheKey =
         encodeURIComponent(tournamentId) + "/" + encodeURIComponent(pairNo.toString())
-        + "/" + encodeURIComponent(pairCode);
+        + "/" + encodeURIComponent(pairCode || "");
     if (!this._movementPromiseCache.get(movementPromiseCacheKey)) {
       var path = "/api/tournaments/" + encodeURIComponent(tournamentId)
           + "/movement/" + encodeURIComponent(pairNo.toString());

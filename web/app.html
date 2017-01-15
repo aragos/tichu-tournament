@@ -20,7 +20,7 @@
   </div>
   <div ng-cloak flex layout="column" tabIndex="-1" role="main" class="md-whiteframe-z2">
 
-    <md-toolbar ng-if="appController.showHeader && (appController.header || appController.backPath)"
+    <md-toolbar ng-if="appController.showHeader && (appController.header || appController.backPath || appController.refresher)"
                 layout="row"
                 class="md-whiteframe-z1">
       <div class="md-toolbar-tools">
@@ -28,8 +28,16 @@
           <md-icon flex="auto">arrow_back</md-icon>
         </md-button>
         <h2 style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis">{{ appController.header }}</h2>
+        <span flex></span>
+        <md-button class="md-icon-button"
+                   ng-if="appController.refresher"
+                   ng-disabled="appController.refreshStatus === null"
+                   ng-click="appController.refresh()">
+          <md-icon flex="auto">{{ appController.refreshStatus === false ? "sync_problem" : "sync" }}</md-icon>
+        </md-button>
       </div>
     </md-toolbar>
+    <md-progress-linear class="md-accent" ng-disabled="!appController.refresher || appController.refreshStatus !== null"></md-progress-linear>
 
     <md-content flex id="content" layout="column" ng-view>
     </md-content>
