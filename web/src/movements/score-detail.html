@@ -63,6 +63,13 @@
                 <span>This hand's score will be deleted.</span>
             </div>
             <div class="md-dialog-content" layout="column" ng-if="!scoreDetailController.deleting">
+                <div layout="column"
+                     style="padding: 0; margin: 0"
+                     layout-align="center center"
+                     ng-if="scoreDetailController.hand.score && !scoreDetailController.overwriting">
+                    <h4 style="padding: 0; margin: 0">This hand is already scored.</h4>
+                    <md-button class="md-warn" ng-click="scoreDetailController.overwriting = true">Edit it anyway</md-button>
+                </div>
                 <div layout="row">
                     <div layout="column" style="width:10em;" flex="50" flex-order="{{ scoreDetailController.position === 'E' ? 2 : 1 }}">
                         <h3 style="text-align: center;margin-top: 0">
@@ -78,6 +85,7 @@
                                    max="400"
                                    step="5"
                                    md-no-asterisk
+                                   ng-disabled="scoreDetailController.hand.score && !scoreDetailController.overwriting"
                                    required />
                             <div ng-messages="scoreForm.northSouthScore.$error">
                                 <div ng-message="required">Enter a score.</div>
@@ -88,7 +96,9 @@
                         </md-input-container>
                         <md-input-container>
                             <label for="northCall">North</label>
-                            <md-select id="northCall" ng-model="scoreDetailController.score.calls.north">
+                            <md-select id="northCall"
+                                       ng-model="scoreDetailController.score.calls.north"
+                                       ng-disabled="scoreDetailController.hand.score && !scoreDetailController.overwriting">
                                 <md-option value="" md-option-empty>No call</md-option>
                                 <md-option value="T">Tichu</md-option>
                                 <md-option value="GT">Grand Tichu</md-option>
@@ -96,7 +106,9 @@
                         </md-input-container>
                         <md-input-container>
                             <label for="southCall">South</label>
-                            <md-select id="southCall" ng-model="scoreDetailController.score.calls.south">
+                            <md-select id="southCall"
+                                       ng-model="scoreDetailController.score.calls.south"
+                                       ng-disabled="scoreDetailController.hand.score && !scoreDetailController.overwriting">
                                 <md-option value="" md-option-empty>No call</md-option>
                                 <md-option value="T">Tichu</md-option>
                                 <md-option value="GT">Grand Tichu</md-option>
@@ -116,6 +128,7 @@
                                    min="-425"
                                    max="400"
                                    step="5"
+                                   ng-disabled="scoreDetailController.hand.score && !scoreDetailController.overwriting"
                                    md-no-asterisk
                                    required/>
                             <div ng-messages="scoreForm.eastWestScore.$error">
@@ -127,7 +140,9 @@
                         </md-input-container>
                         <md-input-container>
                             <label for="eastCall">East</label>
-                            <md-select id="eastCall" ng-model="scoreDetailController.score.calls.east">
+                            <md-select id="eastCall"
+                                       ng-model="scoreDetailController.score.calls.east"
+                                       ng-disabled="scoreDetailController.hand.score && !scoreDetailController.overwriting">
                                 <md-option value="" md-option-empty>No call</md-option>
                                 <md-option value="T">Tichu</md-option>
                                 <md-option value="GT">Grand Tichu</md-option>
@@ -135,7 +150,9 @@
                         </md-input-container>
                         <md-input-container>
                             <label for="westCall">West</label>
-                            <md-select id="westCall" ng-model="scoreDetailController.score.calls.west">
+                            <md-select id="westCall"
+                                       ng-model="scoreDetailController.score.calls.west"
+                                       ng-disabled="scoreDetailController.hand.score && !scoreDetailController.overwriting">
                                 <md-option value="" md-option-empty>No call</md-option>
                                 <md-option value="T">Tichu</md-option>
                                 <md-option value="GT">Grand Tichu</md-option>
@@ -147,7 +164,8 @@
                     <label for="scoringNotes">Notes</label>
                     <textarea id="scoringNotes"
                               name="scoringNotes"
-                              ng-model="scoreDetailController.score.notes">
+                              ng-model="scoreDetailController.score.notes"
+                              ng-disabled="scoreDetailController.hand.score && !scoreDetailController.overwriting">
                     </textarea>
                 </md-input-container>
             </div>
@@ -159,7 +177,7 @@
             </md-button>
             <md-button ng-class="{'md-warn': scoreDetailController.deleting}"
                        ng-click="scoreDetailController.save()"
-                       ng-disabled="scoreForm.$invalid || (!scoreDetailController.deleting && scoreDetailController.hand.score && scoreForm.$pristine)">
+                       ng-disabled="scoreForm.$invalid || (!scoreDetailController.deleting && scoreForm.$pristine) || (scoreDetailController.hand.score && !scoreDetailController.overwriting)">
                 <span ng-if="!scoreDetailController.deleting && scoreDetailController.hand.score">
                     Update Score
                 </span>
