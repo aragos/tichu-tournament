@@ -1,0 +1,14 @@
+runtime: python27
+api_version: 1
+threadsafe: true
+
+handlers:
+- url: /api/.*
+  script: api.src.main.app
+- url: /bower_components
+  static_dir: web/bower_components
+- url: /src
+  static_dir: web/src
+- url: /.*
+  static_files: web/app.html
+  upload: web/app.html
