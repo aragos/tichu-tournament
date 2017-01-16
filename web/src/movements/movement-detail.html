@@ -1,8 +1,9 @@
 <div layout="column" layout-align="start center">
     <div style="width: 30em; padding: 0.5em" ng-if="movementDetailController.movement.pair.players">
         <md-icon md-font-set="material-icons">people</md-icon>
+        &ensp;
         <span ng-repeat="player in movementDetailController.movement.pair.players">
-            {{player.name}}<span ng-if="!$last">, </span>
+            {{player.name}}<span ng-if="!$last">,&ensp;</span>
         </span>
     </div>
     <div style="width: 30em" layout="column">
@@ -50,8 +51,7 @@
                             <p ng-if="!hand.score">Click to score hand</p>
                             <p ng-if="hand.score && hand.score.calls.length">
                                 <span ng-repeat="call in hand.score.calls">
-                                    {{ call | tichuMovementFormatCall}}
-                                    <span ng-if="!$last"> / </span>
+                                    {{ call | tichuMovementFormatCall}}<span ng-if="!$last">&ensp;/&ensp;</span>
                                 </span>
                             </p>
                             <p ng-if="hand.score && !hand.score.calls.length">
