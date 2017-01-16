@@ -12,3 +12,21 @@ handlers:
 - url: /.*
   static_files: web/app.html
   upload: web/app.html
+
+skip_files:
+- ^(.*/)?#.*#$
+- ^(.*/)?.*~$
+- ^(.*/)?.*\.py[co]$
+- ^(.*/)?.*/RCS/.*$
+- ^(.*/)?\..*$
+- ^node_modules$
+- ^docs$
+- ^api/test$
+- ^\.bowerrc$
+- ^\.gitignore$
+- ^\.idea$
+- ^app\.yaml$
+- ^Gruntfile\.js$
+- ^karma\.conf\.js$
+- ^package\.json$
+- ^README\.md$

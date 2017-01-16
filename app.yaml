@@ -10,3 +10,23 @@ handlers:
 - url: /.*
   static_files: build/web/dist/app.html
   upload: build/web/dist/app.html
+
+skip_files:
+- ^(.*/)?#.*#$
+- ^(.*/)?.*~$
+- ^(.*/)?.*\.py[co]$
+- ^(.*/)?.*/RCS/.*$
+- ^(.*/)?\..*$
+- ^web$
+- ^node_modules$
+- ^docs$
+- ^api/test$
+- ^build/(?!web($|/dist($|/))).*$
+- ^\.bowerrc$
+- ^\.gitignore$
+- ^\.idea$
+- ^app-dev\.yaml$
+- ^Gruntfile\.js$
+- ^karma\.conf\.js$
+- ^package\.json$
+- ^README\.md$
