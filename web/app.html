@@ -9,9 +9,15 @@
   <title ng-bind="(appController.header ? appController.header + ' - ' : '') + appController.title">
     Tichu Tournament
   </title>
+  <!-- build:css assets/app.css -->
   <link rel="stylesheet" href="bower_components/angular/angular-csp.css">
+  <!-- ref:css bower_components/angular-material/angular-material.min.css -->
   <link rel="stylesheet" href="bower_components/angular-material/angular-material.css">
+  <!-- endref -->
+  <!-- ref:css bower_components/angular-material-data-table/dist/md-data-table.min.css -->
   <link rel="stylesheet" href="bower_components/angular-material-data-table/dist/md-data-table.css">
+  <!-- endref -->
+  <!-- endbuild -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
 </head>
 <body class="layout-column" layout="column">
@@ -44,13 +50,28 @@
 
   </div>
 
+  <!-- build:js assets/app.js -->
+  <!-- ref:js bower_components/angular/angular.min.js -->
   <script src="bower_components/angular/angular.js"></script>
+  <!-- endref -->
+  <!-- ref:js bower_components/angular-animate/angular-animate.min.js -->
   <script src="bower_components/angular-animate/angular-animate.js"></script>
+  <!-- endref -->
+  <!-- ref:js bower_components/angular-aria/angular-aria.min.js -->
   <script src="bower_components/angular-aria/angular-aria.js"></script>
+  <!-- endref -->
+  <!-- ref:js bower_components/angular-messages/angular-messages.min.js -->
   <script src="bower_components/angular-messages/angular-messages.js"></script>
+  <!-- endref -->
+  <!-- ref:js bower_components/angular-material/angular-material.min.js -->
   <script src="bower_components/angular-material/angular-material.js"></script>
+  <!-- endref -->
+  <!-- ref:js bower_components/angular-material-data-table/dist/md-data-table.min.js -->
   <script src="bower_components/angular-material-data-table/dist/md-data-table.js"></script>
+  <!-- endref -->
+  <!-- ref:js bower_components/angular-route/angular-route.min.js -->
   <script src="bower_components/angular-route/angular-route.js"></script>
+  <!-- endref -->
   <script src="src/common/models.js"></script>
   <script src="src/common/service-helpers.js"></script>
   <script src="src/tichu-tournament.js"></script>
@@ -65,5 +86,6 @@
   <script src="src/tournaments/tournament-results.js"></script>
   <script src="src/tournaments/tournament-service.js"></script>
   <script src="src/tournaments/tournament-store.js"></script>
+  <!-- endbuild -->
 </body>
 </html>

@@ -56,6 +56,13 @@
     this.score = convertScoreToEditable(this.hand.score);
 
     /**
+     * Whether an existing score should be overwritten.
+     * @type {boolean}
+     * @export
+     */
+    this.overwriting = false;
+
+    /**
      * Whether the user has elected to delete the score instead.
      * @type {boolean}
      * @export
@@ -121,7 +128,7 @@
    * @export
    */
   ScoreDetailController.prototype.save = function save() {
-    if (this.saving || this.saveFailure) {
+    if (this.saving || this.saveFailure || (this.hand.score && !this.overwriting)) {
       return;
     }
     this.saving = true;
