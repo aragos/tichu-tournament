@@ -1,6 +1,53 @@
 import json
 import os
 
+# Dictionary of tuple (num pairs, num hands per round, num rounds) to the movement.
+_MOVEMENTS = {}
+
+class MovementRound:
+  '''Class that defines a single round in a movement within a tournament. 
+
+  A MovementRound is seen from the point of view of a single pair.
+
+  Attributes:
+    round: Integer. Round number.
+    table: Integer. Table number.
+    is_north: Boolean. True if the pair sits in North/South position. False for
+      East/West.
+    hands: List of Integers. List of hand numbers to be played in this round.
+    opponent: Integer. Pair number of the opponent for this round.
+    relay_table: Boolean. True if these hands are shared with another table.
+  '''
+  def __init__(self, round, table, is_north, hands, opponent, relay_table):
+    self.round = round
+    self.table = table
+    self.is_north = is_north
+    self.hands = hands
+    self.opponent = opponent
+    self.relay_table = relay_table
+
+  def to_dict(self):
+    ''' Transforms to json dict format.
+
+    Returns:
+      Dict of format:
+        {
+         "round": 1
+         "position": "3N"
+         "opponent": 2
+         "hands": [3, 4, 5]
+         "relay_table": true
+        }
+    '''
+    if not self.hands:
+      return { "round" : self.round }
+    return {"round" : self.round,
+            "position" : str(self.table) + "N" if self.is_north else "E",
+            "hands" : self.hands,
+            "opponent" : self.opponent,
+            "relay_table" : self.relay_table}
+
+
 class Movement:
   ''' Class that defines a movement structure within a tournament. It is 
   wholly defined by the number of pairs participating and the number of
@@ -10,15 +57,8 @@ class Movement:
       
   Attributes:
     pair_dict: Dictionary from pair number to movement pair movement
-      where pair movement is a list of dicts describing a round as below.
-      {
-         "round": 1
-         "position": "3N"
-         "opponent": 2
-         "hands": [3, 4, 5]
-          "relay_table": 5
-      }
-  ''' 
+      where pair movement is a list MovementRounds.
+  '''
   def __init__(self, no_pairs, no_hands_per_round, no_rounds=None):
     ''' Initializes the movement for this configuration.
 
@@ -71,25 +111,39 @@ class Movement:
       raise ValueError(("No movements available for the configuration {} " + 
                            "pairs with {} hands per round").format(
                                no_pairs, no_hands_per_round))
-    self.pair_dict = json.loads(json_data)
+    self.pair_dict = {}
+    for team, rounds in json.loads(json_data).items():
+      list_of_rounds = []
+      for round in rounds:
+        position_str = round.get("position")
+        list_of_rounds.append(MovementRound(
+            round["round"], 
+            int(position_str[0:(len(position_str) - 1)]) if position_str else None,
+            position_str[(len(position_str) - 1):len(position_str)] == "N" if position_str else None,
+            round.get("hands", []),
+            round.get("opponent"),
+            round.get("relay_table")))
+      self.pair_dict[int(team)] = list_of_rounds
     self._CalculateUnplayedHands()
     self._CalculateSuggestedPrep()
+
+  @classmethod
+  def CreateMovement(cls, no_pairs, no_hands_per_round, no_rounds=None):
+    ''' Static factory method to create and cache movements '''
+    key = (no_pairs, no_hands_per_round, no_rounds)
+    if _MOVEMENTS.get(key):
+      return _MOVEMENTS.get(key)
+    movement = Movement(no_pairs, no_hands_per_round, no_rounds)
+    _MOVEMENTS[key] = movement
+    return movement
 
   def GetMovement(self, pair_no):
     ''' Construct a dictionary for this movement.
 
     Returns: 
-      Dictionary from pair number to movement pair movement where pair 
-      movement is a list of dicts describing a round as below.
-      {
-         "round": 1
-         "position": "3N"
-         "opponent": 2
-         "hands": [3, 4, 5]
-         "relay_table": True
-      }
+      List of MovementRounds for this pair.
     '''
-    return self.pair_dict[str(pair_no)]
+    return self.pair_dict[pair_no]
 
   def GetUnplayedHands(self, pair_no):
     ''' Construct hands that this pair will not play.
@@ -97,7 +151,7 @@ class Movement:
     Returns:
       A list of hands that pair will not play and can prepair.
     '''
-    return self.unplayed_hands.get(str(pair_no), [])
+    return self.unplayed_hands.get(pair_no, [])
     
   def GetSuggestedHandPrep(self, pair_no):
     ''' Construct hands that this pair can prepare.
@@ -105,7 +159,7 @@ class Movement:
     Returns:
       A list of hands that pair should prepair.
     '''
-    return self.suggested_prep.get(str(pair_no), [])
+    return self.suggested_prep.get(pair_no, [])
 
   @staticmethod
   def NumBoardsPerRoundFromTotal(no_pairs, total_boards):
@@ -162,10 +216,10 @@ class Movement:
     self.unplayed_hands = {}
     for team, rounds in self.pair_dict.items():
       for round in rounds:
-        if not round.get("hands"):
+        if not round.hands:
           continue
-        self.total_boards = max(max(round["hands"]), self.total_boards)
-        seen_hands[team] = seen_hands.get(team, set()).union(round["hands"])
+        self.total_boards = max(max(round.hands), self.total_boards)
+        seen_hands[team] = seen_hands.get(team, set()).union(round.hands)
     for team, hand_list in seen_hands.items():
       for hand in range(1, self.total_boards + 1):
         if hand not in hand_list:
@@ -192,5 +246,6 @@ class Movement:
           hand = unplayed_hands[j]
           if not hand in hands:
             hands.add(hand)
-            self.suggested_prep.setdefault(str(team), []).append(hand)
+            self.suggested_prep.setdefault(team, []).append(hand)
             break
+

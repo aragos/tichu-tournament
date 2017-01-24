@@ -293,13 +293,13 @@ class Board:
             bs.ew_rps = self._log_rps(avg_score - hr.diff())
             # Now to calculate aggressiveness
             if self._called_t(hr, "ns", "GT"):
-              bs.ns_aps = (len(self._hand_results) - gt_calls_ns) * 2 + t_calls_ns
+              bs.ns_aps = (len(self._hand_results) - gt_calls_ns) * 2 - t_calls_ns
             elif self._called_t(hr, "ns", "T"):
               bs.ns_aps = (len(self._hand_results) - gt_calls_ns - t_calls_ns)
             else:
               bs.ns_aps = 0
             if self._called_t(hr, "ew", "GT"):
-              bs.ew_aps = (len(self._hand_results) - gt_calls_ew) * 2 + t_calls_ew
+              bs.ew_aps = (len(self._hand_results) - gt_calls_ew) * 2 - t_calls_ew
             elif self._called_t(hr, "ew", "T"):
               bs.ew_aps = (len(self._hand_results) - gt_calls_ew - t_calls_ew)
             else:

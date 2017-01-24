@@ -36,17 +36,13 @@ class CompleteScoringHandler(GenericHandler):
     unscored_hands = []
     for i in xrange(1, tourney.no_pairs + 1):
       for round in movement.GetMovement(i):
-        hands = round.get('hands')
-        if not hands:
+        hands = round.hands
+        if not hands or not round.is_north:
           continue
         for hand in hands:
-          position = round.get('position')
-          opponent = round.get('opponent')
           if hand not in scored_hands.get(i, []):
-            if position[1] == 'N':
-              unscored_hands.append({"hand" : hand, "ns_pair": i,
-                                     "ew_pair" : opponent})
-
+            unscored_hands.append({"hand" : hand, "ns_pair": i,
+                                   "ew_pair" : round.opponent})
     self.response.headers['Content-Type'] = 'application/json'
     self.response.set_status(200)
     self.response.out.write(json.dumps({"unscored_hands" : unscored_hands},

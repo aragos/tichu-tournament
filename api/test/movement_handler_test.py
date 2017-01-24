@@ -253,12 +253,12 @@ class AppTest(unittest.TestCase):
                                 Set([2, 3, 4, 5, 6, 7]), "Team 2 Tourney 2")
 
   def assertScoresNotPresent(self, movement, rounds, handmsg=None):
-    for hand in movement:
-      if hand['round'] in rounds:
-        self.assertIsNone(hand.get('score'), 
+    for round in movement:
+      if round['round'] in rounds:
+        self.assertIsNone(round.get('score'), 
                           msg="{}: Round {} hand contains an unexpected " + 
-                              "score {}".format(handmsg, hand['round'],
-                                                hand.get('score')))
+                              "score {}".format(handmsg, round['round'],
+                                                round.get('score')))
     
 
   def assertHandEquals(self, movement, round, expected_hands, handmsg=None):

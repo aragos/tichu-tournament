@@ -5,7 +5,7 @@ PROD_TOURNEY_ID = 5649391675244544
 TOURNEY_ID = 5629499534213120
 
 
-PAIR_IDS = "pair_ids": [
+PAIR_IDS = [
     "CUTQ", 
     "OBRH", 
     "XJTW", 
@@ -31,7 +31,7 @@ PROD_PAIR_IDS = [
     "BLPM"
   ]
   
-URL = "https://http://localhost:8080"
+URL = "http://localhost:8080"
 
 PROD_URL = "https://tichu-tournament.appspot.com"
 
@@ -41,7 +41,7 @@ def GetMovements(pair_no):
     "Content-Type": "application/json",
     'X-tichu-pair-code' : PAIR_IDS[pair_no - 1]
   }
-  r = requests.get(URL + "/api/tournaments/{}/movement/{}".format(
+  r = requests.get((URL + "/api/tournaments/{}/movement/{}").format(
       TOURNEY_ID, pair_no),
       headers=headers)
   r.raise_for_status()
@@ -62,7 +62,7 @@ def PutHand(hand_no, ns_pair, ew_pair, calls, ns_score, ew_score):
     "ew_score" : ew_score
   }
 
-  r = requests.put("http://tichu-tournament.appspot.com/api/tournaments/{}/hands/{}/{}/{}".format(
+  r = requests.put((URL + "/api/tournaments/{}/hands/{}/{}/{}").format(
       TOURNEY_ID, hand_no, ns_pair, ew_pair),
       headers=headers,
       data=json.dumps(info_dict))

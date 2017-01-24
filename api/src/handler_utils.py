@@ -81,7 +81,7 @@ def BuildMovementAndMaybeSetStatus(response, no_pairs, no_boards):
   no_hands_per_round, no_rounds = Movement.NumBoardsPerRoundFromTotal(
       no_pairs, no_boards)
   try:
-    movements = Movement(no_pairs, no_hands_per_round, no_rounds)
+    movements = Movement.CreateMovement(no_pairs, no_hands_per_round, no_rounds)
   except ValueError:
     SetErrorStatus(response, 400, "Invalid Tournament Config",
                    "No valid configuration {} pairs and {} boards".format(
@@ -111,14 +111,14 @@ def CheckValidMatchupForMovementAndMaybeSetStatus(response, movement, board_no,
   detail = ("NS pair {} and EW pairs {} do not play board {} against each " + 
            "other in this tournament format").format(ns_pair, ew_pair, board_no)
   for round in movement.GetMovement(ns_pair):
-    if not round.get('opponent'):
+    if not round.opponent:
       continue
-    if round['opponent'] != ew_pair:
+    if round.opponent != ew_pair:
       continue
-    if round['position'][1] != "N":
+    if not round.is_north:
       SetErrorStatus(response, 400, error, detail)
       return False
-    if not board_no in round['hands']:
+    if not board_no in round.hands:
       SetErrorStatus(response, 400, error, detail)
       return False
     return True

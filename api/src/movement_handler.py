@@ -46,7 +46,7 @@ class MovementHandler(GenericHandler):
     no_hands_per_round, no_rounds = Movement.NumBoardsPerRoundFromTotal(
         tourney.no_pairs, tourney.no_boards)
     try:
-      movement = Movement(
+      movement = Movement.CreateMovement(
           tourney.no_pairs, no_hands_per_round, no_rounds).GetMovement(
               int(pair_no))
     except ValueError:
@@ -54,63 +54,47 @@ class MovementHandler(GenericHandler):
                      "No valid movement for this tourney's config")
       return
 
+    movement_list = []
     for round in movement:
-      self._UpdateRoundWithScore(round, tourney, int(pair_no))
+      movement_list.append(
+          self._GetJsonRoundWithScore(round, tourney, int(pair_no)))
 
     combined_dict = {
       'name' : tourney.name,
       'players' : player_pair.player_list(),
-      'movement': movement
+      'movement': movement_list
     }
 
     self.response.headers['Content-Type'] = 'application/json'
     self.response.set_status(200)
     self.response.out.write(json.dumps(combined_dict, indent=2))
 
-  def _UpdateRoundWithScore(self, round, tourney, pair_no):
-    ''' Update round information with scored hands if any 
+  def _GetJsonRoundWithScore(self, round, tourney, pair_no):
+    ''' Converts round information to a json interpretable string adding 
+    scored hands if any exist.
 
     Args:
-      round: Dictionary. Contains all player/hand information about a specific
-        matchup from the point of view of Pair pair_no. Has the following
-        structure:
-        {
-           "round": 1
-           "position": "3N"
-           "opponent": 2
-           "hands": [3, 4, 5]
-           "relay_table": True
-        }
+      round: MovementRound. Contains all player/hand information about a specific
+        matchup from the point of view of Pair pair_no. 
       tourney: Tournament. Tournament in which this is happening.
       pair_no: Pair from whose point of view this movement is seen.
 
-    Side effects:
-      Field "hands" in round is updated to a dictionary with added fields that 
-        contain score related information. Dictionary has the following
-        structure:
-        {
-          "hand_no": 3,
-          "score": {
-            "calls" : {}
-            "ns_score": 100
-            "ew_score": 0
-            "notes": "Hello"
-            }
-        } 
+    Returns:
+      Dict as expected by api. Includes any scores that have already been added.
     '''
-    hand_nos = round.get('hands')
-    if not hand_nos:
-      return
-    del round['hands']
-    for h in hand_nos:  
-      if round['position'][1] == "N":
+    hands = round.hands
+    round_str = round.to_dict()
+    if hands:
+      del round_str['hands']
+    for h in hands:
+      if round.is_north:
         hand_score = HandScore.GetByHandParams(tourney, h, pair_no, 
-                                               round['opponent'])
+                                               round.opponent)
       else:
-        hand_score = HandScore.GetByHandParams(tourney, h, round['opponent'],
+        hand_score = HandScore.GetByHandParams(tourney, h, round.opponent,
                                                pair_no)
       if hand_score:
-        round.setdefault('hands', []).append({
+        round_str.setdefault('hands', []).append({
           'hand_no' : h,
           'score': {
               'calls' : hand_score.calls_dict(),
@@ -119,7 +103,8 @@ class MovementHandler(GenericHandler):
               'notes' : hand_score.notes,
         }})
       else:
-        round.setdefault('hands', []).append({ 'hand_no' : h })
+        round_str.setdefault('hands', []).append({ 'hand_no' : h })
+    return round_str
 
   def _CheckValidPairMaybeSetStatus(self, tourney, pair_no):
     ''' Test if the provided pair number is valid for tourney. 

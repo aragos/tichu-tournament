@@ -1,5 +1,5 @@
 {
-"hands": [
+  "hands": [
     {
       "board_no": 10, 
       "calls": {
@@ -74,7 +74,7 @@
       "ew_rps": 5.860786223465865, 
       "ew_score": 25, 
       "notes": null, 
-      "ns_aps": 3, 
+      "ns_aps": 1, 
       "ns_mps": 0.0, 
       "ns_pair": 2, 
       "ns_rps": -5.860786223465865, 
@@ -114,7 +114,7 @@
       "ew_rps": -5.351858133476067, 
       "ew_score": -155, 
       "notes": null, 
-      "ns_aps": 3, 
+      "ns_aps": 1, 
       "ns_mps": 2.0, 
       "ns_pair": 7, 
       "ns_rps": 5.351858133476067, 
@@ -134,7 +134,7 @@
       "ew_rps": 5.659482215759621, 
       "ew_score": 15, 
       "notes": null, 
-      "ns_aps": 3, 
+      "ns_aps": 1, 
       "ns_mps": 0.0, 
       "ns_pair": 2, 
       "ns_rps": -5.659482215759621, 
@@ -174,7 +174,7 @@
       "ew_rps": -5.3230099791384085, 
       "ew_score": 20, 
       "notes": null, 
-      "ns_aps": 3, 
+      "ns_aps": 1, 
       "ns_mps": 2.0, 
       "ns_pair": 7, 
       "ns_rps": 5.3230099791384085, 
@@ -788,7 +788,7 @@
         "south": "", 
         "west": "GT"
       }, 
-      "ew_aps": 5, 
+      "ew_aps": 3, 
       "ew_mps": 2.0, 
       "ew_pair": 2, 
       "ew_rps": 4.795790545596741, 
@@ -874,7 +874,7 @@
       "ew_rps": 5.780743515792329, 
       "ew_score": 300, 
       "notes": null, 
-      "ns_aps": 5, 
+      "ns_aps": 3, 
       "ns_mps": 0.0, 
       "ns_pair": 6, 
       "ns_rps": -5.780743515792329, 
@@ -914,7 +914,7 @@
       "ew_rps": 5.455321115357702, 
       "ew_score": 200, 
       "notes": null, 
-      "ns_aps": 3, 
+      "ns_aps": 1, 
       "ns_mps": 0.0, 
       "ns_pair": 1, 
       "ns_rps": -5.455321115357702, 
@@ -954,7 +954,7 @@
       "ew_rps": -2.0794415416798357, 
       "ew_score": 30, 
       "notes": null, 
-      "ns_aps": 3, 
+      "ns_aps": 1, 
       "ns_mps": 1.0, 
       "ns_pair": 7, 
       "ns_rps": 2.0794415416798357, 
@@ -1174,7 +1174,7 @@
       "ew_rps": -0.0, 
       "ew_score": 0, 
       "notes": null, 
-      "ns_aps": 6, 
+      "ns_aps": 2, 
       "ns_mps": 1.0, 
       "ns_pair": 6, 
       "ns_rps": -0.0, 
@@ -1260,22 +1260,22 @@
       "ns_rps": 5.472270673671475, 
       "ns_score": 165
     }
-  ], 
+  ],
   "pair_summaries": [
     {
-      "aps": 24, 
+      "aps": 18, 
       "mps": 17.5, 
       "pair_no": 6, 
       "rps": -9.006100959725131
     }, 
     {
-      "aps": 23, 
+      "aps": 17, 
       "mps": 21.5, 
       "pair_no": 7, 
       "rps": 21.513429184631132
     }, 
     {
-      "aps": 16, 
+      "aps": 10, 
       "mps": 16.0, 
       "pair_no": 2, 
       "rps": -5.525781595620363
@@ -1287,7 +1287,7 @@
       "rps": 5.475143001042765
     }, 
     {
-      "aps": 6, 
+      "aps": 4, 
       "mps": 17.0, 
       "pair_no": 1, 
       "rps": -10.901805937987554
