@@ -84,11 +84,16 @@ class HandResult:
         """ So far doesn't deal with avg, avg+, or avg- """
         self._ns_pair_no = ns_pair_no
         self._ew_pair_no = ew_pair_no
-        self._ns_score = ns_score
-        self._ew_score = ew_score
         self._calls = calls
-        self._diff = ns_score - ew_score
         self._board_no = board_no
+        if isinstance(ns_score, int) and isinstance(ew_score, int): 
+          self._ns_score = ns_score
+          self._ew_score = ew_score
+          self._diff = ns_score - ew_score
+        else:
+          self._ns_score = ns_score.upper().strip()
+          self._ew_score = ew_score.upper().strip()
+          self._diff = "AVG"
         self._ValidateScore()
 
     def ns_pair_no(self):
@@ -127,12 +132,23 @@ class HandResult:
                HandResult._TichuScore(team_to_call[player])
     
     def _ValidateScore(self):
+        if self._IsValidAvgScore():
+          return
         permutations = itertools.permutations(["N", "W", "S", "E"])
         for permutation in permutations:
             if self._IsScoreValid(permutation):
                 return
         raise InvalidScoreError(self._board_no, self._ns_pair_no,
                                 self._ew_pair_no)
+
+    def _IsValidAvgScore(self):
+      avg_scores = ["AVG", "AVG+", "AVG-", "AVG++", "AVG--"]
+      return (self._ns_score in avg_scores and
+              self._ew_score in avg_scores and
+              self._calls.n_call() == "" and
+              self._calls.s_call() == "" and
+              self._calls.e_call() == "" and
+              self._calls.w_call() == "")
 
     def _TeamBounds(self, team1, team2, first_two):
         if (first_two == team1 or first_two == tuple(reversed(team1))):
@@ -246,7 +262,8 @@ class Board:
         return self._board_score
 
     def _get_avg_score_diff(self):
-        return sum([x.diff() for x in self._hand_results])/len(self._hand_results)
+        non_avg_hr = [hr for hr in self._hand_results if hr.diff() != "AVG"]
+        return sum([x.diff() for x in non_avg_hr])/len(non_avg_hr)
 
     def _log_rps(self, rps):
         if rps > 0:
@@ -255,12 +272,30 @@ class Board:
             return -math.log1p(-rps)
 
     def _mp_comp(self, current, other):
+        if other == "AVG":
+          return 0.5
         if current < other:
             return 0
         if current == other:
             return 0.5
         return 1
     
+    def _get_max_rps(self):
+      max_rps = -1
+      for bsl in self._board_score:
+        max_rps = max(max_rps, bsl.ew_rps)
+        max_rps = max(max_rps, bsl.ns_rps)
+      return max_rps
+      
+    def _get_max_mps(self, side="n"):
+      max_mps = 0
+      for bsl in self._board_score:
+        if side == "n":
+          max_mps = max(max_mps, bsl.ns_mps)
+        else:
+          max_mps = max(max_mps, bsl.ew_mps)
+      return max_mps
+
     def _called_t(self, hand_result, position, call_to_check):
       calls = hand_result.calls()
       call_fetcher = {"ns": (calls.n_call(), calls.s_call()), "ew": (calls.e_call(), calls.w_call())}
@@ -268,10 +303,32 @@ class Board:
       if calls_made[0] == call_to_check or calls_made[1] == call_to_check:
         return 1
       return 0
-    
+
+    def _set_avg_mps_rps(self, side, avg_type, max_mps, max_rps, board_score_line):
+      if avg_type == "AVG":
+        mps_val = max_mps / 2
+        rps_val = 0
+      elif avg_type == "AVG+":
+        mps_val = max_mps * 0.6
+        rps_val = 0.2 * max_rps
+      elif avg_type == "AVG++":
+        mps_val = max_mps * 0.8
+        rps_val = 0.6 * max_rps
+      elif avg_type == "AVG-":
+        mps_val = max_mps * 0.4
+        rps_val = -0.2 * max_rps
+      else:
+        mps_val = max_mps * 0.2
+        rps_val = -0.6 * max_rps
+      if side == "n":
+        board_score_line.ns_mps = mps_val
+        board_score_line.ns_rps = rps_val
+      else:
+        board_score_line.ew_mps = mps_val
+        board_score_line.ew_rps = rps_val
+
     def ScoreBoard(self): 
         self._board_score = []
-        self._hand_results.sort(key=lambda hr: hr.diff(), reverse=True)
         avg_score = self._get_avg_score_diff()
         # This is n^2. You can do it in O(n) but will be uglier. Since
         # we will have 4/5 entries each time, this is OK.
@@ -281,6 +338,8 @@ class Board:
         gt_calls_ew = sum([self._called_t(x, "ew", "GT") for x in self._hand_results])
         t_calls_ew = sum([self._called_t(x, "ew", "T") for x in self._hand_results])
         for hr in iter:
+            if (hr.diff() == "AVG"):
+              continue
             bs = BoardScoreLine(hr)
             bs.ns_mps, bs.ew_mps, bs.ns_rps, bs.ew_rps = 0, 0, 0, 0;
             bs.ns_mps = sum(
@@ -292,19 +351,35 @@ class Board:
             bs.ns_rps = self._log_rps(hr.diff() - avg_score)
             bs.ew_rps = self._log_rps(avg_score - hr.diff())
             # Now to calculate aggressiveness
+            num_non_avg = len([x for x in self._hand_results if x.diff() != "AVG" ])
             if self._called_t(hr, "ns", "GT"):
-              bs.ns_aps = (len(self._hand_results) - gt_calls_ns) * 2 - t_calls_ns
+              bs.ns_aps = (num_non_avg - gt_calls_ns) * 2 - t_calls_ns
             elif self._called_t(hr, "ns", "T"):
-              bs.ns_aps = (len(self._hand_results) - gt_calls_ns - t_calls_ns)
+              bs.ns_aps = (num_non_avg - gt_calls_ns - t_calls_ns)
             else:
               bs.ns_aps = 0
             if self._called_t(hr, "ew", "GT"):
-              bs.ew_aps = (len(self._hand_results) - gt_calls_ew) * 2 - t_calls_ew
+              bs.ew_aps = (num_non_avg - gt_calls_ew) * 2 - t_calls_ew
             elif self._called_t(hr, "ew", "T"):
-              bs.ew_aps = (len(self._hand_results) - gt_calls_ew - t_calls_ew)
+              bs.ew_aps = (num_non_avg - gt_calls_ew - t_calls_ew)
             else:
               bs.ew_aps = 0
             self._board_score.append(bs)
+        # Calculate max rp, and max mps
+        max_rps = self._get_max_rps()
+        max_ns_mps = self._get_max_mps("n")
+        max_ew_mps = self._get_max_mps("e")
+        for hr in iter:
+          if (hr.diff() != "AVG"):
+              continue
+          bs = BoardScoreLine(hr)
+          self._set_avg_mps_rps("n", hr.ns_score(), max_ns_mps, max_rps, bs)
+          self._set_avg_mps_rps("e", hr.ew_score(), max_ew_mps, max_rps, bs)
+          bs.ns_aps = 0
+          bs.ew_aps = 0
+          self._board_score.append(bs)
+
+        self._board_score.sort(key = lambda bsl: bsl.ns_mps, reverse=True)
         return self._board_score
 
     def __str__(self):
@@ -400,7 +475,7 @@ def UpdateTeamSummary(team_summaries, board_no, pair_no, position,
     ts.board_rps[board_no] = rps
     ts.board_aps[board_no] = aps
 
-def Calculate(boards, num_rounds, rank_by = "MP"):
+def Calculate(boards, num_rounds):
     """ Boards is a list of Boards """
 
     team_summaries = {}
