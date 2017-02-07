@@ -30,7 +30,7 @@ class TourneyHandler(GenericHandler):
     tourney = GetTourneyWithIdAndMaybeReturnStatus(self.response, id)
     if not tourney:
       return
-    
+
     if not CheckUserOwnsTournamentAndMaybeReturnStatus(self.response, user,
                                                        tourney):
       return
@@ -48,7 +48,6 @@ class TourneyHandler(GenericHandler):
     self.response.headers['Content-Type'] = 'application/json'
     self.response.set_status(200)
     self.response.out.write(json.dumps(combined_dict, indent=2))
-
 
   def put(self, id):
     user = users.get_current_user()

@@ -3,19 +3,19 @@ import json
 
 PROD_TOURNEY_ID = 5649391675244544
 TOURNEY_ID = 5629499534213120
-
+USE_PROD = False
 
 PAIR_IDS = [
-    "CUTQ", 
-    "OBRH", 
-    "XJTW", 
-    "YOTH", 
-    "CEET", 
-    "RBJS", 
-    "LIRD", 
-    "ADMC", 
-    "TIQU", 
-    "OHWX"
+    "DYRC", 
+    "NBDW", 
+    "BRGU", 
+    "FVFY", 
+    "URYW", 
+    "IXDW", 
+    "FHRO", 
+    "NGCZ", 
+    "FYFA", 
+    "FGLK"
   ]
 
 PROD_PAIR_IDS = [
@@ -41,8 +41,10 @@ def GetMovements(pair_no):
     "Content-Type": "application/json",
     'X-tichu-pair-code' : PAIR_IDS[pair_no - 1]
   }
-  r = requests.get((URL + "/api/tournaments/{}/movement/{}").format(
-      TOURNEY_ID, pair_no),
+  url = PROD_URL if USE_PROD else URL
+  tourney_id = PROD_TOURNEY_ID if USE_PROD else TOURNEY_ID
+  r = requests.get((url + "/api/tournaments/{}/movement/{}").format(
+      tourney_id, pair_no),
       headers=headers)
   r.raise_for_status()
 
@@ -61,9 +63,10 @@ def PutHand(hand_no, ns_pair, ew_pair, calls, ns_score, ew_score):
     "ns_score" : ns_score,
     "ew_score" : ew_score
   }
-
-  r = requests.put((URL + "/api/tournaments/{}/hands/{}/{}/{}").format(
-      TOURNEY_ID, hand_no, ns_pair, ew_pair),
+  url = PROD_URL if USE_PROD else URL
+  tourney_id = PROD_TOURNEY_ID if USE_PROD else TOURNEY_ID
+  r = requests.put((url + "/api/tournaments/{}/hands/{}/{}/{}").format(
+      tourney_id, hand_no, ns_pair, ew_pair),
       headers=headers,
       data=json.dumps(info_dict))
   r.raise_for_status()
@@ -129,7 +132,8 @@ PutHand(15, 1, 9, ["", 'T', '', '' ], 300, 0)
 PutHand(15, 3, 10, ["", 'T', '', '' ], 180, 20)
 PutHand(15, 4, 5, ["", 'GT', '', '' ], 260, 40)
 PutHand(16, 2, 7, ["", 'GT', '', '' ], 275, 25)
-PutHand(16, 1, 9, ["", '', 'T', '' ], 80, -80)
+#PutHand(16, 1, 9, ["", '', 'T', '' ], 80, -80)
+PutHand(16, 1, 9, ["", '', '', '' ], 'avg+', 'avg-')
 PutHand(16, 4, 5, ["", 'GT', '', '' ], 275, 25)
 PutHand(16, 3, 10, ["", '', 'T', '' ], 40, 160)
 

@@ -5,6 +5,12 @@ from python import boardgenerator
 
 from google.appengine.ext import ndb
 
+AVG = 555
+AVGP = 666
+AVGPP = 777
+AVGM = 888
+AVGMM = 999
+
 
 class Tournament(ndb.Model):
   ''' Model for all the information needed to describe a Tournament
@@ -101,17 +107,43 @@ class Tournament(ndb.Model):
       ns_pair: Integer. Number of the North/South pair.
       ew_pair: Integer. Number of the East/West pair.
       hand_calls: Dict representation of the calls to this hand
-      hand_ns_score: Integer. Score for the North/South pair.
-      hand_ew_score: Integer. Score for the East/West pair.
+      hand_ns_score: Integer or String. Score for the North/South pair. If
+         String, must be one of AVG, AVG+, AVG++, AVG-, AVG-- allowing for any
+         capitalization.
+      hand_ew_score: Integer or String. Score for the East/West pair. If
+         String, must be one of AVG, AVG+, AVG++, AVG-, AVG-- allowing for any
+         capitalization.
       hand_notes: String. Notes for the hand.
       changed_by: Integer. Pair number of the requestor. 0 if director.
     '''
+    if not isinstance(hand_ns_score, int):
+      hand_ns_score = self._TransformAvgScoreToInt(hand_ns_score)
+      hand_ew_score = self._TransformAvgScoreToInt(hand_ew_score)
+
     hand_score = HandScore(calls=json.dumps(hand_calls), notes=hand_notes,
                            ns_score=hand_ns_score, ew_score=hand_ew_score,
                            deleted=False)
     hand_score.key = HandScore.CreateKey(self, hand_no, ns_pair, ew_pair)
     hand_score.PutChangeLog(changed_by)
     hand_score.put()
+
+  def _TransformAvgScoreToInt(self, score):
+    ''' Return the integer representation of an avg score. If score is not legal
+        avg score, return None.
+    '''
+    score = score.strip()
+    score = score[0:3].upper() + score[3:len(score)]
+    if score == 'AVG':
+      return AVG
+    elif score == 'AVG+':
+      return AVGP
+    elif score == 'AVG++':
+      return AVGPP
+    elif score == 'AVG-':
+      return AVGM
+    elif score == 'AVG--':
+      return AVGMM
+    return None
 
   def _RandomId(self, num_ids):
     ''' Generate a list of num_ids unique random 4 character capitalized ids.
@@ -160,8 +192,8 @@ class Tournament(ndb.Model):
            'board_no': int(split_key[0]),
            'ns_pair': int(split_key[1]), 
            'ew_pair': int(split_key[2]),
-           'ns_score': hand_score.ns_score,
-           'ew_score': hand_score.ew_score,
+           'ns_score': hand_score.get_ns_score(),
+           'ew_score': hand_score.get_ew_score(),
            'notes': hand_score.notes})
     return hand_list
 
@@ -253,9 +285,45 @@ class HandScore(ndb.Model):
   '''
   calls = ndb.JsonProperty()
   notes = ndb.TextProperty()
+  # Special codes for avg, avg+, avg++, avg-, avg-- are listed as:
+  # 555, 666, 777, 888, 999. 
   ns_score = ndb.IntegerProperty()
   ew_score = ndb.IntegerProperty()
   deleted = ndb.BooleanProperty()
+
+  def get_ns_score(self):
+    ''' Return the score of the North/South team. If the team has a special
+    director-set score, returns the appropriate string, e.g. 'AVG+', 'AVG--'.
+    '''
+    if self.ns_score == AVG:
+      return "AVG"
+    elif self.ns_score == AVGP:
+      return "AVG+"
+    elif self.ns_score == AVGPP:
+      return "AVG++"
+    elif self.ns_score == AVGM:
+      return "AVG-"
+    elif self.ns_score == AVGMM:
+      return "AVG--"
+    else:
+      return self.ns_score
+
+  def get_ew_score(self):
+    ''' Return the score of the East/West team. If the team has a special
+    director-set score, returns the appropriate string, e.g. 'AVG+', 'AVG--'.
+    '''
+    if self.ew_score == AVG:
+      return "AVG"
+    elif self.ew_score == AVGP:
+      return "AVG+"
+    elif self.ew_score == AVGPP:
+      return "AVG++"
+    elif self.ew_score == AVGM:
+      return "AVG-"
+    elif self.ew_score == AVGMM:
+      return "AVG--"
+    else:
+     return self.ew_score
 
   def calls_dict(self):
     ''' Returns the calls property as a dictionary if set. None otherwise.'''

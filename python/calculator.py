@@ -81,7 +81,6 @@ class HandResult:
     
     def __init__(self, board_no, ns_pair_no, ew_pair_no, ns_score, ew_score,
                  calls):
-        """ So far doesn't deal with avg, avg+, or avg- """
         self._ns_pair_no = ns_pair_no
         self._ew_pair_no = ew_pair_no
         self._calls = calls

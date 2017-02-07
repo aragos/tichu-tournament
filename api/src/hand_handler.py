@@ -85,7 +85,7 @@ class HandHandler(GenericHandler):
       return
     else:
       tourney.PutHandScore(int(board_no), int(ns_pair), int(ew_pair), calls,
-                           int(ns_score), int(ew_score), notes, change_pair_no)
+                           ns_score, ew_score, notes, change_pair_no)
     self.response.set_status(204)
 
   def delete(self, id, board_no, ns_pair, ew_pair):
@@ -127,16 +127,20 @@ class HandHandler(GenericHandler):
       board_no: Integer. Hand number.
       ns_pair: Integer. Pair number of team playing North/South.
       ew_pair: Integer. Pair number of team playing East/West.
-      ns_score: Integer. Score of the North/South team.
-      ew_score: Integer. Score of the East/West team.
+      ns_score: Integer or String. Score of the North/South team. If string,
+         must be one of AVG, AVG+, AVG++, AVG-, AVG-- allowing for any
+         capitalization.
+      ew_score: Integer or String. Score of the East/West team. If string,
+         must be one of AVG, AVG+, AVG++, AVG-, AVG-- allowing for any
+         capitalization.
       calls: Dictionary. Holds calls from each team. Can be None.
     Returns:
       True iff the proposed score is a valid Tichu score.s
     '''
     error =  "Invalid Score"
     try:
-      HandResult(board_no, ns_pair, ew_pair, int(ns_score),
-                 int(ew_score), Calls.FromDict(calls))
+      HandResult(board_no, ns_pair, ew_pair, ns_score,
+                 ew_score, Calls.FromDict(calls))
     except InvalidScoreError as err:
       SetErrorStatus(self.response, 400, error,
                      "These scores are not a valid Tichu score")
@@ -200,12 +204,16 @@ class HandHandler(GenericHandler):
       SetErrorStatus(self.response, 500, "Invalid Input",
                      "Unable to parse request body as JSON object")
       return None
-    if not isinstance(request_dict.get('ns_score'), int):
-      SetErrorStatus(self.response, 400, "Invalid Input",
-                     "ns_pairs must be an integer")
-      return None
-    elif not isinstance(request_dict.get('ew_score'), int):
-      SetErrorStatus(self.response, 400, "Invalid Input",
-                     "ew_boards must be an integer")
+    ns_score = request_dict.get('ns_score')
+    ew_score = request_dict.get('ew_score')
+    if not isinstance(ns_score, int):
+      if ns_score.strip()[0:3].upper() != "AVG":
+        SetErrorStatus(self.response, 400, "Invalid Input",
+                       "ns_score must be an integer or avg")
+        return None
+    elif not isinstance(ew_score, int):
+      if ew_score.strip()[0:3].upper() != "AVG":
+        SetErrorStatus(self.response, 400, "Invalid Input",
+                       "ew_score must be an integer or avg")
       return None
     return request_dict

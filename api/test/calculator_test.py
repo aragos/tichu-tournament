@@ -6,7 +6,6 @@ import os
 import python.calculator
 from calculator import Calculate
 from calculator import OrderBy
-from calculator import GetMaxRounds
 from calculator import Board
 from calculator import HandResult
 from calculator import Calls
@@ -43,9 +42,12 @@ class CalculatorTest(unittest.TestCase):
     hand_results.append(HandResult(1, 3, 4, 160, 40, Calls("T", "", "", "")))
     hand_results.append(HandResult(1, 5, 6, 100, 0, Calls("", "", "", "")))
     hand_results.append(HandResult(1, 7, 8, 70, -70, Calls("", "", "T", "")))
-    hand_results.append(HandResult(1, 9, 10, 'AVG', 'AVG--', Calls("", "", "", "")))
-    hand_results.append(HandResult(1, 11, 12, 'AVG++', 'AVG-', Calls("", "", "", "")))
-    hand_results.append(HandResult(1, 13, 14, 'AVG+', 'AVG+', Calls("", "", "", "")))
+    hand_results.append(HandResult(1, 9, 10, 'AVG', 'AVG--',
+      Calls("", "", "", "")))
+    hand_results.append(HandResult(1, 11, 12, 'AVG++', 'AVG-', 
+      Calls("", "", "", "")))
+    hand_results.append(HandResult(1, 13, 14, 'AVG+', 'AVG+',
+      Calls("", "", "", "")))
     boards = [Board(1, hand_results)]
     team_summaries = Calculate(boards, 1)
     OrderBy(team_summaries, "MP")
