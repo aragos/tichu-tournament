@@ -158,6 +158,12 @@ def SetDataTableStyle(sheet, start_row, start_col, num_rows, num_cols,
     color: if set - all cells will be filled with color.
   """
 
+  # Set the alignment to be 'right' everywhere but the headers.
+  for row_no in xrange(start_row, start_row + num_rows):
+    for col_no in xrange(start_col, num_cols + start_col):
+      SetAlignment(sheet.cell(column=col_no, row=row_no),
+                   Alignment(horizontal='right'))
+
   # Fill in right and left borders on all rows but the last one.
   for row in xrange(start_row, start_row + num_rows - 1):
     SetBorder(sheet.cell(row=row, column=start_col + num_cols - 1),
