@@ -71,7 +71,7 @@
                     <md-button class="md-warn" ng-click="scoreDetailController.overwriting = true">Edit it anyway</md-button>
                 </div>
                 <div layout="row">
-                    <div layout="column" style="width:10em;" flex="50" flex-order="{{ scoreDetailController.position === 'E' ? 2 : 1 }}">
+                    <div layout="column" style="width:10em;" flex="50">
                         <h3 style="text-align: center;margin-top: 0">
                             Pair #{{scoreDetailController.hand.northSouthPair}}
                         </h3>
@@ -115,7 +115,7 @@
                             </md-select>
                         </md-input-container>
                     </div>
-                    <div layout="column" style="width:10em;" flex="50" flex-order="{{ scoreDetailController.position === 'E' ? 1 : 2 }}">
+                    <div layout="column" style="width:10em;" flex="50">
                         <h3 style="text-align: center; margin-top: 0;">
                             Pair #{{scoreDetailController.hand.eastWestPair}}
                         </h3>

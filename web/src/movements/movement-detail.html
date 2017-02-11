@@ -41,12 +41,17 @@
                                  ng-bind="hand.score ? 'assignment_turned_in' : 'assignment'"></md-icon>
                         <div class="md-list-item-text" layout="column">
                             <h3>Board #{{hand.handNo}}<span ng-if="round.isRelayTable">R</span></h3>
+                            <span ng-switch="round.position">
+                                <span ng-switch-when="N">North/South</span>
+                                <span ng-switch-when="E">East/West</span>
+                                <span ng-switch-default>{{ round.position }}</span>
+                            </span>
                             <p ng-if="hand.score">
-                                [#{{movementDetailController.movement.pair.pairNo}}]
-                                {{hand.score | tichuMovementGetMyScore:round.position}}
+                                [#{{ round.position == "N" ? movementDetailController.movement.pair.pairNo : round.opponent }}]
+                                {{hand.score.northSouthScore}}
                                 vs.
-                                [#{{round.opponent}}]
-                                {{hand.score | tichuMovementGetOpponentsScore:round.position}}
+                                [#{{ round.position == "N" ? round.opponent : movementDetailController.movement.pair.pairNo }}]
+                                {{hand.score.eastWestScore}}
                             </p>
                             <p ng-if="!hand.score">Click to score hand</p>
                             <p ng-if="hand.score && hand.score.calls.length">
