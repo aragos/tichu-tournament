@@ -200,12 +200,11 @@
     }
     ServiceHelpers.assertType('tournament board count', data['no_boards'], 'number');
     ServiceHelpers.assertType('tournament player list', data['players'], 'array', true);
-    var playerLists;
+    var playerLists = [];
+    for (var i = 0; i < data['no_pairs']; i += 1) {
+      playerLists[i] = [];
+    }
     if (data['players']) {
-      playerLists = [];
-      for (var i = 0; i < data['no_pairs']; i += 1) {
-        playerLists[i] = [];
-      }
       playerLists = data['players'].reduce(function validatePlayer(collection, player, index) {
         ServiceHelpers.assertType('players[' + index + '] pair number', player['pair_no'], 'number');
         if (player['pair_no'] <= 0
@@ -231,10 +230,77 @@
     tournament.setNoPairs(
         data['no_pairs'],
         this._tournamentStore.getOrCreateTournamentPair.bind(this._tournamentStore, id));
-    if(playerLists) {
-      tournament.pairs.forEach(function(pair, index) {
-        pair.setPlayers(playerLists[index]);
+    tournament.pairs.forEach(function(pair, index) {
+      pair.setPlayers(playerLists[index]);
+    });
+    return tournament;
+  };
+
+  /**
+   * Creates a new tournament on the server, and returns a promise for the resulting Tournament object.
+   * @param {tichu.TournamentRequest} request
+   * @returns {angular.$q.Promise<tichu.Tournament>}
+   */
+  TichuTournamentService.prototype.createTournament = function createTournament(request) {
+    var path = "/api/tournaments";
+    var $q = this._$q;
+    var $log = this._$log;
+    var self = this;
+    return this._$http({
+      method: 'POST',
+      url: path,
+      data: request
+    }).then(function onSuccess(response) {
+      try {
+        ServiceHelpers.assertType('created tournament data', response.data, 'object', false);
+        var id = ServiceHelpers.assertType('created tournament id', response.data['id'], 'string', false);
+        return self._saveRequestedTournament(id, request);
+      } catch (ex) {
+        $log.error(
+            "Malformed response from " + path + " (" + response.status + " " + response.statusText + "):\n"
+            + ex + "\n\n"
+            + JSON.stringify(response.data));
+        var rejection = new tichu.RpcError();
+        rejection.redirectToLogin = false;
+        rejection.error = "Invalid response from server";
+        rejection.detail = "The server sent confusing data for the tournament creation.";
+        return $q.reject(rejection);
+      }
+    }, ServiceHelpers.handleErrorIn($q, $log, path));
+  };
+
+  /**
+   * Converts the given tournament request into an actual, cached tournament.
+   * @param {string} id
+   * @param {tichu.TournamentRequest} request
+   * @returns {tichu.Tournament}
+   * @private
+   */
+  TichuTournamentService.prototype._saveRequestedTournament = function _saveRequestedTournament(id, request) {
+    var playerLists = [];
+    for (var i = 0; i < request.noPairs; i += 1) {
+      playerLists[i] = [];
+    }
+    playerLists = request.players.reduce(function(collection, player) {
+      var pairIndex = player.pairNo - 1;
+      collection[pairIndex] = collection[pairIndex] || [];
+      collection[pairIndex].push({
+        name: player.name || null,
+        email: player.email || null
       });
+      return collection;
+    }, playerLists);
+    var tournament = this._tournamentStore.getOrCreateTournament(id);
+    tournament.name = request.name;
+    tournament.noBoards = request.noBoards;
+    tournament.setNoPairs(
+        request.noPairs,
+        this._tournamentStore.getOrCreateTournamentPair.bind(this._tournamentStore, id));
+    tournament.pairs.forEach(function(pair, index) {
+      pair.setPlayers(playerLists[index]);
+    });
+    if (this._tournamentList !== null) {
+      this._tournamentList.push(this._tournamentStore.getOrCreateTournamentHeader(id));
     }
     return tournament;
   };

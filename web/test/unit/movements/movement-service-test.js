@@ -16,39 +16,13 @@ describe("movement-service module", function() {
 
   describe("TichuMovementService", function() {
     var service;
+    /** @type {PromiseHelper} */
+    var runPromise;
 
     beforeEach(inject(function (TichuMovementService) {
       service = TichuMovementService;
+      runPromise = promiseHelper($rootScope, $httpBackend);
     }));
-
-    function runPromise(promise, options) {
-      var result = {};
-      promise.then(function(promiseResolvedWith) {
-        result = {
-          promise_resolved_with: promiseResolvedWith === undefined ? "(undefined)" : promiseResolvedWith,
-          actual_result: promiseResolvedWith
-        };
-      }).catch(function(promiseFailedWith) {
-        result = {
-          promise_failed_with: promiseFailedWith === undefined ? "(undefined)" : promiseFailedWith,
-          actual_result: promiseFailedWith
-        };
-      });
-      if (options.flushHttp) {
-        $httpBackend.flush();
-      }
-      $rootScope.$apply();
-      if (options.expectSuccess) {
-        expect(result.promise_failed_with).toBeUndefined();
-        expect(result.promise_resolved_with).toBeDefined();
-        return result.actual_result;
-      } else if (options.expectFailure) {
-        expect(result.promise_resolved_with).toBeUndefined();
-        expect(result.promise_failed_with).toBeDefined();
-        return result.actual_result;
-      }
-      return result.actual_result;
-    }
 
     describe("getMovement", function() {
       it("uses the first two parameters as tournament ID and pair number", function() {

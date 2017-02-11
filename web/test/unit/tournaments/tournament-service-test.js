@@ -1,12 +1,13 @@
 "use strict";
 describe("tournament-service module", function() {
-  var $httpBackend, $rootScope;
+  var $httpBackend, $rootScope, /** @type {PromiseHelper} */ runPromise;
 
   beforeEach(module("tichu-tournament-service"));
 
   beforeEach(inject(function(_$httpBackend_, _$rootScope_) {
     $httpBackend = _$httpBackend_;
     $rootScope = _$rootScope_;
+    runPromise = promiseHelper($rootScope, $httpBackend);
   }));
 
   afterEach(function() {
@@ -31,18 +32,10 @@ describe("tournament-service module", function() {
               ]
             });
 
-        var tournamentList, failure;
-        service.getTournaments().then(function(_tournamentList_) {
-          tournamentList = _tournamentList_;
-        }).catch(function(err) {
-          failure = {
-            promise_rejected_with: err
-          };
+        var tournamentList = runPromise(service.getTournaments(), {
+          flushHttp: true,
+          expectSuccess: true
         });
-        $httpBackend.flush();  // causes the request to receive its response
-        $rootScope.$apply();  // causes the promise to resolve
-
-        expect(failure).toBeUndefined();
         expect(tournamentList.length).toEqual(2);
         expect(tournamentList[0].id).toEqual("123");
         expect(tournamentList[0].name).toEqual("My First Tournament");
@@ -59,26 +52,9 @@ describe("tournament-service module", function() {
               ]
             });
 
-        var firstTournamentList, secondTournamentList, failure;
-        service.getTournaments().then(function(_tournamentList_) {
-          firstTournamentList = _tournamentList_;
-        }).catch(function(err) {
-          failure = {
-            first_promise_rejected_with: err
-          };
-        });
-        $httpBackend.flush();  // causes the request to receive its response
-        $rootScope.$apply();  // causes the promise to resolve
-        service.getTournaments().then(function(_tournamentList_) {
-          secondTournamentList = _tournamentList_;
-        }).catch(function(err) {
-          failure = failure || {};
-          failure.second_promise_rejected_with = err;
-        });
+        var firstTournamentList = runPromise(service.getTournaments(), {expectSuccess: true, flushHttp: true});
+        var secondTournamentList = runPromise(service.getTournaments(), {expectSuccess: true});
         $httpBackend.verifyNoOutstandingRequest();
-        $rootScope.$apply();
-
-        expect(failure).toBeUndefined();
         expect(secondTournamentList).toBe(firstTournamentList);
       });
 
@@ -89,16 +65,8 @@ describe("tournament-service module", function() {
               "detail": "is happening in Oz"
             });
 
-        var tournamentList, rejection;
-        service.getTournaments().then(function(_tournamentList_) {
-          tournamentList = _tournamentList_;
-        }).catch(function(err) {
-          rejection = err;
-        });
-        $httpBackend.flush();  // causes the request to receive its response
-        $rootScope.$apply();  // causes the promise to resolve
+        var rejection = runPromise(service.getTournaments(), {expectFailure: true, flushHttp: true});
 
-        expect(tournamentList).toBeUndefined();
         expect(rejection.redirectToLogin).toBe(false);
         expect(rejection.error).toBe("something baaaad");
         expect(rejection.detail).toBe("is happening in Oz");
@@ -111,16 +79,7 @@ describe("tournament-service module", function() {
               "detail": "get over to the login page"
             });
 
-        var tournamentList, rejection;
-        service.getTournaments().then(function(_tournamentList_) {
-          tournamentList = _tournamentList_;
-        }).catch(function(err) {
-          rejection = err;
-        });
-        $httpBackend.flush();  // causes the request to receive its response
-        $rootScope.$apply();  // causes the promise to resolve
-
-        expect(tournamentList).toBeUndefined();
+        var rejection = runPromise(service.getTournaments(), {expectFailure: true, flushHttp: true});
         expect(rejection.redirectToLogin).toBe(true);
       });
 
@@ -131,11 +90,7 @@ describe("tournament-service module", function() {
               "detail": "is happening in Oz"
             });
 
-        service.getTournaments().catch(function() {
-          // it's okay just ignore this
-        });
-        $httpBackend.flush();  // causes the request to receive its response
-        $rootScope.$apply();  // causes the promise to resolve
+        runPromise(service.getTournaments(), {expectFailure: true, flushHttp: true});
 
         $httpBackend.expectGET('/api/tournaments')
             .respond(200, {
@@ -145,16 +100,7 @@ describe("tournament-service module", function() {
               ]
             });
 
-        var tournamentList, rejection;
-        service.getTournaments().then(function(_tournamentList_) {
-          tournamentList = _tournamentList_;
-        }).catch(function(err) {
-          rejection = err;
-        });
-        $httpBackend.flush();  // causes the request to receive its response
-        $rootScope.$apply();  // causes the promise to resolve
-
-        expect(tournamentList).toBeDefined();
+        runPromise(service.getTournaments(), {expectSuccess: true, flushHttp: true});
       });
 
       it("only makes one server call even if another call comes in before it returns", function() {
@@ -166,25 +112,11 @@ describe("tournament-service module", function() {
               ]
             });
 
-        var firstTournamentList, secondTournamentList, failure;
-        service.getTournaments().then(function(_tournamentList_) {
-          firstTournamentList = _tournamentList_;
-        }).catch(function(err) {
-          failure = {
-            first_promise_rejected_with: err
-          };
-        });
-        service.getTournaments().then(function(_tournamentList_) {
-          secondTournamentList = _tournamentList_;
-        }).catch(function(err) {
-          failure = failure || {};
-          failure.second_promise_rejected_with = err;
-        });
-        $httpBackend.flush(1);  // causes the first request to receive its response
-        $rootScope.$apply();  // causes the promise to resolve
+        var firstPromise = service.getTournaments();
+        var secondPromise = service.getTournaments();
+        var firstTournamentList = runPromise(firstPromise, {expectSuccess: true, flushHttp: 1});
+        var secondTournamentList = runPromise(secondPromise, {expectSuccess: true});
 
-        expect(failure).toBeUndefined();
-        expect(secondTournamentList).toBeDefined();
         expect(secondTournamentList).toBe(firstTournamentList);
       });
     });
@@ -204,18 +136,11 @@ describe("tournament-service module", function() {
               "hands": []
             });
 
-        var tournament, failure;
-        service.getTournament("123456").then(function (_tournament_) {
-          tournament = _tournament_;
-        }).catch(function (err) {
-          failure = {
-            promise_rejected_with: err
-          };
+        var tournament = runPromise(service.getTournament("123456"), {
+          expectSuccess: true,
+          flushHttp: true
         });
-        $httpBackend.flush();  // causes the request to receive its response
-        $rootScope.$apply();  // causes the promise to resolve
 
-        expect(failure).toBeUndefined();
         expect(tournament.id).toEqual("123456");
         expect(tournament.name).toEqual("My Cool Tournament");
         expect(tournament.noBoards).toEqual(24);
@@ -242,26 +167,10 @@ describe("tournament-service module", function() {
               "hands": []
             });
 
-        var firstTournament, secondTournament, failure;
-        service.getTournament("123456").then(function (_tournament_) {
-          firstTournament = _tournament_;
-        }).catch(function (err) {
-          failure = {
-            first_promise_rejected_with: err
-          };
-        });
-        $httpBackend.flush();  // causes the request to receive its response
-        $rootScope.$apply();  // causes the promise to resolve
-        service.getTournament("123456").then(function (_tournament_) {
-          secondTournament = _tournament_;
-        }).catch(function (err) {
-          failure = failure || {};
-          failure.second_promise_rejected_with = err;
-        });
+        var firstTournament = runPromise(service.getTournament("123456"), {expectSuccess: true, flushHttp: true});
+        var secondTournament = runPromise(service.getTournament("123456"), {expectSuccess: true});
         $httpBackend.verifyNoOutstandingRequest();
-        $rootScope.$apply();
 
-        expect(failure).toBeUndefined();
         expect(secondTournament).toBe(firstTournament);
       });
 
@@ -272,16 +181,8 @@ describe("tournament-service module", function() {
               "detail": "is happening in Oz"
             });
 
-        var tournament, rejection;
-        service.getTournament("123456").then(function (_tournament_) {
-          tournament = _tournament_;
-        }).catch(function (err) {
-          rejection = err;
-        });
-        $httpBackend.flush();  // causes the request to receive its response
-        $rootScope.$apply();  // causes the promise to resolve
+        var rejection = runPromise(service.getTournament("123456"), {expectFailure: true, flushHttp: true});
 
-        expect(tournament).toBeUndefined();
         expect(rejection.redirectToLogin).toBe(false);
         expect(rejection.error).toBe("something baaaad");
         expect(rejection.detail).toBe("is happening in Oz");
@@ -294,16 +195,8 @@ describe("tournament-service module", function() {
               "detail": "get over to the login page"
             });
 
-        var tournament, rejection;
-        service.getTournament("123456").then(function (_tournament_) {
-          tournament = _tournament_;
-        }).catch(function (err) {
-          rejection = err;
-        });
-        $httpBackend.flush();  // causes the request to receive its response
-        $rootScope.$apply();  // causes the promise to resolve
+        var rejection = runPromise(service.getTournament("123456"), {expectFailure: true, flushHttp: true});
 
-        expect(tournament).toBeUndefined();
         expect(rejection.redirectToLogin).toBe(true);
       });
 
@@ -314,11 +207,7 @@ describe("tournament-service module", function() {
               "detail": "is happening in Oz"
             });
 
-        service.getTournament("123456").catch(function () {
-          // it's okay just ignore this
-        });
-        $httpBackend.flush();  // causes the request to receive its response
-        $rootScope.$apply();  // causes the promise to resolve
+        runPromise(service.getTournament("123456"), {expectFailure: true, flushHttp: true});
 
         $httpBackend.expectGET('/api/tournaments/123456')
             .respond(200, {
@@ -333,16 +222,7 @@ describe("tournament-service module", function() {
               "hands": []
             });
 
-        var tournament, rejection;
-        service.getTournament("123456").then(function (_tournament_) {
-          tournament = _tournament_;
-        }).catch(function (err) {
-          rejection = err;
-        });
-        $httpBackend.flush();  // causes the request to receive its response
-        $rootScope.$apply();  // causes the promise to resolve
-
-        expect(tournament).toBeDefined();
+        runPromise(service.getTournament("123456"), {expectSuccess: true, flushHttp: true});
       });
 
       it("only makes one server call even if another call comes in before it returns", function () {
@@ -359,30 +239,20 @@ describe("tournament-service module", function() {
               "hands": []
             });
 
-        var firstTournament, secondTournament, failure;
-        service.getTournament("123456").then(function (_tournament_) {
-          firstTournament = _tournament_;
-        }).catch(function (err) {
-          failure = {
-            first_promise_rejected_with: err
-          };
+        var firstPromise = service.getTournament("123456");
+        var secondPromise = service.getTournament("123456");
+        var firstTournament = runPromise(firstPromise, {
+          expectSuccess: true,
+          flushHttp: 1
         });
-        service.getTournament("123456").then(function (_tournament_) {
-          secondTournament = _tournament_;
-        }).catch(function (err) {
-          failure = failure || {};
-          failure.second_promise_rejected_with = err;
+        var secondTournament = runPromise(secondPromise, {
+          expectSuccess: true
         });
-        $httpBackend.flush(1);  // causes the first request to receive its response
-        $rootScope.$apply();  // causes the promise to resolve
 
-        expect(failure).toBeUndefined();
-        expect(secondTournament).toBeDefined();
         expect(secondTournament).toBe(firstTournament);
       });
 
       it("updates its title when the tournament list is downloaded", function () {
-        var tournament, tournamentList, failure;
         $httpBackend.expectGET('/api/tournaments/123456')
             .respond(200, {
               "name": "My Cool Tournament",
@@ -395,15 +265,7 @@ describe("tournament-service module", function() {
               ],
               "hands": []
             });
-        service.getTournament("123456").then(function (_tournament_) {
-          tournament = _tournament_;
-        }).catch(function (err) {
-          failure = {
-            first_promise_rejected_with: err
-          };
-        });
-        $httpBackend.flush();  // causes the request to receive its response
-        $rootScope.$apply();  // causes the promise to resolve
+        var tournament = runPromise(service.getTournament("123456"), {expectSuccess: true, flushHttp: true});
 
         $httpBackend.expectGET('/api/tournaments')
             .respond(200, {
@@ -411,36 +273,19 @@ describe("tournament-service module", function() {
                 {"id": "123456", "name": "My First Tournament"}
               ]
             });
-        service.getTournaments().then(function (_tournamentList_) {
-          tournamentList = _tournamentList_;
-        }).catch(function (err) {
-          failure = failure || {};
-          failure.second_promise_rejected_with = err;
-        });
-        $httpBackend.flush();  // causes the request to receive its response
-        $rootScope.$apply();  // causes the promise to resolve
+        runPromise(service.getTournaments(), {expectSuccess: true, flushHttp: true});
 
-        expect(failure).toBeUndefined();
         expect(tournament.name).toBe("My First Tournament");
       });
 
       it("updates the matching title in the tournament list when it is downloaded", function () {
-        var tournament, tournamentList, failure;
         $httpBackend.expectGET('/api/tournaments')
             .respond(200, {
               "tournaments": [
                 {"id": "123456", "name": "My First Tournament"}
               ]
             });
-        service.getTournaments().then(function (_tournamentList_) {
-          tournamentList = _tournamentList_;
-        }).catch(function (err) {
-          failure = {
-            first_promise_rejected_with: err
-          };
-        });
-        $httpBackend.flush();  // causes the request to receive its response
-        $rootScope.$apply();  // causes the promise to resolve
+        var tournamentList = runPromise(service.getTournaments(), {expectSuccess: true, flushHttp: true});
 
         $httpBackend.expectGET('/api/tournaments/123456')
             .respond(200, {
@@ -454,17 +299,155 @@ describe("tournament-service module", function() {
               ],
               "hands": []
             });
-        service.getTournament("123456").then(function (_tournament_) {
-          tournament = _tournament_;
-        }).catch(function (err) {
-          failure = failure || {};
-          failure.second_promise_rejected_with = err;
-        });
-        $httpBackend.flush();  // causes the request to receive its response
-        $rootScope.$apply();  // causes the promise to resolve
+        runPromise(service.getTournament("123456"), {expectSuccess: true, flushHttp: true});
 
-        expect(failure).toBeUndefined();
         expect(tournamentList[0].name).toBe("My Cool Tournament");
+      });
+    });
+
+    describe("createTournament", function() {
+      it("sends the JSONified tournament request to the server", function () {
+          $httpBackend.expectPOST("/api/tournaments", {
+              name: "Tichu of the Damned",
+              no_boards: 24,
+              no_pairs: 8,
+              players: [
+                  {
+                      name: "Dracula",
+                      email: "master@castlevania.example",
+                      pair_no: 4
+                  }
+              ]
+          }).respond(200, {});
+
+          runPromise(service.createTournament(makeTournamentRequest({
+            name: "Tichu of the Damned",
+            noBoards: 24,
+            noPairs: 8,
+            players: [
+                makePlayerRequest({
+                  name: "Dracula",
+                  email: "master@castlevania.example",
+                  pairNo: 4
+                })
+            ]
+          })), {flushHttp: true});
+      });
+
+      it("returns a Tournament object representing the created tournament on success", function() {
+        $httpBackend.expectPOST("/api/tournaments").respond(200, {
+          "id": "0912348"
+        });
+
+        var tournament = runPromise(service.createTournament(makeTournamentRequest({
+          name: "Tichu of the Damned",
+          noBoards: 24,
+          noPairs: 8,
+          players: [
+            makePlayerRequest({
+              name: "Dracula",
+              email: "master@castlevania.example",
+              pairNo: 4
+            })
+          ]
+        })), {expectSuccess: true, flushHttp: true});
+
+        expect(tournament.id).toBe("0912348");
+        expect(tournament.name).toBe("Tichu of the Damned");
+        expect(tournament.noBoards).toBe(24);
+        expect(tournament.noPairs).toBe(8);
+        expect(tournament.pairs[3].players[0].name).toBe("Dracula");
+        expect(tournament.pairs[3].players[0].email).toBe("master@castlevania.example");
+      });
+
+      it("rejects the returned promise if an error is returned", function() {
+        $httpBackend.expectPOST("/api/tournaments").respond(400, {
+          "error": "What kind of request is this",
+          "detail": "What do you even want me to do with this"
+        });
+
+        var rejection = runPromise(
+            service.createTournament(makeTournamentRequest({})), {expectFailure: true, flushHttp: true});
+
+        expect(rejection.error).toBe("What kind of request is this");
+        expect(rejection.detail).toBe("What do you even want me to do with this");
+        expect(rejection.redirectToLogin).toBe(false);
+      });
+
+      it("sets redirectToLogin on the rejection for a 401", function() {
+        $httpBackend.expectPOST("/api/tournaments").respond(401, {
+          "error": "Log your dumb ass in",
+          "detail": "How am I supposed to work with this"
+        });
+
+        var rejection = runPromise(
+            service.createTournament(makeTournamentRequest({})), {expectFailure: true, flushHttp: true});
+
+        expect(rejection.redirectToLogin).toBe(true);
+      });
+
+      it("adds its header to the tournament list cache on success if there was one", function() {
+        $httpBackend.expectGET('/api/tournaments')
+            .respond(200, {
+              "tournaments": [
+                {"id": "123", "name": "My First Tournament"},
+                {"id": "321", "name": "My Other Tournament"}
+              ]
+            });
+
+        var tournamentList = runPromise(service.getTournaments(), {
+          flushHttp: true,
+          expectSuccess: true
+        });
+
+        $httpBackend.expectPOST("/api/tournaments").respond(200, {
+          "id": "231"
+        });
+
+        var tournament = runPromise(service.createTournament(makeTournamentRequest({
+          name: "Tichu of the Damned"
+        })), {expectSuccess: true, flushHttp: true});
+
+        expect(tournamentList).toContain(tournament._header);
+      });
+
+      it("does not create a tournament list cache if there was not one", function() {
+        $httpBackend.expectPOST("/api/tournaments").respond(200, {
+          "id": "231"
+        });
+
+        var tournament = runPromise(service.createTournament(makeTournamentRequest({
+          name: "Tichu of the Damned"
+        })), {expectSuccess: true, flushHttp: true});
+
+        $httpBackend.expectGET('/api/tournaments')
+            .respond(200, {
+              "tournaments": [
+                {"id": "123", "name": "My First Tournament"},
+                {"id": "321", "name": "My Other Tournament"}
+              ]
+            });
+
+        var tournamentList = runPromise(service.getTournaments(), {
+          flushHttp: true,
+          expectSuccess: true
+        });
+
+        expect(tournamentList).not.toContain(tournament._header);
+      });
+
+      it("puts the tournament in the cache for getTournament on success", function() {
+        $httpBackend.expectPOST("/api/tournaments").respond(200, {
+          "id": "231"
+        });
+
+        var createdTournament = runPromise(service.createTournament(makeTournamentRequest({
+          name: "Tichu of the Damned"
+        })), {expectSuccess: true, flushHttp: true});
+
+        var gotTournament = runPromise(service.getTournament("231"), {expectSuccess: true});
+        $httpBackend.verifyNoOutstandingRequest();
+        expect(gotTournament).toBe(createdTournament);
       });
     });
   });

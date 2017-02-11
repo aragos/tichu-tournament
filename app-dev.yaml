@@ -5,6 +5,8 @@ threadsafe: true
 handlers:
 - url: /api/.*
   script: api.src.main.app
+- url: /css
+  static_dir: web/css
 - url: /bower_components
   static_dir: web/bower_components
 - url: /src

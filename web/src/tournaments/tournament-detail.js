@@ -95,7 +95,7 @@
    */
   function mapRoute($routeProvider) {
     $routeProvider
-        .when("/tournaments/:id", {
+        .when("/tournaments/:id/view", {
           templateUrl: "src/tournaments/tournament-detail.html",
           controller: "TournamentDetailController",
           controllerAs: "tournamentDetailController",

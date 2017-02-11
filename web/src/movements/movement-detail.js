@@ -21,7 +21,7 @@
       header: loadResults.failure
           ? "Movement Error"
           : "Pair #" + loadResults.movement.pair.pairNo + " - " + loadResults.movement.tournamentId.name,
-      backPath: (loadResults.pairCode || loadResults.failure) ? "/home" : "/tournaments/" + loadResults.movement.tournamentId.id,
+      backPath: (loadResults.pairCode || loadResults.failure) ? "/home" : "/tournaments/" + loadResults.movement.tournamentId.id + "/view",
       showHeader: true,
       refresh: loadResults.failure ? null : this._refresh.bind(this)
     });

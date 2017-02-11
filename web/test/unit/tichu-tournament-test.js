@@ -2,6 +2,44 @@
 describe("tichu-tournament module", function() {
   beforeEach(module("tichu-tournament"));
 
+  describe("default routing", function() {
+    var $rootScope;
+    var $location;
+    var $route;
+
+    beforeEach(inject(function(/** $location */ _$location_,
+                               /** $route */ _$route_,
+                               /** $rootScope */ _$rootScope_) {
+      $rootScope = _$rootScope_;
+      $route = _$route_;
+      $location = _$location_;
+    }));
+
+    it("routes to /home by default", function() {
+      $location.path("/");
+      $rootScope.$digest();
+      expect($location.path()).toBe("/home");
+    });
+
+    it("redirects old-style tournament URLs to new-style ones", function() {
+      $location.path("/tournaments/91820");
+      $rootScope.$digest();
+      expect($location.path()).toBe("/tournaments/91820/view");
+    });
+
+    it("redirects old-style tournament URLs with trailing slash to new-style ones", function() {
+      $location.path("/tournaments/91820/");
+      $rootScope.$digest();
+      expect($location.path()).toBe("/tournaments/91820/view");
+    });
+
+    it("leaves tournament URLs with extra stuff after alone", function() {
+      $location.path("/tournaments/91820/junk");
+      $rootScope.$digest();
+      expect($location.path()).toBe("/home");
+    });
+  });
+
   describe("AppController controller", function() {
     var $rootScope;
     var scope;

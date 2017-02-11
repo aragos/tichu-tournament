@@ -103,6 +103,13 @@
         .accentPalette('blue');
   }
 
+
+  /**
+   * The regexp used to match old-style tournament URLs in otherwise.
+   * @const {RegExp}
+   */
+  var OLD_STYLE_TOURNAMENT_URL = /^\/tournaments\/([^/]+)(?:\/)?$/;
+
   /**
    * Configures the routing provider to go to /home when no other page is specified.
    * (e.g., on initial load) Also configures html5mode.
@@ -113,7 +120,15 @@
    */
   function setDefaultRoute($locationProvider, $routeProvider) {
     $routeProvider
-        .otherwise("/home");
+        .otherwise({
+          redirectTo: function(routeParams, path) {
+            var match = OLD_STYLE_TOURNAMENT_URL.exec(path);
+            if (match) {
+              return "/tournaments/" + match[1] + "/view"
+            }
+            return "/home";
+          }
+        });
     $locationProvider.html5Mode({
       enabled: true,
       requireBase: true,
@@ -129,6 +144,7 @@
           "tichu-home",
           "tichu-movement-detail",
           "tichu-tournament-detail",
+          "tichu-tournament-form",
           "tichu-tournament-list",
           "tichu-tournament-results"])
       .controller("AppController", AppController)
