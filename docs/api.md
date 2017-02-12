@@ -400,6 +400,10 @@ Optional. Necessary only for non-tournament owners.
             "round": 1
             "position": "3N"
             "opponent": 2
+            "opponent_names": [
+                "Peter the Positive",
+                "Christopher the Columbus"
+            ]
             "hands": [
                 {
                     "hand_no" : 13
@@ -427,6 +431,10 @@ Optional. Necessary only for non-tournament owners.
             "round": 2
             "position": "1E"
             "opponent": 4
+            "opponent_names": [
+                "Jonathan the Jovial",
+                "Nathaniel the Notorious"
+            ]
             "hands": [
                 {
                     "hand_no" : 7
@@ -454,6 +462,8 @@ Optional. Necessary only for non-tournament owners.
     * `round`: Integer. The round number during which this hand is to be played. Required.
     * `position`: String. Position for this team. Two character string starting with the 
        table number and ending with either 'N' for North/South or 'E' for East/West. Optional.
+    * `opponent`: Integer. The number of the opponent pair for this round. Required.
+    * `opponent_names`: List of Strings. Names of the opponents for this round. Optional.
     * `hands`: List of integers. Set of hand numbers to be played by this team/opponent
        combination. Optional.
         * `score`: Object. If the hand has already been scored contains relevant information

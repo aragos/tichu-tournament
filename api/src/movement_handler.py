@@ -86,8 +86,10 @@ class MovementHandler(GenericHandler):
     round_str = round.to_dict()
     opp = round.opponent
     if opp:
-      round_str["opponent_names"] = [x.get("name") for x in
-          PlayerPair.GetByPairNo(tourney, opp).player_list()]
+      opp_pp = PlayerPair.GetByPairNo(tourney, opp)
+      if opp_pp:
+        round_str["opponent_names"] = [x.get("name") for x in
+            opp_pp.player_list()]
     if hands:
       del round_str['hands']
     for h in hands:
