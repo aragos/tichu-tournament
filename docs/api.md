@@ -462,9 +462,9 @@ Optional. Necessary only for non-tournament owners.
             Each entry may be `"T"`, indicating a call of Tichu, `"GT"`, indicating a call of Grand Tichu,
             or `""`, indicating no call. If an entry is absent, it is assumed to mean no call.
           * `ns_score`: Integer or string. The score of the north-south pair, including Tichu bonuses and
-            penalties. May also be the string "AVG+" or "AVG-".
+            penalties. May also be the string "AVG", "AVG+", "AVG++", "AVG-", or "AVG--".
           * `ew_score`: Integer or string. The score of the east-west pair, including Tichu bonuses and
-            penalties. May also be the string "AVG+" or "AVG-".
+            penalties. May also be the string "AVG", "AVG+", "AVG++", "AVG-", or "AVG--".
           * `notes`: String. Any additional notes about the hand added by the scorer or the director.
     * `relay_table`: Boolean. If set, this set of hands must be played simultaneously with
        another table. Optional.

@@ -85,6 +85,11 @@ class AppTest(unittest.TestCase):
     params = {'calls': {}, 'ns_score': 100, 'ew_score': 0}
     response = self.testapp.put_json("/api/tournaments/{}/hands/22/2/7".format(id),
                                      params)
+    # Team 2 is N team 3 is E. Playing hand 16 in Round 4.
+    params = {'calls': {}, 'ns_score': "avg--", 'ew_score': "avg++"}
+    response = self.testapp.put_json("/api/tournaments/{}/hands/16/2/3".format(id),
+                                     params)
+
     # Team 4 is N team 7 is E. Playing hand 13 in Round 1.
     params = {'calls': {}, 'ns_score': 125, 'ew_score': -25}
     response = self.testapp.put_json("/api/tournaments/{}/hands/13/4/7".format(id),
@@ -160,9 +165,15 @@ class AppTest(unittest.TestCase):
         {"hand_no" : 22, "score"  : { "calls" : {}, "ns_score" : 100, "ew_score" : 0 }},
         {"hand_no" : 23}, {"hand_no" : 24}]
     self.assertHandEquals(response_dict['movement'], 2, expected_hands,
-                          "Round 1, Tourney 1, Hands 22-24, Team 2 vs 7")
+                          "Round 2, Tourney 1, Hands 22-24, Team 2 vs 7")
+    expected_hands = [
+        {"hand_no" : 16, "score"  : { "calls" : {}, "ns_score" : 'AVG--',
+             "ew_score" : 'AVG++' }},
+        {"hand_no" : 17}, {"hand_no" : 18}]
+    self.assertHandEquals(response_dict['movement'], 4, expected_hands,
+                          "Round 4, Tourney 1, Hands 16-18, Team 2 vs 3")
     self.assertScoresNotPresent(response_dict['movement'],
-                                Set([3, 4, 5, 6, 7]), "Team 2")
+                                Set([3, 5, 6, 7]), "Team 2")
     
     # Team 4                            
     response = self.testapp.get(
