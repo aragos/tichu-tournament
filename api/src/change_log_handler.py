@@ -21,11 +21,11 @@ class ChangeLogHandler(GenericHandler):
     tourney = GetTourneyWithIdAndMaybeReturnStatus(self.response, id)
     if not tourney:
       return
-    
+
     if not CheckUserOwnsTournamentAndMaybeReturnStatus(self.response, 
         users.get_current_user(), tourney):
       return
-    
+
     if not CheckValidHandPlayersCombinationAndMaybeSetStatus(
         self.response, tourney, board_no, ns_pair, ew_pair):
       return

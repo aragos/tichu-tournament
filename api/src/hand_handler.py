@@ -114,7 +114,8 @@ class HandHandler(GenericHandler):
     hand_score = HandScore.GetByHandParams(tourney, board_no, ns_pair, ew_pair)
     if not hand_score:
       SetErrorStatus(self.response, 404, "Invalid Request",
-                     "Hand not set in tournament")
+                     "Hand {} between pairs {} and {} is not set".format(
+                         board_no, ns_pair, ew_pair))
       return
     hand_score.Delete()
     self.response.set_status(204) 

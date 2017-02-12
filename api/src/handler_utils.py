@@ -56,7 +56,9 @@ def CheckValidHandPlayersCombinationAndMaybeSetStatus(response, tourney,
   movements = BuildMovementAndMaybeSetStatus(response, tourney.no_pairs,
                                              tourney.no_boards)
   if not movements:
-    SetErrorStatus(response, 400, error, detail)
+    SetErrorStatus(response, 400, error, 
+                   ("Tournament config with {} pairs and {} boards is not" +
+                        "valid").format(tourney.no_pairs, tourney.no_boards))
     return False
   return CheckValidMatchupForMovementAndMaybeSetStatus(response, movements,
       int(board_no), int(ns_pair), int(ew_pair))
@@ -142,8 +144,8 @@ def CheckUserLoggedInAndMaybeReturnStatus(response, user):
     True iff the user is logged in.
   '''
   if not user:
-    SetErrorStatus(response, 401, "User is not logged in.",
-                   "Seriously, not logged in, not even a little.")
+    SetErrorStatus(response, 401, "Invalid User",
+                   "User not logged in")
     return False
   return True
 
@@ -166,7 +168,7 @@ def CheckUserOwnsTournamentAndMaybeReturnStatus(response, user, tourney):
     return False
   if tourney.owner_id != user.user_id():
     SetErrorStatus(response, 403, "Forbidden User",
-                   "User is not director of tournament with id {}".format(id))
+                   "User is not director of tournament {}".format(id))
     return False
   return True
 
