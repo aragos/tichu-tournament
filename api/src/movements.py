@@ -42,7 +42,7 @@ class MovementRound:
     if not self.hands:
       return { "round" : self.round }
     return {"round" : self.round,
-            "position" : str(self.table) + "N" if self.is_north else "E",
+            "position" : str(self.table) + ("N" if self.is_north else "E"),
             "hands" : self.hands,
             "opponent" : self.opponent,
             "relay_table" : self.relay_table}

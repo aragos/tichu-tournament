@@ -415,8 +415,8 @@ class HandScore(ndb.Model):
     change_dict = {
       "calls" : self.calls_dict(),
       "notes" : self.notes,
-      "ns_score" : self.ns_score,
-      "ew_score" : self.ew_score,
+      "ns_score" : self.get_ns_score(),
+      "ew_score" : self.get_ew_score(),
     }
     epoch = datetime.datetime.utcfromtimestamp(0)
     nowtime = datetime.datetime.now()

@@ -73,6 +73,37 @@ class AppTest(unittest.TestCase):
     self.assertEqual(1, response_dict['players'][0]["pair_no"])
     self.assertEqual("my name", response_dict['players'][0]["name"])
 
+  def testGetTournament_Hands(self):
+    self.loginUser()
+    id = self.AddBasicTournament()
+    params1 = {'ns_score' : 'AVG',
+              'ew_score' : 'AVG+'}
+    response = self.testapp.put_json(
+        "/api/tournaments/{}/hands/1/2/3".format(id), params1)
+    params2 = {'ns_score' : 'AVG--',
+               'ew_score' : 'AVG-'}
+    response = self.testapp.put_json(
+        "/api/tournaments/{}/hands/1/1/4".format(id), params2)
+    params3 = {'calls': { 'north': "T" }, 
+              'ns_score': 75,
+              'ew_score': 125,
+              'notes': 'I am a note'}
+    response = self.testapp.put_json("/api/tournaments/{}/hands/1/7/5".format(id),
+                                     params3)
+    response = self.testapp.get("/api/tournaments/{}".format(id))
+    self.assertEqual(response.status_int, 200)
+    response_dict = json.loads(response.body)
+    hands = response_dict["hands"]
+    hands.sort(key=lambda hand: hand["ns_pair"])
+    params2.update({"ns_pair" : 1, "ew_pair" : 4, "calls"  : {},
+                    "board_no" : 1, "notes" : None})
+    self.assertEqual(params2, hands[0])
+    params1.update({"ns_pair" : 2, "ew_pair" : 3, "calls"  : {},
+                    "board_no" : 1, "notes" : None})
+    self.assertEqual(params1, hands[1])
+    params3.update({"ns_pair" : 7, "ew_pair" : 5, "board_no" : 1})
+    self.assertEqual(params3, hands[2])
+
   def testPutTournament_not_logged_in(self):
     self.loginUser()
     id = self.AddBasicTournament()
@@ -274,7 +305,7 @@ class AppTest(unittest.TestCase):
     response = self.testapp.get("/api/tournaments/{}".format(id2),
                                 expect_errors=True)
     self.CheckBasicTournamentMetadataUnchanged(json.loads(response.body))
-    
+
   def testDeleteTournament_hands_removed(self):
     self.loginUser()
     id = self.AddBasicTournament()
