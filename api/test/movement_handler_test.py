@@ -213,17 +213,21 @@ class AppTest(unittest.TestCase):
     response_dict = json.loads(response.body)
     self.assertEqual([], response_dict['players'])
     self.assertEqual('name', response_dict['name'])
-    self.assertEqual(7, len(response_dict['movement']))
+    movement_dict = response_dict['movement']
+    self.assertEqual(7, len(movement_dict))
     expected_hands = [
         {"hand_no" : 13, "score"  : { "calls" : {}, "ns_score" : 125, "ew_score" : -25 }},
         {"hand_no" : 14}, {"hand_no" : 15}]
-    self.assertHandEquals(response_dict['movement'], 1, expected_hands,
+    self.assertHandEquals(movement_dict, 1, expected_hands,
                           "Round 1, Tourney 1, Hand 13, Team 7 vs 4")
     expected_hands = [
         {"hand_no" : 22, "score"  : { "calls" : {}, "ns_score" : 100, "ew_score" : 0 }},
         {"hand_no" : 23}, {"hand_no" : 24}]
-    self.assertHandEquals(response_dict['movement'], 2, expected_hands,
+    self.assertHandEquals(movement_dict, 2, expected_hands,
                           "Round 2 Tourney 1, Hands 22-24, Team 7 vs 2")
+    self.assertEqual(
+        ["My name"],
+        self.getRoundFromMovementDict(movement_dict, 2)['opponent_names'])
     self.assertScoresNotPresent(response_dict['movement'],
                                 Set([3, 4, 5, 6, 7]), "Team 7")
 
@@ -270,42 +274,43 @@ class AppTest(unittest.TestCase):
                           msg="{}: Round {} hand contains an unexpected " + 
                               "score {}".format(handmsg, round['round'],
                                                 round.get('score')))
-    
 
   def assertHandEquals(self, movement, round, expected_hands, handmsg=None):
-    for r in movement:
-      if r['round'] != round:
-        continue
-      hands = r['hands']
-      for i in range(3):
-        #if not expected_hands[i]:
-        #  self.assertiIsNone(hands[i], msg="Expected no score" )
-        self.assertEqual(3, len(hands),
-                         msg="{}: wrong number of hands. Hands are {}.".format(
-                             handmsg, hands))
-        self.assertEqual(
-             expected_hands[i]['hand_no'], hands[i]['hand_no'],
-             msg="{}: hand numbers do not match up. Expected {}, was {}".format(
-                 handmsg, expected_hands[i]['hand_no'], hands[i]['hand_no']))
-        expected_score = expected_hands[i].get('score')
-        if expected_score:
-          actual_score = hands[i]['score']
-          self.assertEqual(expected_score['calls'], actual_score['calls'],
-              msg="{}: Hand {} calls do not match up. Expected {}, was {}".format(
-                  handmsg, i, expected_score['calls'], actual_score['calls']))
-          self.assertEqual(expected_score['ns_score'], actual_score['ns_score'],
-              msg="{}: Hand {} ns_score do not match up. Expected {}, was {}".format(
-                  handmsg, i, expected_score['ns_score'], actual_score['ns_score']))
-          self.assertEqual(expected_score['ew_score'], actual_score['ew_score'],
-              msg="{}: Hand {} calls do not match up. Expected {}, was {}".format(
-                  handmsg, i, expected_score['ew_score'], actual_score['ew_score']))
-        else: 
-          self.assertIsNone(actual_score.get('score'),
-                            msg="{}: Did not expect any scores. Got {}.".format(
-                                handmsg, actual_score.get('score')))
-      return
-    self.assertTrue(False,
-                    msg="{}: round {} not present in movement".format(handmsg, round))
+    r = self.getRoundFromMovementDict(movement, round)
+    if not r:
+      self.assertTrue(False,
+                      msg="{}: round {} not present in movement".format(
+                          handmsg, round))
+    hands = r['hands']
+    for i in range(3):
+      #if not expected_hands[i]:
+      #  self.assertiIsNone(hands[i], msg="Expected no score" )
+      self.assertEqual(3, len(hands),
+                       msg="{}: wrong number of hands. Hands are {}.".format(
+                           handmsg, hands))
+      self.assertEqual(
+           expected_hands[i]['hand_no'], hands[i]['hand_no'],
+           msg="{}: hand numbers do not match up. Expected {}, was {}".format(
+               handmsg, expected_hands[i]['hand_no'], hands[i]['hand_no']))
+      expected_score = expected_hands[i].get('score')
+      if expected_score:
+        actual_score = hands[i]['score']
+        self.assertEqual(expected_score['calls'], actual_score['calls'],
+            msg="{}: Hand {} calls do not match up. Expected {}, was {}".format(
+                handmsg, i, expected_score['calls'], actual_score['calls']))
+        self.assertEqual(expected_score['ns_score'], actual_score['ns_score'],
+            msg="{}: Hand {} ns_score do not match up. Expected {}, was {}".format(
+                handmsg, i, expected_score['ns_score'], actual_score['ns_score']))
+        self.assertEqual(expected_score['ew_score'], actual_score['ew_score'],
+            msg="{}: Hand {} calls do not match up. Expected {}, was {}".format(
+                handmsg, i, expected_score['ew_score'], actual_score['ew_score']))
+      else: 
+        self.assertIsNone(actual_score.get('score'),
+                          msg="{}: Did not expect any scores. Got {}.".format(
+                              handmsg, actual_score.get('score')))
+
+  def getRoundFromMovementDict(self, movement, round):
+    return next(r for r in movement if r['round'] == round)
 
   def loginUser(self, email='user@example.com', id='123', is_admin=False):
     self.testbed.setup_env(

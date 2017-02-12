@@ -231,7 +231,7 @@ class PlayerPair(ndb.Model):
 
   Attribtes:
     players: json object describing a list of players. Should have length at
-             most 2.
+             most 2. Each player is a dict with keys name, email.
     pair_no: the number associated with this pair in this tournament
     id: a 4 character capitalized letter string that identifies this pair.
   '''
@@ -240,6 +240,7 @@ class PlayerPair(ndb.Model):
   id = ndb.StringProperty()
 
   def player_list(self):
+    ''' Return a list of players in this pair. '''
     return json.loads(self.players) if self.players else []
 
   @classmethod
