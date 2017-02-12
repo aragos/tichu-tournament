@@ -98,8 +98,8 @@ class MovementHandler(GenericHandler):
           'hand_no' : h,
           'score': {
               'calls' : hand_score.calls_dict(),
-              'ns_score' : hand_score.ns_score,
-              'ew_score' : hand_score.ew_score,
+              'ns_score' : hand_score.get_ns_score(),
+              'ew_score' : hand_score.get_ew_score(),
               'notes' : hand_score.notes,
         }})
       else:
