@@ -145,6 +145,74 @@ tichu.Tournament.prototype.setNoPairs = function setNoPairs(noPairs, factory) {
 };
 
 /**
+ * A player request, used as part of a TournamentRequest.
+ * @constructor
+ */
+tichu.PlayerRequest = function PlayerRequest() {
+  /**
+   * The number of the pair this player is part of.
+   * @type {?number}
+   */
+  this.pairNo = null;
+  /**
+   * The name of this player.
+   * @type {?string}
+   */
+  this.name = null;
+  /**
+   * The e-mail address of this player.
+   * @type {?string}
+   */
+  this.email = null;
+};
+
+/** Converts the names of this PlayerRequest into the form the server expects. */
+tichu.PlayerRequest.prototype.toJSON = function toJSON() {
+  return {
+    'pair_no': this.pairNo,
+    'name': this.name || undefined,
+    'email': this.email || undefined
+  }
+};
+
+/**
+ * A tournament request, used to create a tournament or edit one which has not been played.
+ * @constructor
+ */
+tichu.TournamentRequest = function TournamentRequest() {
+  /**
+   * The title of the newly created tournament.
+   * @type {?string}
+   */
+  this.name = null;
+  /**
+   * The number of pairs playing in this tournament.
+   * @type {?number}
+   */
+  this.noPairs = null;
+  /**
+   * The number of boards to be played in this tournament.
+   * @type {?number}
+   */
+  this.noBoards = null;
+  /**
+   * The set of player objects detailing the players in the pairs.
+   * @type {tichu.PlayerRequest[]}
+   */
+  this.players = [];
+};
+
+/** Converts the names of this TournamentRequest into the form the server expects. */
+tichu.TournamentRequest.prototype.toJSON = function toJSON() {
+  return {
+    'name': this.name,
+    'no_pairs': this.noPairs,
+    'no_boards': this.noBoards,
+    'players': this.players
+  }
+};
+
+/**
  * Enum for positions of pairs.
  * @enum {string}
  */

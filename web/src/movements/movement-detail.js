@@ -21,7 +21,7 @@
       header: loadResults.failure
           ? "Movement Error"
           : "Pair #" + loadResults.movement.pair.pairNo + " - " + loadResults.movement.tournamentId.name,
-      backPath: (loadResults.pairCode || loadResults.failure) ? "/home" : "/tournaments/" + loadResults.movement.tournamentId.id,
+      backPath: (loadResults.pairCode || loadResults.failure) ? "/home" : "/tournaments/" + loadResults.movement.tournamentId.id + "/view",
       showHeader: true,
       refresh: loadResults.failure ? null : this._refresh.bind(this)
     });
@@ -218,32 +218,6 @@
   }
 
   /**
-   * Extracts the score matching the side in the position from the score object.
-   * @param {?tichu.HandScore} score
-   * @param {string} position
-   * @returns {(number|string|null)}
-   */
-  function getMyScore(score, position) {
-    if (!score) {
-      return null;
-    }
-    return position === tichu.PairPosition.EAST_WEST ? score.eastWestScore : score.northSouthScore;
-  }
-
-  /**
-   * Extracts the score opposite the side in the position from the score object.
-   * @param {?tichu.HandScore} score
-   * @param {string} position
-   * @returns {(number|string|null)}
-   */
-  function getOpponentsScore(score, position) {
-    if (!score) {
-      return null;
-    }
-    return position === tichu.PairPosition.EAST_WEST ? score.northSouthScore : score.eastWestScore;
-  }
-
-  /**
    * Asynchronously loads the movement specified by the tournament and pair.
    *
    * @param {TichuMovementService} movementService
@@ -296,11 +270,5 @@
       .config(mapRoute)
       .filter("tichuMovementFormatCall", function() {
         return formatCall;
-      })
-      .filter("tichuMovementGetMyScore", function() {
-        return getMyScore;
-      })
-      .filter("tichuMovementGetOpponentsScore", function() {
-        return getOpponentsScore;
       });
 })(angular);

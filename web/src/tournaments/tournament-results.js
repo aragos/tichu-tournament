@@ -15,10 +15,9 @@
   function TournamentResultsController($scope, $mdDialog, $window, $location, $route, loadResults) {
     $scope.appController.setPageHeader({
       header: loadResults.failure ? "Tournament Error" : "Results - " + loadResults.tournament.name,
-      backPath: loadResults.id ? "/tournaments/" + loadResults.id : "/tournaments/" + loadResults.tournament.id,
+      backPath: "/tournaments/" + ( loadResults.id || loadResults.tournament.id) + "/view",
       showHeader: true
     });
-
 
     /**
      * The tournament being displayed to the user.

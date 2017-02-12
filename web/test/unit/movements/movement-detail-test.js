@@ -15,6 +15,8 @@ describe("tichu-movement-detail module", function() {
     var dialogDeferred;
     var fakeMovementService;
     var movementDeferred;
+    /** @type {PromiseHelper} */
+    var runPromise;
 
     beforeEach(module(function($provide) {
       $window = {location: {href: "/tournaments/123456/movement/7"}};
@@ -38,6 +40,7 @@ describe("tichu-movement-detail module", function() {
                                /** $mdDialog */ _$mdDialog_,
                                TichuMovementService) {
       $rootScope = _$rootScope_;
+      runPromise = promiseHelper($rootScope);
       var appScope = $rootScope.$new(false);
       appScope.appController = {
         setPageHeader: function(_header_) {
@@ -93,7 +96,7 @@ describe("tichu-movement-detail module", function() {
         movement: movement
       });
       expect(header.header).toBe("Pair #7 - my tournament");
-      expect(header.backPath).toBe("/tournaments/123456789");
+      expect(header.backPath).toBe("/tournaments/123456789/view");
       expect(header.showHeader).toBe(true);
     });
 
@@ -188,18 +191,11 @@ describe("tichu-movement-detail module", function() {
       });
 
       var promise = header.refresh.call(null);
-      var result = null;
-      promise.then(function() {
-        result = true;
-      }).catch(function(failure) {
-        result = {promiseRejectedWith: failure};
-      });
+      runPromise(promise, {expectUnfinished: true});
       expect(fakeMovementService.getMovement).toHaveBeenCalledWith("123456789", 7, "APES", true);
-      expect(result).toBe(null);
 
       movementDeferred.resolve(movement);
-      $rootScope.$apply();
-      expect(result).toBe(true);
+      runPromise(promise, {expectSuccess: true});
       expect($mdToast.showSimple).toHaveBeenCalled();
     });
 
@@ -214,20 +210,13 @@ describe("tichu-movement-detail module", function() {
       });
 
       var promise = header.refresh.call(null);
-      var result = null;
-      promise.then(function(success) {
-        result = {promiseResolvedWith: success};
-      }).catch(function() {
-        result = false;
-      });
 
       var error = new tichu.RpcError();
       error.error = "boom";
       error.detail = "an explosion happened";
       error.redirectToLogin = false;
       movementDeferred.reject(error);
-      $rootScope.$apply();
-      expect(result).toBe(false);
+      runPromise(promise, {expectFailure: true});
       expect($mdToast.showSimple).toHaveBeenCalled();
     });
 

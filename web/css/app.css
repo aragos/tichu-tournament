@@ -1,0 +1,5 @@
+md-input-container.no-error-spacer {
+    margin-bottom: 0;
+}
+
+md-input-container.no-error-spacer .md-errors-spacer:empty { display: none; }

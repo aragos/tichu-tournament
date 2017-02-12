@@ -16,39 +16,13 @@ describe("code-service module", function() {
 
   describe("TichuCodeService", function() {
     var service;
+    /** @type {PromiseHelper} */
+    var runPromise;
 
     beforeEach(inject(function (TichuCodeService) {
       service = TichuCodeService;
+      runPromise = promiseHelper($rootScope, $httpBackend);
     }));
-
-    function runPromise(promise, options) {
-      var result = {};
-      promise.then(function(promiseResolvedWith) {
-        result = {
-          promise_resolved_with: promiseResolvedWith === undefined ? "(undefined)" : promiseResolvedWith,
-          actual_result: promiseResolvedWith
-        };
-      }).catch(function(promiseFailedWith) {
-        result = {
-          promise_failed_with: promiseFailedWith === undefined ? "(undefined)" : promiseFailedWith,
-          actual_result: promiseFailedWith
-        };
-      });
-      if (options.flushHttp) {
-        $httpBackend.flush();
-      }
-      $rootScope.$apply();
-      if (options.expectSuccess) {
-        expect(result.promise_failed_with).toBeUndefined();
-        expect(result.promise_resolved_with).toBeDefined();
-        return result.actual_result;
-      } else if (options.expectFailure) {
-        expect(result.promise_resolved_with).toBeUndefined();
-        expect(result.promise_failed_with).toBeDefined();
-        return result.actual_result;
-      }
-      return result.actual_result;
-    }
 
     describe("getMovementForCode", function() {
       it("sends the pair ID as the last parameter of the URL", function() {

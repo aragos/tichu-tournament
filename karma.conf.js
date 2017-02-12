@@ -14,6 +14,7 @@ module.exports = function (config) {
       'bower_components/angular-route/angular-route.js',
 
       'src/**/*.js',
+      'test/helpers/**/*.js',
 
       'test/unit/**/*.js'
     ],

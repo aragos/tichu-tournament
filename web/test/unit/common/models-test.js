@@ -1,5 +1,9 @@
 "use strict";
 describe("models", function() {
+  function getJSON(value) {
+    return JSON.parse(JSON.stringify(value));
+  }
+
   describe("TournamentPair", function() {
     describe("setPlayers", function() {
       it("empties the player array if it receives an empty array", function() {
@@ -77,10 +81,6 @@ describe("models", function() {
   });
   describe("HandScore", function() {
     describe("toJson", function() {
-      function getJSON(value) {
-        return JSON.parse(JSON.stringify(value));
-      }
-
       it("forwards the northSouthScore to ns_score", function() {
         var score = new tichu.HandScore();
         score.northSouthScore = 100;
@@ -109,6 +109,55 @@ describe("models", function() {
         score.calls.push({side: tichu.Position.NORTH, call: tichu.Call.GRAND_TICHU});
         score.calls.push({side: tichu.Position.EAST, call: tichu.Call.TICHU});
         expect(getJSON(score)["calls"]).toEqual({"north": "GT", "east": "T"});
+      });
+    });
+  });
+  describe("PlayerRequest", function() {
+    describe("toJSON", function() {
+      it("translates camelcase to snakecase for pair_no", function() {
+        var request = new tichu.PlayerRequest();
+        request.name = "George III";
+        request.email = "hailtothe@king.example";
+        request.pairNo = 5;
+        expect(getJSON(request)).toEqual({
+          'pair_no': 5,
+          'email': "hailtothe@king.example",
+          'name': "George III"
+        });
+      });
+      it("removes null or empty fields", function() {
+        var request = new tichu.PlayerRequest();
+        request.name = null;
+        request.email = "";
+        request.pairNo = 3;
+        expect(getJSON(request)).toEqual({
+          'pair_no': 3
+        });
+      });
+    });
+  });
+  describe("TournamentRequest", function() {
+    describe("toJSON", function() {
+      it("translates camelcase to snakecase for no_boards/pairs", function() {
+        var request = new tichu.TournamentRequest();
+        request.name = "Tichu Jousting";
+        request.noPairs = 10;
+        request.noBoards = 11;
+        var player = new tichu.PlayerRequest();
+        player.pairNo = 9;
+        player.name = "The Black Knight";
+        request.players.push(player);
+        expect(getJSON(request)).toEqual({
+          name: "Tichu Jousting",
+          no_pairs: 10,
+          no_boards: 11,
+          players: [
+            {
+              'pair_no': 9,
+              'name': "The Black Knight"
+            }
+          ]
+        });
       });
     });
   });
