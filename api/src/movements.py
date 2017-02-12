@@ -107,6 +107,9 @@ class Movement:
     elif no_hands_per_round == 3 and no_pairs == 11 and no_rounds == 6:
       json_data=open(os.path.join(os.getcwd(), 
                      'api/src/movement_files/11_pair_3_hands_7_rounds_6_max.txt')).read()
+    elif no_hands_per_round == 3 and no_pairs == 6 and no_rounds == 5:
+      json_data=open(os.path.join(os.getcwd(), 
+                     'api/src/movement_files/6_pair_3_hands_5_rounds.txt')).read()
     else:
       raise ValueError(("No movements available for the configuration {} " + 
                            "pairs with {} hands per round").format(
@@ -201,6 +204,8 @@ class Movement:
       return (2, 7)
     elif total_boards == 21 and no_pairs == 7:
       return (3, 7)
+    elif total_boards == 15 and no_pairs == 6:
+      return (3, 5)
     else:
       return (0, 0)
       
@@ -236,9 +241,11 @@ class Movement:
      Sets attribute suggested_prep. Dict from string representation of pair
        number to the list of hands the pair should prepare.
     '''
+    self.suggested_prep = {}
+    if not self.unplayed_hands:
+      return
     max_unplayed_hands =  max([len(x) for x in self.unplayed_hands.values()])
     hands = set()
-    self.suggested_prep = {}
     for i in range(max_unplayed_hands):
       for team in range (1, len(self.pair_dict) + 1):
         unplayed_hands = self.GetUnplayedHands(team)
