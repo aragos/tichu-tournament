@@ -108,7 +108,7 @@ class AppTest(unittest.TestCase):
     pair_2_id = json.loads(response.body)['pair_id']
     response = self.testapp.get("/api/tournaments/{}/pairids/3".format(id))
     pair_3_id = json.loads(response.body)['pair_id']
-    
+
     # First hand put in by the director
     params = {'calls': { 'north': "T" }, 
               'ns_score': 75,
@@ -118,8 +118,8 @@ class AppTest(unittest.TestCase):
                                      params)
     self.assertEqual(response.status_int, 204)
     # Add sleep because keying by timestamp makes quick tests flaky.
-    time.sleep(0.05)
-    
+    time.sleep(0.01)
+
     # Then changed by Pair 2
     self.logoutUser()
     hand_headers = {'X-tichu-pair-code' : str(pair_2_id)}
@@ -129,23 +129,22 @@ class AppTest(unittest.TestCase):
               'notes': 'I am another note'}
     self.testapp.put_json("/api/tournaments/{}/hands/1/2/3".format(id),
                           headers=hand_headers, params=params)
-    time.sleep(0.05)
-    
+    time.sleep(0.01)
+
     # Then deleted by the director
     self.loginUser()
     self.testapp.delete("/api/tournaments/{}/hands/1/2/3".format(id))
-    time.sleep(0.05)
-    
+    time.sleep(0.01)
+
     # Then readded by Pair 3
     self.logoutUser()
     hand_headers = {'X-tichu-pair-code' : str(pair_3_id)}
-    params = {'ns_score': 80,
-              'ew_score': 20,
+    params = {'ns_score': 'avg-',
+              'ew_score': 'avg',
               'notes': 'I am a third note'}
     self.testapp.put_json("/api/tournaments/{}/hands/1/2/3".format(id),
                           headers=hand_headers, params=params)
-    
-    
+
     # Test the changelog
     self.loginUser()
     response = self.testapp.get("/api/tournaments/{}/hands/changelog/1/2/3".format(id))
@@ -167,7 +166,7 @@ class AppTest(unittest.TestCase):
     self.assertEqual(115,second_score_change['ew_score'])
     self.assertEqual('I am another note', second_score_change['notes'])
     self.assertEqual(2, second_change_log['changed_by'])
-    
+
     third_change_log = change_list[1]
     third_score_change = third_change_log['change']
     self.assertIsNone(third_score_change.get('calls'))
@@ -175,16 +174,14 @@ class AppTest(unittest.TestCase):
     self.assertIsNone(third_score_change.get('ew_score'))
     self.assertIsNone(third_score_change.get('notes'))
     self.assertEqual(0, third_change_log['changed_by'])
-    
+
     fourth_change_log = change_list[0]
     fourth_score_change = fourth_change_log['change']
     self.assertEqual( { }, fourth_score_change['calls'])
-    self.assertEqual(80, fourth_score_change['ns_score'])
-    self.assertEqual(20,fourth_score_change['ew_score'])
+    self.assertEqual('AVG-', fourth_score_change['ns_score'])
+    self.assertEqual('AVG', fourth_score_change['ew_score'])
     self.assertEqual('I am a third note', fourth_score_change['notes'])
     self.assertEqual(3, fourth_change_log['changed_by'])
-    
-    
 
 
   def loginUser(self, email='user@example.com', id='123', is_admin=False):

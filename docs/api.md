@@ -533,9 +533,9 @@ Optional. Necessary only for overriding hand scores for non-tournament owners.
   Each entry may be `"T"`, indicating a call of Tichu, `"GT"`, indicating a call of Grand Tichu,
   or `""`, indicating no call. If an entry is absent, it is assumed to mean no call. Required.
 * `ns_score`: Integer or string. The score of the north-south pair, including Tichu bonuses and
-  penalties. May also be the string "AVG+" or "AVG-". Required.
+  penalties. May also be the string "AVG", "AVG+", "AVG++", "AVG-", or "AVG--". Required.
 * `ew_score`: Integer or string. The score of the east-west pair, including Tichu bonuses and
-  penalties. May also be the string "AVG+" or "AVG-". Required.
+  penalties. May also be the string "AVG", "AVG+", "AVG++", "AVG-", or "AVG--". Required.
 * `notes`: String. Any additional notes about the hand added by the scorer or the director.
   Required.
 
@@ -632,11 +632,11 @@ Gets a complete change log for a specific hand.
       or `""`, indicating no call. If an entry is absent, it is assumed to mean no call. Must be null
       or not present for a hand deletion change. Optional.
     * `ns_score`: Integer or string. The score of the north-south pair, including Tichu bonuses and
-      penalties. May also be the string "AVG+" or "AVG-". Must be null or not present for a hand 
-      deletion change. Required.
+      penalties. May also be the string "AVG", "AVG+", "AVG++", "AVG-", or "AVG--". Must be null or
+      not present for a hand deletion change. Required.
     * `ew_score`: Integer or string. The score of the east-west pair, including Tichu bonuses and
-      penalties. May also be the string "AVG+" or "AVG-". Must be null or not present for a hand
-      deletion change. Required.
+      penalties. May also be the string "AVG", "AVG+", "AVG++", "AVG-", or "AVG--". Must be null 
+      or not present for a hand deletion change. Required.
     * `notes`: String. Any additional notes about the hand added by the scorer or the director.
       Must be null or not present for a hand deletion change. Required.
   * `timestamp_sec`: Float. Time in seconds from epoch when the change was made. Required.
