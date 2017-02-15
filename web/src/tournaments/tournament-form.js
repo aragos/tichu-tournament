@@ -159,6 +159,12 @@
         noBoards: 21,
         noHands: 3,
         noRounds: 7
+      },
+      {
+        noPairs: 6,
+        noBoards: 15,
+        noHands: 3,
+        noRounds: 5
       }
     ];
 
