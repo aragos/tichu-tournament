@@ -71,7 +71,8 @@ class TourneyHandler(GenericHandler):
                                                            no_boards,
                                                            player_list):
       return
-    if HandScore.query(ancestor=tourney.key).iter(keys_only=True).has_next():
+    if ((tourney.no_pairs != no_pairs or tourney.no_boards != no_boards) and
+         len(tourney.GetScoredHandList()) != 0):
       SetErrorStatus(self.response, 400, "Invalid Request",
                      "Tournament already has registered hands")
       return
