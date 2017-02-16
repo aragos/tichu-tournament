@@ -41,11 +41,6 @@
                                  ng-bind="hand.score ? 'assignment_turned_in' : 'assignment'"></md-icon>
                         <div class="md-list-item-text" layout="column">
                             <h3>Board #{{hand.handNo}}<span ng-if="round.isRelayTable">R</span></h3>
-                            <span ng-switch="round.position">
-                                <span ng-switch-when="N">North/South</span>
-                                <span ng-switch-when="E">East/West</span>
-                                <span ng-switch-default>{{ round.position }}</span>
-                            </span>
                             <p ng-if="hand.score">
                                 [#{{ round.position == "N" ? movementDetailController.movement.pair.pairNo : round.opponent }}]
                                 {{hand.score.northSouthScore}}
