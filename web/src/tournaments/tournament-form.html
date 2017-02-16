@@ -1,9 +1,6 @@
 <div layout="column" ng-if="!tournamentFormController.failure">
-    <div ng-if="tournamentFormController.original">
-        <h3>Editing tournaments is currently not supported.</h3>
-    </div>
-    <form name="tournamentForm" ng-if="!tournamentFormController.original">
-        <md-card ng-if="!tournamentFormController.original">
+    <form name="tournamentForm">
+        <md-card>
             <md-card-header style="padding-bottom: 0">
                 <md-card-header-text>
                     <span class="md-title">Tournament Setup</span>
@@ -32,7 +29,7 @@
                                name="noPairs"
                                ng-change="tournamentFormController.checkNoBoards()"
                                ng-model="tournamentFormController.tournament.noPairs"
-                               ng-disabled="tournamentFormController.saving"
+                               ng-disabled="tournamentFormController.saving || (tournamentFormController.original && tournamentFormController.original.hasScoredHands)"
                                required>
                             <md-option ng-value="pairCount"
                                        ng-repeat="pairCount in tournamentFormController.boardPresets | tichuUnique:'noPairs'">
@@ -50,7 +47,7 @@
                         <md-select id="noBoards"
                                    name="noBoards"
                                    ng-model="tournamentFormController.tournament.noBoards"
-                                   ng-disabled="!tournamentFormController.tournament.noPairs || tournamentFormController.saving"
+                                   ng-disabled="!tournamentFormController.tournament.noPairs || tournamentFormController.saving || (tournamentFormController.original && tournamentFormController.original.hasScoredHands)"
                                    required>
                             <md-option ng-value="preset.noBoards"
                                        ng-repeat="preset in tournamentFormController.boardPresets | filter:{noPairs: tournamentFormController.tournament.noPairs}">
@@ -63,6 +60,9 @@
                             </div>
                         </div>
                     </md-input-container>
+                </div>
+                <div ng-if="tournamentFormController.original && tournamentFormController.original.hasScoredHands">
+                    The parameters of a tournament cannot be edited once hands have been scored.
                 </div>
             </md-card-content>
         </md-card>
@@ -133,7 +133,10 @@
             <md-button class="md-raised md-primary"
                        ng-disabled="tournamentForm.$invalid"
                        ng-if="!tournamentFormController.saving"
-                       ng-click="tournamentFormController.save()">Create Tournament</md-button>
+                       ng-click="tournamentFormController.save()">
+                <span ng-if="!tournamentFormController.original">Create Tournament</span>
+                <span ng-if="tournamentFormController.original">Update Tournament</span>
+            </md-button>
             <md-progress-circular ng-if="tournamentFormController.saving"></md-progress-circular>
         </div>
     </form>

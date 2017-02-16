@@ -39,6 +39,11 @@
      */
     this.isLoggedIn = true;
     /**
+     * Whether the user has permission to the object they try to access.
+     * @type {boolean}
+     */
+    this.hasPermissions = true;
+    /**
      * Whether requests should fail with a 500 error.
      * @type {boolean}
      */
@@ -60,6 +65,70 @@
    */
   TichuFakeBackends.prototype.install = function install() {
     this._$httpBackend.whenPOST("/api/tournaments").respond(this._handleCreateTournament.bind(this));
+    this._$httpBackend.whenPUT(/\/api\/tournaments\/([^/]+)/, undefined, undefined, ["id"])
+        .respond(this._handleEditTournament.bind(this));
+  };
+
+  /**
+   * Handler for editing a tournament.
+   * @private
+   * @param {string} method
+   * @param {string} url
+   * @param {*} data
+   * @param {object} headers
+   * @param {object} params
+   * @returns {[number,*,object,string]}
+   */
+  TichuFakeBackends.prototype._handleEditTournament = function createTournament(method, url, data, headers, params) {
+    if (this.requestCrash) {
+      return [500, {"error": "Crash", "detail": "The fake backend crashed as requested."}, {}, "Internal Server Error"];
+    }
+    if (!this.hasPermissions) {
+      return [
+        403,
+        {"error": "Forbidden", "detail": "The fake backend is configured to treat the user as not owning objects."},
+        {},
+        "Forbidden"
+      ];
+    }
+    if (!this.isLoggedIn) {
+      return [
+        401,
+        {"error": "Not logged in", "detail": "The fake backend is configured to treat the user as logged out."},
+        {},
+        "Unauthorized"];
+    }
+    var tournamentOptions = this.tournaments.filter(function(tournament) {
+      return tournament.id === params["id"];
+    });
+    if (tournamentOptions.length !== 1) {
+      return [
+        404,
+        {"error": "Not found", "detail": "There was no tournament with id " + params["id"]},
+        {},
+        "Not Found"
+      ];
+    }
+    var tournament = tournamentOptions[0];
+    try {
+      data = JSON.parse(data);
+      ServiceHelpers.assertType("tournament request", data, "object", false);
+      var inputPlayers = ServiceHelpers.assertType("players", data['players'], "array", true) || [];
+      var players = inputPlayers.map(function(player, index) {
+        return {
+          pair_no: ServiceHelpers.assertType("player pair number " + index, player['pair_no'], "number", false),
+          name: ServiceHelpers.assertType("player name " + index, player['name'], "string", false),
+          email: ServiceHelpers.assertType("player email " + index, player['email'], "string", false)
+        };
+      });
+      tournament.name = ServiceHelpers.assertType("tournament name", data['name'], "string", false);
+      tournament.no_pairs = ServiceHelpers.assertType("number of pairs", data['no_pairs'], "number", false);
+      tournament.no_boards = ServiceHelpers.assertType("number of boards", data['no_boards'], "number", false);
+      tournament.players = players;
+      return [204, "", {}, "No Content"];
+    } catch (ex) {
+      return [400, {"error": "Bad request", "detail": "Invalid request: " + ex.toString()}, {}, "Bad Request"]
+    }
   };
 
   /**
@@ -103,7 +172,7 @@
       };
       this.nextTournamentId += 1;
       this.tournaments.push(tournament);
-      return [200, {"id": tournament.id}, {}, "Created"];
+      return [201, {"id": tournament.id}, {}, "Created"];
     } catch (ex) {
       return [400, {"error": "Bad request", "detail": "Invalid request: " + ex.toString()}, {}, "Bad Request"]
     }

@@ -146,12 +146,13 @@
   /**
    * Retrieves a single tournament, calling the server only if necessary.
    * @param {string} id The ID of the tournament to be retrieved.
+   * @param {boolean} refresh True to refresh the tournament even if it is in the cache.
    * @returns {angular.$q.Promise<tichu.Tournament>}
    */
-  TichuTournamentService.prototype.getTournament = function getTournament(id) {
+  TichuTournamentService.prototype.getTournament = function getTournament(id, refresh) {
     var $q = this._$q;
     var $log = this._$log;
-    if (this._tournamentStore.hasTournament(id)) {
+    if (!refresh && this._tournamentStore.hasTournament(id)) {
       return $q.when(this._tournamentStore.getOrCreateTournament(id));
     }
     if (!this._tournamentPromises.get(id)) {
@@ -199,6 +200,8 @@
       throw new Error('tournament pair count was not an integer in the legal range');
     }
     ServiceHelpers.assertType('tournament board count', data['no_boards'], 'number');
+    ServiceHelpers.assertType('tournament hand list', data['hands'], 'array', true);
+    var hasScoredHands = !!data['hands'] && data['hands'].length > 0;
     ServiceHelpers.assertType('tournament player list', data['players'], 'array', true);
     var playerLists = [];
     for (var i = 0; i < data['no_pairs']; i += 1) {
@@ -233,6 +236,7 @@
     tournament.pairs.forEach(function(pair, index) {
       pair.setPlayers(playerLists[index]);
     });
+    tournament.hasScoredHands = hasScoredHands;
     return tournament;
   };
 
@@ -266,6 +270,26 @@
         rejection.detail = "The server sent confusing data for the tournament creation.";
         return $q.reject(rejection);
       }
+    }, ServiceHelpers.handleErrorIn($q, $log, path));
+  };
+
+  /**
+   * Updates a tournament on the server, and returns a promise for the resulting Tournament object.
+   * @param {string} id
+   * @param {tichu.TournamentRequest} request
+   * @returns {angular.$q.Promise<tichu.Tournament>}
+   */
+  TichuTournamentService.prototype.editTournament = function editTournament(id, request) {
+    var path = "/api/tournaments/" + encodeURIComponent(id);
+    var $q = this._$q;
+    var $log = this._$log;
+    var self = this;
+    return this._$http({
+      method: 'PUT',
+      url: path,
+      data: request
+    }).then(function onSuccess() {
+      return self._saveRequestedTournament(id, request);
     }, ServiceHelpers.handleErrorIn($q, $log, path));
   };
 

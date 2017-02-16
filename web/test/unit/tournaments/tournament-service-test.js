@@ -151,6 +151,52 @@ describe("tournament-service module", function() {
         expect(tournament.pairs[4].players.length).toEqual(1);
         expect(tournament.pairs[0].players[1].name).toEqual("Player 1.2");
         expect(tournament.pairs[4].players[0].email).toEqual("player5-1@email.example");
+        expect(tournament.hasScoredHands).toEqual(false);
+      });
+
+      it("sets hasScoredHands based on the presence of a non-empty hands array", function() {
+        $httpBackend.expectGET('/api/tournaments/123456')
+            .respond(200, {
+              "name": "My Cool Tournament",
+              "no_boards": 24,
+              "no_pairs": 8,
+              "players": [
+                {"pair_no": 1, "name": "Player 1.1", "email": "player1-1@email.example"},
+                {"pair_no": 1, "name": "Player 1.2", "email": "player1-2@email.example"},
+                {"pair_no": 5, "name": "Player 5.1", "email": "player5-1@email.example"}
+              ],
+              "hands": [{
+                "board_no": 3,
+                "ns_pair": 4,
+                "ew_pair": 6,
+                "calls": {
+                  "north": "T",
+                  "east": "GT",
+                  "west": "",
+                  "south": ""
+                },
+                "ns_score": 150,
+                "ew_score": -150,
+                "notes": "hahahahahaha what a fool"
+              }]
+            });
+
+        var tournament = runPromise(service.getTournament("123456"), {
+          expectSuccess: true,
+          flushHttp: true
+        });
+
+        expect(tournament.id).toEqual("123456");
+        expect(tournament.name).toEqual("My Cool Tournament");
+        expect(tournament.noBoards).toEqual(24);
+        expect(tournament.pairs.length).toEqual(8);
+        expect(tournament.pairs[0].pairNo).toEqual(1);
+        expect(tournament.pairs[0].players.length).toEqual(2);
+        expect(tournament.pairs[1].players.length).toEqual(0);
+        expect(tournament.pairs[4].players.length).toEqual(1);
+        expect(tournament.pairs[0].players[1].name).toEqual("Player 1.2");
+        expect(tournament.pairs[4].players[0].email).toEqual("player5-1@email.example");
+        expect(tournament.hasScoredHands).toEqual(true);
       });
 
       it("returns the tournament without a server call on subsequent calls", function () {
@@ -241,6 +287,74 @@ describe("tournament-service module", function() {
 
         var firstPromise = service.getTournament("123456");
         var secondPromise = service.getTournament("123456");
+        var firstTournament = runPromise(firstPromise, {
+          expectSuccess: true,
+          flushHttp: 1
+        });
+        var secondTournament = runPromise(secondPromise, {
+          expectSuccess: true
+        });
+
+        expect(secondTournament).toBe(firstTournament);
+      });
+
+      it("makes a second server call if another call with refresh comes in after it returns", function () {
+        $httpBackend.expectGET('/api/tournaments/123456')
+            .respond(200, {
+              "name": "My Cool Tournament",
+              "no_boards": 24,
+              "no_pairs": 8,
+              "players": [
+                {"pair_no": 1, "name": "Player 1.1", "email": "player1-1@email.example"},
+                {"pair_no": 1, "name": "Player 1.2", "email": "player1-2@email.example"},
+                {"pair_no": 5, "name": "Player 5.1", "email": "player5-1@email.example"}
+              ],
+              "hands": []
+            });
+
+        var firstTournament = runPromise(service.getTournament("123456"), {
+          expectSuccess: true,
+          flushHttp: true
+        });
+
+        $httpBackend.expectGET('/api/tournaments/123456')
+            .respond(200, {
+              "name": "My Cooler Tournament",
+              "no_boards": 24,
+              "no_pairs": 8,
+              "players": [
+                {"pair_no": 1, "name": "Player 1.1", "email": "player1-1@email.example"},
+                {"pair_no": 1, "name": "Player 1.2", "email": "player1-2@email.example"},
+                {"pair_no": 5, "name": "Player 5.1", "email": "player5-1@email.example"}
+              ],
+              "hands": []
+            });
+
+        var secondTournament = runPromise(service.getTournament("123456", true), {
+          expectSuccess: true,
+          flushHttp: true
+        });
+
+        expect(secondTournament).toBe(firstTournament);
+        expect(secondTournament.name).toBe("My Cooler Tournament");
+      });
+
+      it("only makes one server call even if another call with refresh comes in before it returns", function () {
+        $httpBackend.expectGET('/api/tournaments/123456')
+            .respond(200, {
+              "name": "My Cool Tournament",
+              "no_boards": 24,
+              "no_pairs": 8,
+              "players": [
+                {"pair_no": 1, "name": "Player 1.1", "email": "player1-1@email.example"},
+                {"pair_no": 1, "name": "Player 1.2", "email": "player1-2@email.example"},
+                {"pair_no": 5, "name": "Player 5.1", "email": "player5-1@email.example"}
+              ],
+              "hands": []
+            });
+
+        var firstPromise = service.getTournament("123456");
+        var secondPromise = service.getTournament("123456", true);
         var firstTournament = runPromise(firstPromise, {
           expectSuccess: true,
           flushHttp: 1
@@ -448,6 +562,128 @@ describe("tournament-service module", function() {
         var gotTournament = runPromise(service.getTournament("231"), {expectSuccess: true});
         $httpBackend.verifyNoOutstandingRequest();
         expect(gotTournament).toBe(createdTournament);
+      });
+    });
+
+    describe("editTournament", function() {
+      it("sends the JSONified tournament request to the server", function () {
+        $httpBackend.expectPUT("/api/tournaments/120839", {
+          name: "Tichu of the Damned",
+          no_boards: 24,
+          no_pairs: 8,
+          players: [
+            {
+              name: "Dracula",
+              email: "master@castlevania.example",
+              pair_no: 4
+            }
+          ]
+        }).respond(201, "");
+
+        runPromise(service.editTournament("120839", makeTournamentRequest({
+          name: "Tichu of the Damned",
+          noBoards: 24,
+          noPairs: 8,
+          players: [
+            makePlayerRequest({
+              name: "Dracula",
+              email: "master@castlevania.example",
+              pairNo: 4
+            })
+          ]
+        })), {flushHttp: true});
+      });
+
+      it("updates and returns the cached Tournament object representing the modified tournament on success", function() {
+        $httpBackend.expectGET("/api/tournaments/98021").respond(200, {
+          name: "Tichu of the Darned",
+          no_boards: 15,
+          no_pairs: 6,
+          players: [{
+            pair_no: 3,
+            name: "Alucard",
+            email: "noone@castlevania.example"
+          }]
+        });
+
+        var originalTournament = runPromise(service.getTournament("98021"), {
+          flushHttp: true,
+          expectSuccess: true
+        });
+
+        $httpBackend.expectPUT("/api/tournaments/98021").respond(201, "");
+
+        var tournament = runPromise(service.editTournament("98021", makeTournamentRequest({
+          name: "Tichu of the Damned",
+          noBoards: 24,
+          noPairs: 8,
+          players: [
+            makePlayerRequest({
+              name: "Dracula",
+              email: "master@castlevania.example",
+              pairNo: 4
+            })
+          ]
+        })), {expectSuccess: true, flushHttp: true});
+
+        expect(tournament).toBe(originalTournament);
+        expect(tournament.id).toBe("98021");
+        expect(tournament.name).toBe("Tichu of the Damned");
+        expect(tournament.noBoards).toBe(24);
+        expect(tournament.noPairs).toBe(8);
+        expect(tournament.pairs[2].players.length).toBe(0);
+        expect(tournament.pairs[3].players.length).toBe(1);
+        expect(tournament.pairs[3].players[0].name).toBe("Dracula");
+        expect(tournament.pairs[3].players[0].email).toBe("master@castlevania.example");
+      });
+
+      it("rejects the returned promise if an error is returned", function() {
+        $httpBackend.expectPUT("/api/tournaments/76543").respond(400, {
+          "error": "What kind of request is this",
+          "detail": "What do you even want me to do with this"
+        });
+
+        var rejection = runPromise(
+            service.editTournament("76543", makeTournamentRequest({})), {expectFailure: true, flushHttp: true});
+
+        expect(rejection.error).toBe("What kind of request is this");
+        expect(rejection.detail).toBe("What do you even want me to do with this");
+        expect(rejection.redirectToLogin).toBe(false);
+      });
+
+      it("sets redirectToLogin on the rejection for a 401", function() {
+        $httpBackend.expectPUT("/api/tournaments/76543").respond(401, {
+          "error": "Log your dumb ass in",
+          "detail": "How am I supposed to work with this"
+        });
+
+        var rejection = runPromise(
+            service.editTournament("76543", makeTournamentRequest({})), {expectFailure: true, flushHttp: true});
+
+        expect(rejection.redirectToLogin).toBe(true);
+      });
+
+      it("updates its header in the tournament list cache on success if there was one", function() {
+        $httpBackend.expectGET('/api/tournaments')
+            .respond(200, {
+              "tournaments": [
+                {"id": "123", "name": "My First Tournament"},
+                {"id": "321", "name": "My Other Tournament"}
+              ]
+            });
+
+        var tournamentList = runPromise(service.getTournaments(), {
+          flushHttp: true,
+          expectSuccess: true
+        });
+
+        $httpBackend.expectPUT("/api/tournaments/123").respond(201);
+
+        runPromise(service.editTournament("123", makeTournamentRequest({
+          name: "Tichu of the Damned"
+        })), {expectSuccess: true, flushHttp: true});
+
+        expect(tournamentList[0].name).toBe("Tichu of the Damned");
       });
     });
   });
