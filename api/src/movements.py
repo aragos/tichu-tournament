@@ -110,6 +110,9 @@ class Movement:
     elif no_hands_per_round == 3 and no_pairs == 6 and no_rounds == 5:
       json_data=open(os.path.join(os.getcwd(), 
                      'api/src/movement_files/6_pair_3_hands_5_rounds.txt')).read()
+    elif no_hands_per_round == 4 and no_pairs == 6 and no_rounds == 5:
+      json_data=open(os.path.join(os.getcwd(), 
+                     'api/src/movement_files/6_pair_4_hands_5_rounds.txt')).read()
     elif no_hands_per_round == 4 and no_pairs == 5 and no_rounds == 5:
       json_data=open(os.path.join(os.getcwd(), 
                      'api/src/movement_files/5_pair_4_hands_5_rounds.txt')).read()
@@ -209,6 +212,8 @@ class Movement:
       return (3, 7)
     elif total_boards == 15 and no_pairs == 6:
       return (3, 5)
+    elif total_boards == 20 and no_pairs == 6:
+      return (4, 5)
     elif total_boards == 20 and no_pairs == 5:
       return (4, 5)
     else:
