@@ -165,6 +165,12 @@
         noBoards: 15,
         noHands: 3,
         noRounds: 5
+      },
+      {
+        noPairs: 5,
+        noBoards: 20,
+        noHands: 4,
+        noRounds: 5
       }
     ];
 

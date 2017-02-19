@@ -140,6 +140,14 @@ class MovementTest(unittest.TestCase):
     self.checkTableConsistency(movement, 6, 3)
     self.checkNumRounds(movement, 6, 5)
 
+  def testConsistentOpponents_five_four_five(self):
+    movement = movements.Movement.CreateMovement(5, 4, 5)
+    self.checkConsistentSchedule(movement, 5, 4)
+    self.checkConsistentOpponents(movement, 5, 4)
+    self.checkHandsPlayedRightNumberOfTimes(movement, 5, 4)
+    self.checkTableConsistency(movement, 5, 4)
+    self.checkNumRounds(movement, 5, 5)
+
   def checkConsistentSchedule(self, movement, num_pairs, num_hands_per_round):
     for i in range(num_pairs):
       opponents_played = set()
