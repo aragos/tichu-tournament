@@ -100,6 +100,11 @@ tichu.Tournament = function Tournament(header) {
    * @type {tichu.TournamentPair[]}
    */
   this.pairs = [];
+  /**
+   * True if this tournament has scored hands (meaning that its number of boards and pairs may not be edited).
+   * @type {boolean}
+   */
+  this.hasScoredHands = false;
 };
 
 Object.defineProperty(tichu.Tournament.prototype, "id", {

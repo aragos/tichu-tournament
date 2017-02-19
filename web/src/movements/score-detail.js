@@ -128,7 +128,7 @@
    * @export
    */
   ScoreDetailController.prototype.save = function save() {
-    if (this.saving || this.saveFailure || (this.hand.score && !this.overwriting)) {
+    if (this.saving || this.saveFailure || (this.hand.score && !this.deleting && !this.overwriting)) {
       return;
     }
     this.saving = true;

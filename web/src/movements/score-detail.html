@@ -176,7 +176,7 @@
             </md-button>
             <md-button ng-class="{'md-warn': scoreDetailController.deleting}"
                        ng-click="scoreDetailController.save()"
-                       ng-disabled="scoreForm.$invalid || (!scoreDetailController.deleting && scoreForm.$pristine) || (scoreDetailController.hand.score && !scoreDetailController.overwriting)">
+                       ng-disabled="scoreForm.$invalid || (!scoreDetailController.deleting && scoreForm.$pristine) || (scoreDetailController.hand.score && !scoreDetailController.overwriting && !scoreDetailController.deleting)">
                 <span ng-if="!scoreDetailController.deleting && scoreDetailController.hand.score">
                     Update Score
                 </span>

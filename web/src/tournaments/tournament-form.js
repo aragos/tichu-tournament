@@ -14,7 +14,7 @@
    * @ngInject
    */
   function TournamentFormController($scope, TichuTournamentService, $mdDialog, $window, $location, $route, loadResults) {
-    var backPath = "/tournaments" + (loadResults.id ? "/" + loadResults.id : "");
+    var backPath = "/tournaments" + (loadResults.id ? "/" + loadResults.id + "/view" : "");
     $scope.appController.setPageHeader({
       header: loadResults.failure
           ? "Tournament Error"
@@ -69,6 +69,22 @@
      * @type {tichu.TournamentRequest}
      */
     this.tournament = new tichu.TournamentRequest();
+
+    if (this.original) {
+      this.tournament.name = this.original.name;
+      this.tournament.noBoards = this.original.noBoards;
+      this.tournament.noPairs = this.original.noPairs;
+      var players = this.tournament.players;
+      this.original.pairs.forEach(function(pair) {
+        pair.players.forEach(function(player) {
+          var request = new tichu.PlayerRequest();
+          request.pairNo = pair.pairNo;
+          request.name = player.name;
+          request.email = player.email;
+          players.push(request);
+        });
+      });
+    }
 
     /**
      * The presets available to play tournaments with.
@@ -249,7 +265,11 @@
 
     var self = this;
 
-    this._tournamentService.createTournament(this.tournament).then(function(result) {
+    var promise = this.original
+        ? this._tournamentService.editTournament(this.original.id, this.tournament)
+        : this._tournamentService.createTournament(this.tournament);
+
+    promise.then(function(result) {
       self._$location
           .path("/tournaments/" + encodeURIComponent(result.id) + "/view");
     }).catch(function(failure) {
@@ -290,7 +310,7 @@
    * @return {!angular.$q.Promise<!{failure: ?tichu.RpcError, id: ?string, tournament: ?tichu.Tournament}>}
    */
   function loadTournament(tournamentService, id) {
-    return tournamentService.getTournament(id).then(function(result) {
+    return tournamentService.getTournament(id, true).then(function(result) {
       return {
         id: id,
         tournament: result
