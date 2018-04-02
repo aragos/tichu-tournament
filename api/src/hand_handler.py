@@ -212,9 +212,19 @@ class HandHandler(GenericHandler):
         SetErrorStatus(self.response, 400, "Invalid Input",
                        "ns_score must be an integer or avg")
         return None
-    elif not isinstance(ew_score, int):
+      if isinstance(ew_score, int):
+        SetErrorStatus(self.response, 400, "Invalid Input",
+                       "Cannot have one team with an avg score and another "
+                       "with a real Tichu value")
+        return None
+    if not isinstance(ew_score, int):
       if ew_score.strip()[0:3].upper() != "AVG":
         SetErrorStatus(self.response, 400, "Invalid Input",
                        "ew_score must be an integer or avg")
-      return None
+        return None
+      if isinstance(ns_score, int):
+        SetErrorStatus(self.response, 400, "Invalid Input",
+                       "Cannot have one team with an avg score and another "
+                       "with a real Tichu value")
+        return None
     return request_dict
