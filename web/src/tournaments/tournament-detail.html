@@ -24,6 +24,13 @@
             </p>
         </div>
     </md-list-item>
+    <md-subheader>Master Hand List</md-subheader>
+    <md-button class="md-raised "
+               ng-href="/api/tournaments/{{tournamentDetailController.tournament.id}}/pdfboards"
+               download="{{tournamentDetailController.tournament.name}} Boards.pdf"
+               target="_blank">
+        Download
+    </md-button>
     <md-subheader>Results</md-subheader>
     <md-list-item class="md-2-line"
                   ng-href="/tournaments/{{tournamentDetailController.tournament.id}}/results">
