@@ -143,11 +143,7 @@ class HandResult:
     def _IsValidAvgScore(self):
       avg_scores = ["AVG", "AVG+", "AVG-", "AVG++", "AVG--"]
       return (self._ns_score in avg_scores and
-              self._ew_score in avg_scores and
-              self._calls.n_call() == "" and
-              self._calls.s_call() == "" and
-              self._calls.e_call() == "" and
-              self._calls.w_call() == "")
+              self._ew_score in avg_scores)
 
     def _TeamBounds(self, team1, team2, first_two):
         if (first_two == team1 or first_two == tuple(reversed(team1))):

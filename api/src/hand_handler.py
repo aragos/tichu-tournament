@@ -18,6 +18,9 @@ from python.calculator import InvalidCallError
 from python.calculator import InvalidScoreError
 
 
+AVG_VALUES = ["AVG", "AVG+", "AVG++", "AVG-", "AVG--"]
+
+
 class HandHandler(GenericHandler):
   ''' Class to handle requests to 
       /api/tournaments/:id/hands/:hand_no/:ns_pair/:ew_pair
@@ -208,19 +211,31 @@ class HandHandler(GenericHandler):
     ns_score = request_dict.get('ns_score')
     ew_score = request_dict.get('ew_score')
     if not isinstance(ns_score, int):
-      if ns_score.strip()[0:3].upper() != "AVG":
+      if not isinstance(ns_score, basestring):
+        SetErrorStatus(self.response, 400, "Invalid Input", 
+                       "ns_score must be int or string, was " + 
+                       type(ns_score).__name__)
+        return None
+      if ns_score.strip().upper() not in AVG_VALUES:
         SetErrorStatus(self.response, 400, "Invalid Input",
-                       "ns_score must be an integer or avg")
+                       "ns_score must be an integer or avg, was " + 
+                       str(ns_score))
         return None
       if isinstance(ew_score, int):
         SetErrorStatus(self.response, 400, "Invalid Input",
                        "Cannot have one team with an avg score and another "
-                       "with a real Tichu value")
+                       "with a real Tichu value ")
         return None
     if not isinstance(ew_score, int):
-      if ew_score.strip()[0:3].upper() != "AVG":
+      if not isinstance(ew_score, basestring):
+        SetErrorStatus(self.response, 400, "Invalid Input", 
+                       "ew_score must be int or string, was " + 
+                       type(ew_score).__name__)
+        return None
+      if ew_score.strip().upper() not in AVG_VALUES:
         SetErrorStatus(self.response, 400, "Invalid Input",
-                       "ew_score must be an integer or avg")
+                       "ew_score must be an integer or avg, was " + 
+                       str(ew_score))
         return None
       if isinstance(ns_score, int):
         SetErrorStatus(self.response, 400, "Invalid Input",
