@@ -197,9 +197,9 @@
       score.calls = [];
     }
     score.northSouthScore = ServiceHelpers.assertType(
-        handContext + " north/south score", scoreData['ns_score'], "number");
+        handContext + " north/south score", scoreData['ns_score'], "number|string");
     score.eastWestScore = ServiceHelpers.assertType(
-        handContext + " east/west score", scoreData['ew_score'], "number");
+        handContext + " east/west score", scoreData['ew_score'], "number|string");
     score.notes = ServiceHelpers.assertType(
         handContext + " scoring notes", scoreData['notes'], "string", true) || null;
     return score;

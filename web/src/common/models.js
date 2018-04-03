@@ -282,13 +282,13 @@ tichu.HandScore = function HandScore() {
 
   /**
    * The score earned by the north-south pair in this hand, including Tichu bonuses and penalties.
-   * @type {number}
+   * @type {number|string}
    */
   this.northSouthScore = 0;
 
   /**
    * The score earned by the east-west pair in this hand, including Tichu bonuses and penalties.
-   * @type {number}
+   * @type {number|string}
    */
   this.eastWestScore = 0;
 
