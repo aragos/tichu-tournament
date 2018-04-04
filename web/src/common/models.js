@@ -391,6 +391,12 @@ tichu.MovementRound = function MovementRound() {
   this.opponent = 0;
 
   /**
+   * The names of the opponents.
+   * @type {string}
+   */
+  this.opponentNames = [];
+
+  /**
    * The hands contained within this movement, including scores if applicable.
    * @type {tichu.Hand[]}
    */
