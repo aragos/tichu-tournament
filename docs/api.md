@@ -792,6 +792,10 @@ Calculates and returns the final detailed results of the tournament as a .xlsx f
 * **404**: The tournament with the given ID does not exist.
 * **500**: Server failed to generate the score for any other reason.
 
+#### Response
+.xlsx file with all the results.
+
+
 ### Download hand results in PDF format (GET /api/tournaments/:id/pdfboards)
 
 **Requires authentication and ownership of the given tournament.**
@@ -808,7 +812,6 @@ Each tournament has an associated set of hands. This returns them in pdf format.
 * **403**: The user is logged in, but does not own this tournament.
 * **404**: The tournament with the given ID does not exist.
 * **500**: Server failed to return the boards for any other reason.
-
 
 #### Response
 .pdf file with all hands used. Returns 35 hands regardless of the number of
