@@ -103,6 +103,15 @@ class AppTest(unittest.TestCase):
     self.assertEqual(params1, hands[1])
     params3.update({"ns_pair" : 7, "ew_pair" : 5, "board_no" : 1})
     self.assertEqual(params3, hands[2])
+    
+  def testGetTournament_pair_ids(self):
+    self.loginUser()
+    id = self.AddBasicTournament()
+    tournament_get_response = self.testapp.get("/api/tournaments/{}".format(id))
+    self.assertEqual(tournament_get_response.status_int, 200)
+    self.assertEqual(json.loads(tournament_get_response.body)["pair_ids"],
+                     json.loads(self.testapp.get(
+                         "/api/tournaments/{}/pairids".format(id)).body)["pair_ids"])
 
   def testPutTournament_not_logged_in(self):
     self.loginUser()

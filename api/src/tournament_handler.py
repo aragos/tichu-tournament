@@ -39,7 +39,10 @@ class TourneyHandler(GenericHandler):
                      'no_boards' :tourney.no_boards,
                      'name' : tourney.name,
                      'hands' : tourney.GetScoredHandList()}
-    for player_pair in PlayerPair.query(ancestor=tourney.key).fetch():
+    player_pairs = PlayerPair.query(ancestor=tourney.key).fetch()
+    player_pairs.sort(key = lambda p : p.pair_no)
+    combined_dict['pair_ids'] = [p.id for p in player_pairs]
+    for player_pair in player_pairs:
       if player_pair.players:
         for player in player_pair.player_list():
           player['pair_no'] = player_pair.pair_no

@@ -201,6 +201,7 @@
     }
     ServiceHelpers.assertType('tournament board count', data['no_boards'], 'number');
     ServiceHelpers.assertType('tournament hand list', data['hands'], 'array', true);
+    ServiceHelpers.assertType('tournament pair id list', data['pair_ids'], 'array');
     var hasScoredHands = !!data['hands'] && data['hands'].length > 0;
     ServiceHelpers.assertType('tournament player list', data['players'], 'array', true);
     var playerLists = [];
@@ -234,6 +235,7 @@
         data['no_pairs'],
         this._tournamentStore.getOrCreateTournamentPair.bind(this._tournamentStore, id));
     tournament.pairs.forEach(function(pair, index) {
+      pair.setPairId(data['pair_ids'][index]);
       pair.setPlayers(playerLists[index]);
     });
     tournament.hasScoredHands = hasScoredHands;
