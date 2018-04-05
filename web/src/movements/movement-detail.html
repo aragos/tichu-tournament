@@ -18,8 +18,13 @@
                             <span ng-switch-default>{{ round.position }}</span>
                         </span></span>
                     </span>
-                    <span class="md-subhead" ng-if="!round.isSitOut">
-                        vs. Pair #{{round.opponent}}
+                    <span class="md-subhead" ng-if="!round.isSitOut"
+                          style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; width: 300px">
+                        vs. Pair #{{round.opponent}}: 
+                        <span ng-repeat="player in round.opponentNames">
+                            {{player}}<span ng-if="!$last">,&ensp;
+                    </span>
+                </span>
                     </span>
                 </md-card-header-text>
             </md-card-header>

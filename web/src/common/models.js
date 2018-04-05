@@ -53,12 +53,27 @@ tichu.TournamentPair = function TournamentPair(pairNo) {
    * @type {number}
    */
   this.pairNo = pairNo;
+  
+  /**
+   * The id of this pair.
+   * @type {string}
+   */
+  this.pairId = '';
+
   /**
    * The players in this pair.
    * @type {tichu.TournamentPlayer[]}
    */
   this.players = [];
 };
+
+
+/**
+ * Updates the pair id for a given TournamentPair.
+ */
+tichu.TournamentPair.prototype.setPairId = function setPairId(pairId) {
+  this.pairId = pairId;
+}
 
 /**
  * Quickly updates the player list in the given TournamentPair, reusing TournamentPlayers if possible.
@@ -397,6 +412,12 @@ tichu.MovementRound = function MovementRound() {
    * @type {number}
    */
   this.opponent = 0;
+
+  /**
+   * The names of the opponents.
+   * @type {string}
+   */
+  this.opponentNames = [];
 
   /**
    * The hands contained within this movement, including scores if applicable.

@@ -255,6 +255,8 @@
     if (round.opponent <= 0 || Math.floor(round.opponent) !== round.opponent) {
       throw new Error(context + " opponent was not a positive integer");
     }
+    ServiceHelpers.assertType(context + " opponent names", movementRound["opponent_names"], 'array');
+    round.opponentNames = movementRound["opponent_names"];
     var position = ServiceHelpers.assertType(context + " position", movementRound['position'], "string");
     if (position.length <= 1) {
       throw new Error(context + " position was too short")

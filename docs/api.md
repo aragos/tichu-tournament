@@ -109,6 +109,7 @@ Retrieves the details about a tournament owned by the currently logged in direct
         "name": "Tournament Name",
         "no_pairs": 8,
         "no_boards": 10,
+        "pair_ids": ["ABCD", "DEFG", "HIJK", "LMNO", "QRST", "UVWX", "YZAB", "CDEF"],
         "players": [{
             "pair_no": 1,
             "name": "Michael the Magnificent",
@@ -134,6 +135,8 @@ Retrieves the details about a tournament owned by the currently logged in direct
 * `no_pairs`: Integer. The number of pairs (teams) to play in this tournament. Must be greater
   than 0. 
 * `no_boards`: Integer. The number of boards (hands) to be played. Must be greater than 0.
+* `pair_ids`: List of Strings. A list of unique ID codes associated with a team for
+   this specific tournament. Length of the list must equal `no_pairs`.
 * `players`: List of objects. More information about the players. There should be at most
   two players for the same `pair_no`. Optional.
     * `pair_no`: Integer. The pair this player belongs to. Must be between 0 and `no_pairs`. Required.
@@ -794,3 +797,25 @@ Calculates and returns the final detailed results of the tournament as a .xlsx f
 
 #### Response
 .xlsx file with all the results.
+
+
+### Download hand results in PDF format (GET /api/tournaments/:id/pdfboards)
+
+**Requires authentication and ownership of the given tournament.**
+Each tournament has an associated set of hands. This returns them in pdf format.
+
+#### Request
+
+* `id`: String. An opaque, unique ID returned from `GET /tournaments` or `POST /tournaments`.
+
+#### Status codes
+
+* **200**: The score has been generated.
+* **401**: User is not logged in.
+* **403**: The user is logged in, but does not own this tournament.
+* **404**: The tournament with the given ID does not exist.
+* **500**: Server failed to return the boards for any other reason.
+
+#### Response
+.pdf file with all hands used. Returns 35 hands regardless of the number of
+boards in the tournament. The extra hands may be used as substitutes.
