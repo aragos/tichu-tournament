@@ -58,6 +58,14 @@
      * @private
      */
     this._tournamentPromises = $cacheFactory("TournamentPromises");
+    
+    /**
+     * The current outstanding promise(s) for loading hand status.
+     *
+     * @type {angular.$cacheFactory.Cache}
+     * @private
+     */
+    this._handStatusPromises = $cacheFactory("HandStatusPromises");
 
     /**
      * The cache of tournament headers in the order they were received from the server.
@@ -181,6 +189,47 @@
     }
     return this._tournamentPromises.get(id);
   };
+  
+   /**
+   * Retrieves the status of all rounds and hands.
+   * @param {string} id The ID of the tournament to be retrieved.
+   * @returns {angular.$q.Promise<tichu.HandStatus>}
+   */
+  TichuTournamentService.prototype.getHandStatus = function getTournament(id) {
+    var $q = this._$q;
+    var $log = this._$log;
+    if (!this._handStatusPromises.get(id)) {
+      var self = this;
+      var path = "/api/tournaments/" + encodeURIComponent(id) + "/unscoredHands";
+      this._handStatusPromises.put(id, this._$http({
+        method: 'GET',
+        url: path
+      }).then(function onSuccess(response) {
+        try {
+          return self._parseHandStatus(id, response.data);
+        } catch (ex) {
+          $log.error(
+              "Malformed response from " + path + " (" + response.status + " " + response.statusText + "):\n"
+              + ex + "\n\n"
+              + JSON.stringify(response.data));
+          var rejection = new tichu.RpcError();
+          rejection.redirectToLogin = false;
+          rejection.error = "Invalid response from server";
+          rejection.detail = "The server sent confusing data for the hand status.";
+          return $q.reject(rejection);
+        }
+      }, ServiceHelpers.handleErrorIn($q, $log, path)).finally(function afterResolution() {
+        self._handStatusPromises.remove(id);
+      }));
+    }
+    return this._handStatusPromises.get(id);
+  };
+  
+  TichuTournamentService.prototype_parseHandStatus = function _parseHandStatus(id, data) {
+    var handStatus = new tichu.HandStatus();
+    handStatus.unscoredHands = [data["unscored_hands"][0]["hand"]];
+    return handStatus;
+  }
 
   /**
    * Converts the given tournament list from the server into a Tournament, reusing a cached Tournament

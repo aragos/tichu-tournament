@@ -79,6 +79,14 @@ tichu.TournamentPair.prototype.setPlayers = function setPlayers(players) {
 };
 
 /**
+ * The HandStatus object.
+ * @constructor 
+ */
+tichu.HandStatus = function HandStatus() {
+  this.unscoredHands = [];
+};
+
+/**
  * The tournament object, containing the full details about the tournament and related objects.
  * @param {!tichu.TournamentHeader} header The header object this tournament is associated with.
  * @constructor

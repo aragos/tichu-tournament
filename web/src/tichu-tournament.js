@@ -146,7 +146,8 @@
           "tichu-tournament-detail",
           "tichu-tournament-form",
           "tichu-tournament-list",
-          "tichu-tournament-results"])
+          "tichu-tournament-results",
+          "tichu-tournament-status"])
       .controller("AppController", AppController)
       .config(configureTheme)
       .config(setDefaultRoute);
