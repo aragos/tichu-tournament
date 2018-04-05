@@ -170,6 +170,10 @@ class Movement:
     '''
     return self.suggested_prep.get(pair_no, [])
 
+  def GetNumRounds(self):
+    ''' Returns the total number of rounds in this movement.'''
+    return len(self.pair_dict[1])
+
   @staticmethod
   def NumBoardsPerRoundFromTotal(no_pairs, total_boards):
     ''' Determine how many boards are to be used per round from the total 

@@ -661,42 +661,73 @@ Gets a complete change log for a specific hand.
   or the pairs are not scheduled to play this board in the tournament movement scheme.
 * **500**: Server failed to score the hand for any other reason.
 
-### Check hands that have not been scored yet (GET /api/tournaments/:id/unscoredHands)
+### Check hands that have not been scored yet (GET /api/tournaments/:id/handStatus)
 
 **Requires authentication and ownership of the given tournament.**
-Checks if all the hands to be played in this tournament have been scored and returns
-all hands not yet scored.
+Checks if all the hands to be played in this tournament have been scored and the scored/
+unscored status of all hands.
 
 #### Request
 
 * `id`: String. An opaque, unique ID returned from `GET /tournaments` or `POST /tournaments`.
 
 #### Status Codes
-* **200**: The unscored hands have been returned. 
+* **200**: The hand status has been returned. 
 * **401**: User is not logged in.
 * **403**: The user is logged in, but does not own this tournament.
 * **404**: The tournament with the given ID does not exist.
-* **500**: Server failed to generate the list of unscored hands for any other reason.
+* **500**: Server failed to generate the list of hands for any other reason.
 
 #### Response
 
     {
-        "unscored_hands": [
+        "rounds":  [
             {
-                "hand": 9, 
-                "ew_pair": 2, 
-                "ns_pair": 1
+                "round_no": 1, 
+                "scored_hands": [
+                     {
+                         "hand_no" : 13
+                         "ew_pair" : 1
+                         "ns_pair" : 2
+                         "table" : 12
+                     }
+                ]
+                "unscored_hands": [
+                     {
+                         "hand_no" : 13
+                         "ew_pair" : 1
+                         "ns_pair" : 2
+                         "table" : 12
+                     }
+                ]
             }
         ]
     }
 
-* `unscored_hands`: List of objects. Each object is a hand that has not been scored yet.
-  * `hand`: Integer. Number of the hand that hasn't been scored yet. Must be between 1
-    and the number of hands in the tournament configuration.
-  * `ew_pair`: Integer. Number of the East/West pair in this matchup. Must be between 1
-    and the number of pairs in the tournament configuration.
-  * `ns_pair`: Integer. Number of the North/South pair in this matchup. Must be between 1
-    and the number of pairs in the tournament configuration.
+* `rounds`: List of objects. Each object contains the status of all hands in the round.
+  Sorted in round order, where the number of objects is the number of rounds in the 
+  tournament's movement.
+  * `round_no`: Integer. Number of the round. 
+  * `scored_hands`: List of objects. Each object is a hand that has already been
+    scored in this round. Sorted in hand number, followed by table order.
+    * `hand_no` : Integer. Number of the hand. Must be between 1 and the number of hands
+      in this tournament configuration.
+    * `ew_pair`: Integer. Number of the East/West pair in this matchup. Must be between 1
+      and the number of pairs in the tournament configuration.
+    * `ns_pair`: Integer. Number of the North/South pair in this matchup. Must be between 1
+      and the number of pairs in the tournament configuration.
+    * `table` : The table at which this hand is being played. Must be between 1 and
+      the total number of tables in this tournament configuration.
+  * `unscored_hands`: List of objects. Each object is a hand that has not yet been
+    scored in this round. Sorted in hand number, followed by table order.
+    * `hand_no` : Integer. Number of the hand. Must be between 1 and the number of hands
+      in this tournament configuration.
+    * `ew_pair`: Integer. Number of the East/West pair in this matchup. Must be between 1
+      and the number of pairs in the tournament configuration.
+    * `ns_pair`: Integer. Number of the North/South pair in this matchup. Must be between 1
+      and the number of pairs in the tournament configuration.
+    * `table` : The table at which this hand is being played. Must be between 1 and
+      the total number of tables in this tournament configuration.
 
 ### Generate final score (GET /api/tournaments/:id/results)
 

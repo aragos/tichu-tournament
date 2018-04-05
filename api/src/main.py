@@ -24,7 +24,7 @@ app = webapp2.WSGIApplication([
     ('/api/tournaments/?', TourneyListHandler),
     ('/api/tournaments/pairno/([^/]+)/?', PairIdHandler),
     ('/api/tournaments/([^/]+)/?', TourneyHandler),
-    ('/api/tournaments/([^/]+)/unscoredHands/?', CompleteScoringHandler),
+    ('/api/tournaments/([^/]+)/handStatus/?', CompleteScoringHandler),
     ('/api/tournaments/([^/]+)/handprep/?', HandPreparationHandler),
     ('/api/tournaments/([^/]+)/hands/([^/]+)/([^/]+)/([^/]+)/?', HandHandler),
     ('/api/tournaments/([^/]+)/hands/changelog/([^/]+)/([^/]+)/([^/]+)/?', ChangeLogHandler),
