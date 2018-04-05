@@ -50,7 +50,7 @@
 
     /**
      * The current edited form of the score.
-     * @type {{northSouthScore: number, eastWestScore: number, calls: Object.<tichu.Position, tichu.Call>, notes: string}}
+     * @type {{northSouthScore: string, eastWestScore: string, calls: Object.<tichu.Position, tichu.Call>, notes: string}}
      * @export
      */
     this.score = convertScoreToEditable(this.hand.score);
@@ -199,8 +199,8 @@
   function convertScoreToEditable(score) {
     if (!score) {
       return {
-        northSouthScore: 0,
-        eastWestScore: 0,
+        northSouthScore: "0",
+        eastWestScore: "0",
         calls: {},
         notes: ""
       };
@@ -210,8 +210,8 @@
       convertedCalls[call.side] = call.call;
     });
     return {
-      northSouthScore: score.northSouthScore,
-      eastWestScore: score.eastWestScore,
+      northSouthScore: score.northSouthScore.toString(),
+      eastWestScore: score.eastWestScore.toString(),
       calls: convertedCalls,
       notes: score.notes
     };
@@ -219,13 +219,15 @@
 
   /**
    * Converts the editable score back into a HandScore.
-   * @param {!{northSouthScore: number, eastWestScore: number, calls: Object<tichu.Position, tichu.Call>, notes: string}} editable
+   * @param {!{northSouthScore: string, eastWestScore: string, calls: Object<tichu.Position, tichu.Call>, notes: string}} editable
    * @returns {!tichu.HandScore}
    */
   function convertEditableToScore(editable) {
     var score = new tichu.HandScore();
-    score.northSouthScore = editable.northSouthScore;
-    score.eastWestScore = editable.eastWestScore;
+    var parsedNorthSouthScore = parseInt(editable.northSouthScore);
+    var parsedEastWestScore = parseInt(editable.eastWestScore);
+    score.northSouthScore = Number.isNaN(parsedNorthSouthScore) ? editable.northSouthScore : parsedNorthSouthScore;
+    score.eastWestScore = Number.isNaN(parsedEastWestScore) ? editable.eastWestScore : parsedEastWestScore;
     score.notes = editable.notes;
     Object.keys(tichu.Position).forEach(function (key) {
       var side = tichu.Position[key];

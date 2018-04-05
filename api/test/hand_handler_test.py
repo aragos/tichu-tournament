@@ -211,7 +211,8 @@ class AppTest(unittest.TestCase):
   def testPut_avg_calls(self):
     self.loginUser()
     id = self.AddBasicTournament()
-    params = {'ns_score' : '    aVg ',
+    params = {'calls': { 'north': "T" },
+              'ns_score' : '    aVg ',
               'ew_score' : '  Avg+ '}
     response = self.testapp.put_json("/api/tournaments/{}/hands/1/2/3".format(id),
                                      params)
@@ -226,6 +227,15 @@ class AppTest(unittest.TestCase):
     response = self.testapp.put_json("/api/tournaments/{}/hands/1/2/3".format(id),
                                      params)
     self.assertEqual(response.status_int, 204)
+
+  def testPut_avg_calls_bad_input(self):
+    self.loginUser()
+    id = self.AddBasicTournament()
+    params = {'ns_score' : '    aVg ',
+              'ew_score' : 123}
+    response = self.testapp.put_json("/api/tournaments/{}/hands/1/2/3".format(id),
+                                     params, expect_errors=True)
+    self.assertEqual(response.status_int, 400)
 
   def testPut(self):
     self.loginUser()
