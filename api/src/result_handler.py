@@ -17,7 +17,7 @@ from models import PlayerPair
 from models import Tournament
 
 class CompleteScoringHandler(GenericHandler):
-  ''' Handles calls to /api/tournament/:id/unscoredHands '''
+  ''' Handles calls to /api/tournament/:id/handStatus '''
   
   def get(self, id):
     tourney = GetTourneyWithIdAndMaybeReturnStatus(self.response, id)
@@ -32,21 +32,36 @@ class CompleteScoringHandler(GenericHandler):
         self.response, tourney.no_pairs, tourney.no_boards)
     if not movement:
       return
+    
     scored_hands = self._TuplesToDict(tourney.ScoredHands())
     unscored_hands = []
-    for i in xrange(1, tourney.no_pairs + 1):
-      for round in movement.GetMovement(i):
+    round_list = []
+    for round_no in xrange (1, movement.GetNumRounds() + 1):
+      round_dict = {}
+      round_dict["round"] = round_no
+      round_dict["scored_hands"] = []
+      round_dict["unscored_hands"] = []
+      for team_no in xrange(1, tourney.no_pairs + 1):
+        round = movement.GetMovement(team_no)[round_no - 1]
         hands = round.hands
         if not hands or not round.is_north:
           continue
         for hand in hands:
-          if hand not in scored_hands.get(i, []):
-            unscored_hands.append({"hand" : hand, "ns_pair": i,
-                                   "ew_pair" : round.opponent})
+          hand_dict = {"hand" : hand, "ns_pair": team_no,
+                       "ew_pair" : round.opponent, "table" : round.table }
+          if hand in scored_hands.get(team_no, []):
+            scored_unscored = "scored_hands" 
+          else: 
+            scored_unscored = "unscored_hands"
+          round_dict[scored_unscored].append(hand_dict)
+      round_dict["scored_hands"].sort(key=lambda x : x["table"])
+      round_dict["unscored_hands"].sort(key=lambda x : x["table"])
+      round_dict["scored_hands"].sort(key=lambda x : x["hand"])
+      round_dict["unscored_hands"].sort(key=lambda x : x["hand"])
+      round_list.append(round_dict)
     self.response.headers['Content-Type'] = 'application/json'
     self.response.set_status(200)
-    self.response.out.write(json.dumps({"unscored_hands" : unscored_hands},
-                                       indent=2))
+    self.response.out.write(json.dumps({"rounds" : round_list }, indent=2))
 
   def _TuplesToDict(self, hands):
     ''' Take tuples representing each hand and dump them into a per-pair dict.
@@ -55,7 +70,7 @@ class CompleteScoringHandler(GenericHandler):
       hands: list of tuples (hand, ns_pair, ew_pair).
 
     Returns:
-      Dictionary from user to list of hand numbers already played.
+      Dictionary from team to list of hand numbers already played.
     '''
     ret = {}
     for hand in hands:

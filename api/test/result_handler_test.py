@@ -59,7 +59,7 @@ class AppTest(unittest.TestCase):
     id = self.buildFullTournament()
     self.logoutUser()
     response = self.testapp.get(
-        "/api/tournaments/{}/unscoredHands".format(id),
+        "/api/tournaments/{}/handStatus".format(id),
         expect_errors=True)
     self.assertEqual(response.status_int, 401)
 
@@ -68,7 +68,7 @@ class AppTest(unittest.TestCase):
     id = self.buildFullTournament()
     self.loginUser(email='user2@example.com', id='234')
     response = self.testapp.get(
-        "/api/tournaments/{}/unscoredHands".format(id),
+        "/api/tournaments/{}/handStatus".format(id),
         expect_errors=True)
     self.assertEqual(response.status_int, 403)
     
@@ -76,7 +76,7 @@ class AppTest(unittest.TestCase):
     self.loginUser()
     id = self.buildFullTournament()
     response = self.testapp.get(
-        "/api/tournaments/{}a/unscoredHands".format(id),
+        "/api/tournaments/{}a/handStatus".format(id),
         expect_errors=True)
     self.assertEqual(response.status_int, 404)
 
@@ -84,19 +84,21 @@ class AppTest(unittest.TestCase):
     self.loginUser()
     id = self.buildFullTournament()
     response = self.testapp.get(
-        "/api/tournaments/{}/unscoredHands".format(id))
+        "/api/tournaments/{}/handStatus".format(id))
     self.assertEqual(response.status_int, 200)
     response_dict = json.loads(response.body)
-    self.assertEqual([], response_dict['unscored_hands'])
+    for round in response_dict['rounds']:
+      self.assertEqual([], round['unscored_hands'])
 
   def testCheckCompleteTournament_none_scored(self):
     self.loginUser()
     id = self.AddBasicTournament()
     response = self.testapp.get(
-        "/api/tournaments/{}/unscoredHands".format(id))
+        "/api/tournaments/{}/handStatus".format(id))
     self.assertEqual(response.status_int, 200)
     response_dict = json.loads(response.body)
-    self.assertEqual(72, len(response_dict['unscored_hands']))
+    num_hands = sum([len(x['unscored_hands']) for x in response_dict['rounds']])
+    self.assertEqual(72, num_hands)
 
   def testCheckCompleteTournament_some_scored(self):
     self.loginUser()
@@ -106,10 +108,15 @@ class AppTest(unittest.TestCase):
     response = self.testapp.put_json(
         "/api/tournaments/{}/hands/10/1/3".format(id), params)
     response = self.testapp.get(
-        "/api/tournaments/{}/unscoredHands".format(id))
+        "/api/tournaments/{}/handStatus".format(id))
     self.assertEqual(response.status_int, 200)
     response_dict = json.loads(response.body)
-    self.assertEqual(71, len(response_dict['unscored_hands']))
+    num_unscored = sum([len(x['unscored_hands']) for x in response_dict['rounds']])
+    num_scored = sum([len(x['scored_hands']) for x in response_dict['rounds']])
+    expected_scored = [{"hand": 10, "ns_pair": 1, "ew_pair" : 3, "table" : 1}]
+    self.assertEqual(71, num_unscored)
+    self.assertEqual(1, num_scored)
+    self.assertEqual(expected_scored, response_dict['rounds'][0]['scored_hands'])
 
   def AddBasicTournament(self):
     params = {'name': 'name', 'no_pairs': 8, 'no_boards': 24,
