@@ -16,7 +16,7 @@
                   ng-repeat="pair in tournamentDetailController.tournament.pairs">
         <md-icon class="md-avatar-icon" md-font-set="material-icons">people</md-icon>
         <div class="md-list-item-text">
-            <h3>Pair #{{ pair.pairNo }}</h3>
+            <h3>Pair #{{ pair.pairNo }}&ensp;[{{ pair.pairId }}]</h3>
             <p>
                 <span ng-repeat="player in pair.players">
                     {{player.name}}<span ng-if="!$last">,&ensp;</span>

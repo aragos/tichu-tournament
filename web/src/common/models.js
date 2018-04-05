@@ -53,12 +53,27 @@ tichu.TournamentPair = function TournamentPair(pairNo) {
    * @type {number}
    */
   this.pairNo = pairNo;
+  
+  /**
+   * The id of this pair.
+   * @type {string}
+   */
+  this.pairId = '';
+
   /**
    * The players in this pair.
    * @type {tichu.TournamentPlayer[]}
    */
   this.players = [];
 };
+
+
+/**
+ * Updates the pair id for a given TournamentPair.
+ */
+tichu.TournamentPair.prototype.setPairId = function setPairId(pairId) {
+  this.pairId = pairId;
+}
 
 /**
  * Quickly updates the player list in the given TournamentPair, reusing TournamentPlayers if possible.
@@ -282,13 +297,13 @@ tichu.HandScore = function HandScore() {
 
   /**
    * The score earned by the north-south pair in this hand, including Tichu bonuses and penalties.
-   * @type {number}
+   * @type {number|string}
    */
   this.northSouthScore = 0;
 
   /**
    * The score earned by the east-west pair in this hand, including Tichu bonuses and penalties.
-   * @type {number}
+   * @type {number|string}
    */
   this.eastWestScore = 0;
 

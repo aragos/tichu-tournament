@@ -78,20 +78,17 @@
                         <md-input-container class="md-block">
                             <label for="northSouthScore">North/South</label>
                             <input id="northSouthScore"
-                                   type="number"
+                                   type="text"
+                                   style="text-transform:uppercase"
                                    name="northSouthScore"
+                                   ng-pattern="/^-?([05]|([1-9][05])|([1-4][0-9][05]))$|^AVG([+-]{0,2})$/"
                                    ng-model="scoreDetailController.score.northSouthScore"
-                                   min="-425"
-                                   max="400"
-                                   step="5"
                                    md-no-asterisk
                                    ng-disabled="scoreDetailController.hand.score && !scoreDetailController.overwriting"
                                    required />
                             <div ng-messages="scoreForm.northSouthScore.$error">
                                 <div ng-message="required">Enter a score.</div>
-                                <div ng-message="min">Too low!</div>
-                                <div ng-message="max">Too high!</div>
-                                <div ng-message="step">Not divisible by 5!</div>
+                                <div ng-message="pattern">Invalid score.</div>
                             </div>
                         </md-input-container>
                         <md-input-container>
@@ -122,20 +119,17 @@
                         <md-input-container class="md-block">
                             <label for="eastWestScore">East/West</label>
                             <input id="eastWestScore"
-                                   type="number"
+                                   type="string"
+                                   style="text-transform:uppercase"
                                    name="eastWestScore"
+                                   ng-pattern="/^-?([05]|([1-9][05])|([1-4][0-9][05]))$|^AVG([+-]{0,2})$/"
                                    ng-model="scoreDetailController.score.eastWestScore"
-                                   min="-425"
-                                   max="400"
-                                   step="5"
                                    ng-disabled="scoreDetailController.hand.score && !scoreDetailController.overwriting"
                                    md-no-asterisk
                                    required/>
                             <div ng-messages="scoreForm.eastWestScore.$error">
                                 <div ng-message="required">Enter a score.</div>
-                                <div ng-message="min">Too low!</div>
-                                <div ng-message="max">Too high!</div>
-                                <div ng-message="step">Not divisible by 5!</div>
+                                <div ng-message="pattern">Invalid score.</div>
                             </div>
                         </md-input-container>
                         <md-input-container>

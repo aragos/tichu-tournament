@@ -10,7 +10,7 @@ ServiceHelpers = window.ServiceHelpers || {};
  * @template T
  * @param {string} context the string describing the value to put in the error message
  * @param {T} value the value to test the type of
- * @param {string} type the type to test for
+ * @param {string} type the type to test for. Can be multiple types, separated by |
  * @param {boolean=} allowNullOrUndefined whether null and undefined are allowed (default false)
  * @returns {T} the original value
  */
@@ -32,7 +32,8 @@ ServiceHelpers.assertType = function assertType(context, value, type, allowNullO
     actualType = 'NaN';
   }
 
-  if (actualType !== type) {
+  var acceptableTypes = type.split('|')
+  if (acceptableTypes.indexOf(actualType) < 0) {
     throw new Error(context + " was " + actualType + ", not " + type);
   }
   return value;
