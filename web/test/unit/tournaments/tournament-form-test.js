@@ -690,7 +690,7 @@ describe("tichu-tournament-form module", function() {
                 name: "George",
                 email: "curious@yellow.example"
               }
-            ]
+            ],
           });
 
           $location.url("/tournaments/32732/edit");
