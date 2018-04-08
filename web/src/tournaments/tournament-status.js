@@ -10,7 +10,7 @@
    * @param {angular.$window} $window
    * @param {angular.$location} $location
    * @param {$route} $route
-   * @param {!{failure: ?tichu.RpcError, id: ?string, tournament: ?tichu.Tournament}} loadResults
+   * @param {!{failure: ?tichu.RpcError, id: ?string, tournamentStatus: ?tichu.TournamentStatus}} loadResults
    * @ngInject
    */
   function TournamentStatusController($scope, TichuTournamentService, $mdDialog, $window, $location, $route, loadResults) {
@@ -18,7 +18,7 @@
     $scope.appController.setPageHeader({
       header: loadResults.failure
           ? "Tournament Error"
-          : (loadResults.tournament ? "Editing " + loadResults.tournament.name : "Create Tournament"),
+          : (loadResults.tournament ? "Editing " + loadResults.id : "Tournament Status"),
       backPath: backPath,
       showHeader: true
     });
@@ -31,20 +31,18 @@
     this._tournamentService = TichuTournamentService;
 
     /**
-     * The original tournament being edited, if there was one.
-     *
-     * @type {tichu.Tournament}
-     */
-    this.original = loadResults.tournament;
-
-    /**
      * The details about the failure, if there was one.
      *
      * @type {tichu.RpcError}
      */
     this.failure = loadResults.failure;
     
-    this.handStatus = loadResults.handStatus
+    /**
+     * The status of all hands in the tournament.
+     *
+     * @type {tichu.TournamentStatus}
+     */
+    this.tournamentStatus = loadResults.tournamentStatus
 
     /** The location service injected at creation. */
     this._$location = $location;
@@ -58,145 +56,6 @@
      * @private
      */
     this._$mdDialog = $mdDialog;
-
-    /**
-     * Whether this form is currently saving.
-     *
-     * @type {boolean}
-     */
-    this.saving = false;
-
-    /**
-     * The editable tournament object for the user to customize.
-     * @type {tichu.TournamentRequest}
-     */
-    this.tournament = new tichu.TournamentRequest();
-
-    if (this.original) {
-      this.tournament.name = this.original.name;
-      this.tournament.noBoards = this.original.noBoards;
-      this.tournament.noPairs = this.original.noPairs;
-      var players = this.tournament.players;
-      this.original.pairs.forEach(function(pair) {
-        pair.players.forEach(function(player) {
-          var request = new tichu.PlayerRequest();
-          request.pairNo = pair.pairNo;
-          request.name = player.name;
-          request.email = player.email;
-          players.push(request);
-        });
-      });
-    }
-
-    /**
-     * The presets available to play tournaments with.
-     *
-     * @type {[{noPairs: number, noBoards: number, noHands: number, noRounds: number]}
-     */
-    this.boardPresets = [
-      {
-        noPairs: 11,
-        noBoards: 14,
-        noHands: 2,
-        noRounds: 7
-      },
-      {
-        noPairs: 11,
-        noBoards: 21,
-        noHands: 3,
-        noRounds: 7
-      },
-      {
-        noPairs: 11,
-        noBoards: 16,
-        noHands: 2,
-        noRounds: 6
-      },
-      {
-        noPairs: 11,
-        noBoards: 24,
-        noHands: 3,
-        noRounds: 6
-      },
-      {
-        noPairs: 10,
-        noBoards: 24,
-        noHands: 3,
-        noRounds: 7
-      },
-      {
-        noPairs: 10,
-        noBoards: 16,
-        noHands: 2,
-        noRounds: 7
-      },
-      {
-        noPairs: 9,
-        noBoards: 18,
-        noHands: 2,
-        noRounds: 8
-      },
-      {
-        noPairs: 9,
-        noBoards: 27,
-        noHands: 3,
-        noRounds: 8
-      },
-      {
-        noPairs: 9,
-        noBoards: 14,
-        noHands: 2,
-        noRounds: 7
-      },
-      {
-        noPairs: 9,
-        noBoards: 21,
-        noHands: 3,
-        noRounds: 7
-      },
-      {
-        noPairs: 8,
-        noBoards: 16,
-        noHands: 2,
-        noRounds: 6
-      },
-      {
-        noPairs: 8,
-        noBoards: 24,
-        noHands: 3,
-        noRounds: 6
-      },
-      {
-        noPairs: 7,
-        noBoards: 14,
-        noHands: 2,
-        noRounds: 7
-      },
-      {
-        noPairs: 7,
-        noBoards: 21,
-        noHands: 3,
-        noRounds: 7
-      },
-      {
-        noPairs: 6,
-        noBoards: 15,
-        noHands: 3,
-        noRounds: 5
-      },
-      {
-        noPairs: 6,
-        noBoards: 20,
-        noHands: 4,
-        noRounds: 5
-      },
-      {
-        noPairs: 5,
-        noBoards: 20,
-        noHands: 4,
-        noRounds: 5
-      }
-    ];
 
     if (this.failure) {
       var redirectToLogin = this.failure.redirectToLogin;
@@ -231,97 +90,18 @@
     }
   }
 
-  /** Clears the number of boards if the number of pairs is currently set to a value for which it would be invalid. */
-  TournamentStatusController.prototype.checkNoBoards = function checkNoBoards() {
-    var noBoards = this.tournament.noBoards;
-    var noPairs = this.tournament.noPairs;
-    var possibilities = this.boardPresets
-        .filter(function (preset) { return preset.noPairs === noPairs; })
-        .map(function (preset) { return preset.noBoards; });
-
-    if (possibilities.indexOf(noBoards) === -1) {
-      this.tournament.noBoards = null;
-    }
-  };
-
-  /** Adds a player to the set of players. */
-  TournamentStatusController.prototype.addPlayer = function addPlayer() {
-    var request = new tichu.PlayerRequest();
-    this.tournament.players.push(request);
-    var pairCounts = this.tournament.players
-        .map(function (player) { return player.pairNo })
-        .reduce(function (list, pairNo) { list[pairNo] = (list[pairNo] || 0) + 1; return list;}, []);
-    for (var i = 1; i <= this.tournament.noPairs; i += 1) {
-      if ((pairCounts[i] || 0) < 2) {
-        request.pairNo = i;
-        return;
-      }
-    }
-  };
-
-  /** Removes a player from the set of players. */
-  TournamentStatusController.prototype.removePlayer = function removePlayer(index) {
-    this.tournament.players.splice(index, 1);
-  };
-
-  /** Saves the tournament being edited, disabling the form until save is complete. */
-  TournamentStatusController.prototype.save = function save() {
-    if (this.saving) {
-      return;
-    }
-    this.saving = true;
-
-    var self = this;
-
-    var promise = this.original
-        ? this._tournamentService.editTournament(this.original.id, this.tournament)
-        : this._tournamentService.createTournament(this.tournament);
-
-    promise.then(function(result) {
-      self._$location
-          .path("/tournaments/" + encodeURIComponent(result.id) + "/view");
-    }).catch(function(failure) {
-      self.saving = false;
-      var alert = self._$mdDialog.alert()
-          .title(failure.error)
-          .textContent(failure.detail)
-          .ok("Try again");
-      var dialogDestroyed = false;
-      self._$mdDialog.show(alert).then(function() {
-        dialogDestroyed = true;
-      });
-      self._$scope.$on("$destroy", function() {
-        if (!dialogDestroyed) {
-          self._$mdDialog.hide();
-        }
-      });
-    });
-  };
-
   /**
-   * Gets the unique values of the given property in the objects in the array.
-   */
-  function uniqueProperties(array, property) {
-    if (!array) {
-      return array;
-    }
-    return array
-        .map(function(item) {return item[property];})
-        .filter(function(item, index, self) {return self.indexOf(item) === index});
-  }
-
-  /**
-   * Asynchronously loads the requested tournament.
+   * Asynchronously loads the requested tournament status.
    *
    * @param {TichuTournamentService} tournamentService
    * @param {string} id
-   * @return {!angular.$q.Promise<!{failure: ?tichu.RpcError, id: ?string, tournament: ?tichu.Tournament}>}
+   * @return {!angular.$q.Promise<!{failure: ?tichu.RpcError, id: ?string, tournamentStatus: ?tichu.TournamentStatus}>}
    */
-  function loadTournament(tournamentService, id) {
-    return tournamentService.getTournament(id, true).then(function(result) {
+  function loadTournamentStatus(tournamentService, id) {
+    return tournamentService.getTournamentStatus(id).then(function(result) {
       return {
         id: id,
-        tournament: result
+        tournamentStatus: result
       };
     }).catch(function(rejection) {
       return {
@@ -332,7 +112,7 @@
   }
 
   /**
-   * Configures the routing provider to load the tournament list at its path.
+   * Configures the routing provider to load the tournament status at its path.
    *
    * @param {!$routeProvider} $routeProvider
    * @ngInject
@@ -345,7 +125,7 @@
           controllerAs: "tournamentStatusController",
           resolve: {
             "loadResults": /** @ngInject */ function($route, TichuTournamentService) {
-              return loadTournament(TichuTournamentService, $route.current.params["id"]);
+              return loadTournamentStatus(TichuTournamentService, $route.current.params["id"]);
             }
           }
         });
@@ -353,6 +133,5 @@
 
   angular.module("tichu-tournament-status", ["ng", "ngRoute", "ngMaterial", "tichu-tournament-service"])
       .controller("TournamentStatusController", TournamentStatusController)
-      .config(mapRoute)
-      .filter("tichuUnique", function() {return uniqueProperties;});
+      .config(mapRoute);
 })(angular);

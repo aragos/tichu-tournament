@@ -94,12 +94,34 @@ tichu.TournamentPair.prototype.setPlayers = function setPlayers(players) {
 };
 
 /**
- * The HandStatus object.
+ * Holder for data for status of all hands in the tournament.
  * @constructor 
  */
-tichu.HandStatus = function HandStatus() {
-  this.unscoredHands = [];
+tichu.TournamentStatus = function TournamentStatus() {
+  this.roundStatus = [];
 };
+
+
+/**
+ * Holder for data for status of all hands in a specific round.
+ * @constructor
+ */
+tichu.RoundStatus = function RoundStatus() {
+  this.roundNo = 0;
+  this.unscoredHands = [];
+  this.scoredHands = [];
+}
+
+/**
+ * Holder for identifying a specific hand by participants, hand number, and table.
+ * @constructor
+ */
+tichu.HandIdentifier = function HandIdentifier() {
+  this.northSouthPair = 0;
+  this.eastWestPair = 0;
+  this.tableNo = 0;
+  this.handNo = 0;
+}
 
 /**
  * The tournament object, containing the full details about the tournament and related objects.

@@ -60,12 +60,12 @@
     this._tournamentPromises = $cacheFactory("TournamentPromises");
     
     /**
-     * The current outstanding promise(s) for loading hand status.
+     * The current outstanding promise(s) for loading tournament hand status.
      *
      * @type {angular.$cacheFactory.Cache}
      * @private
      */
-    this._handStatusPromises = $cacheFactory("HandStatusPromises");
+    this._tournamentStatusPromises = $cacheFactory("TournamentStatusPromises");
 
     /**
      * The cache of tournament headers in the order they were received from the server.
@@ -193,20 +193,20 @@
    /**
    * Retrieves the status of all rounds and hands.
    * @param {string} id The ID of the tournament to be retrieved.
-   * @returns {angular.$q.Promise<tichu.HandStatus>}
+   * @returns {angular.$q.Promise<tichu.TournamentStatus>}
    */
-  TichuTournamentService.prototype.getHandStatus = function getTournament(id) {
+  TichuTournamentService.prototype.getTournamentStatus = function getTournamentStatus(id) {
     var $q = this._$q;
     var $log = this._$log;
-    if (!this._handStatusPromises.get(id)) {
+    if (!this._tournamentStatusPromises.get(id)) {
       var self = this;
-      var path = "/api/tournaments/" + encodeURIComponent(id) + "/unscoredHands";
-      this._handStatusPromises.put(id, this._$http({
+      var path = "/api/tournaments/" + encodeURIComponent(id) + "/handStatus";
+      this._tournamentStatusPromises.put(id, this._$http({
         method: 'GET',
         url: path
       }).then(function onSuccess(response) {
         try {
-          return self._parseHandStatus(id, response.data);
+          return self._parseTournamentStatus(response.data);
         } catch (ex) {
           $log.error(
               "Malformed response from " + path + " (" + response.status + " " + response.statusText + "):\n"
@@ -219,16 +219,51 @@
           return $q.reject(rejection);
         }
       }, ServiceHelpers.handleErrorIn($q, $log, path)).finally(function afterResolution() {
-        self._handStatusPromises.remove(id);
+        self._tournamentStatusPromises.remove(id);
       }));
     }
-    return this._handStatusPromises.get(id);
+    return this._tournamentStatusPromises.get(id);
   };
   
-  TichuTournamentService.prototype_parseHandStatus = function _parseHandStatus(id, data) {
-    var handStatus = new tichu.HandStatus();
-    handStatus.unscoredHands = [data["unscored_hands"][0]["hand"]];
-    return handStatus;
+  /**
+   * Converts the given tournament hand status from the server into a TournamentStatus.
+   * @param {*} data
+   * @private
+   * @returns {tichu.TournamentStatus}
+   */
+  TichuTournamentService.prototype._parseTournamentStatus = function _parseTournamentStatus(data) {
+    var tournamentStatus = new tichu.TournamentStatus();
+    tournamentStatus.roundStatus = data["rounds"].map(this._parseRoundStatus.bind(this));
+    return tournamentStatus;
+  }
+  
+  /**
+   * Converts the given round hand status from the server into a RoundStatus.
+   * @param {*} data
+   * @private
+   * @returns {tichu.RoundStatus}
+   */
+  TichuTournamentService.prototype._parseRoundStatus = function _parseRoundStatus(data) {
+    var roundStatus = new tichu.RoundStatus();
+    roundStatus.roundNo = data["round"];
+    roundStatus.unscoredHands = data["unscored_hands"].map(this._parseHandIdentifier.bind(this));
+    roundStatus.scoredHands = data["scored_hands"].map(this._parseHandIdentifier.bind(this));
+    return roundStatus;
+  }
+  
+  /**
+   * Converts the given hand status from the server into a HandIdentifier.
+   * @param {*} data
+   * @private
+   * @returns {tichu.HandIdentifier}
+   */
+  TichuTournamentService.prototype._parseHandIdentifier = function _parseHandIdentifier(data) {
+    var handId = new tichu.HandIdentifier();
+    handId.northSouthPair = data["ns_pair"];
+    handId.eastWestPair = data["ew_pair"];
+    handId.tableNo = data["table"];
+    handId.handNo = data["hand"]
+    return handId;
   }
 
   /**

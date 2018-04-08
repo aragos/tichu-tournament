@@ -10,6 +10,13 @@
             </p>
         </div>
     </md-list-item>
+    <md-list-item class="md-2-line"
+                  ng-href="/tournaments/{{tournamentDetailController.tournament.id}}/status">
+        <md-icon class="md-avatar-icon" md-font-set="material-icons">explore</md-icon>
+        <div class="md-list-item-text">
+            <h3>Tournament Hand Status</h3>
+        </div>
+    </md-list-item>
     <md-subheader>Pairs</md-subheader>
     <md-list-item class="md-2-line"
                   ng-href="/tournaments/{{tournamentDetailController.tournament.id}}/movement/{{pair.pairNo}}"
