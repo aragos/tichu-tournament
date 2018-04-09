@@ -116,6 +116,9 @@ class Movement:
     elif no_hands_per_round == 4 and no_pairs == 5 and no_rounds == 5:
       json_data=open(os.path.join(os.getcwd(), 
                      'api/src/movement_files/5_pair_4_hands_5_rounds.txt')).read()
+    elif no_hands_per_round == 3 and no_pairs == 12 and no_rounds == 5:
+      json_data=open(os.path.join(os.getcwd(), 
+                     'api/src/movement_files/12_pair_3_hands_5_rounds.txt')).read()
     else:
       raise ValueError(("No movements available for the configuration {} " + 
                            "pairs with {} hands per round").format(
@@ -186,6 +189,8 @@ class Movement:
       Tuple (number of boards per round, maximum number of rounds).
         (0, 0) if no movement configuration exists for this input.
     '''
+    if total_boards == 18 and no_pairs == 12:
+      return (3, 5)
     if total_boards == 14 and no_pairs == 11:
       return (2, 7)
     if total_boards == 21 and no_pairs == 11:
