@@ -235,6 +235,10 @@ class AppTest(unittest.TestCase):
   def testPutTournament_override_num_pairs_fewer(self):
     self.loginUser()
     id = self.AddBasicTournament()
+    response = self.testapp.get("/api/tournaments/{}".format(id))
+    original_ids = json.loads(self.testapp.get(
+        "/api/tournaments/{}/pairids".format(id)).body)["pair_ids"]
+        
     params = {'name': 'name2', 'no_pairs': 7, 'no_boards': 21, 
               'players' : [{ "pair_no": 2, "name": "other name" }]}
     self.testapp.put_json("/api/tournaments/{}".format(id), params)
@@ -247,8 +251,33 @@ class AppTest(unittest.TestCase):
     self.assertEqual(1, len(response_dict['players']))
     self.assertEqual(2, response_dict['players'][0]["pair_no"])
     self.assertEqual("other name", response_dict['players'][0]["name"])
-    self.assertEqual(7, len(json.loads(self.testapp.get(
-        "/api/tournaments/{}/pairids".format(id)).body)["pair_ids"]))
+    self.assertEqual(original_ids[0:7], response_dict["pair_ids"])
+    self.assertEqual(original_ids[0:7], json.loads(self.testapp.get(
+        "/api/tournaments/{}/pairids".format(id)).body)["pair_ids"])
+        
+  def testPutTournament_override_num_pairs_more(self):
+    self.loginUser()
+    id = self.AddBasicTournament()
+    response = self.testapp.get("/api/tournaments/{}".format(id))
+    original_ids = json.loads(self.testapp.get(
+        "/api/tournaments/{}/pairids".format(id)).body)["pair_ids"]
+        
+    params = {'name': 'name2', 'no_pairs': 9, 'no_boards': 27, 
+              'players' : [{ "pair_no": 2, "name": "other name" }]}
+    self.testapp.put_json("/api/tournaments/{}".format(id), params)
+    response = self.testapp.get("/api/tournaments/{}".format(id))
+    self.assertEqual(response.status_int, 200)
+    response_dict = json.loads(response.body)
+    self.assertEqual('name2', response_dict['name'])
+    self.assertEqual(9, response_dict['no_pairs'])
+    self.assertEqual(27, response_dict['no_boards'])
+    self.assertEqual(1, len(response_dict['players']))
+    self.assertEqual(2, response_dict['players'][0]["pair_no"])
+    self.assertEqual("other name", response_dict['players'][0]["name"])
+    self.assertEqual(9, len(response_dict["pair_ids"]))
+    self.assertEqual(original_ids[0:7], response_dict["pair_ids"][0:7])
+    self.assertEqual(original_ids[0:7], json.loads(self.testapp.get(
+        "/api/tournaments/{}/pairids".format(id)).body)["pair_ids"][0:7])
 
   def testPutTournament_override_num_pairs_scoredhandsexist(self):
     self.loginUser()
