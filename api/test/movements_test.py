@@ -122,6 +122,24 @@ class MovementTest(unittest.TestCase):
     self.checkTableConsistency(movement, 12, 3)
     self.checkPrepareHands(movement, 12, 18)
     self.checkNumRounds(movement, 12, 5)
+    
+  def testConsistentOpponents_twelve_three_six(self):
+    movement = movements.Movement.CreateMovement(12, 3, 6)
+    self.checkConsistentSchedule(movement, 12, 3)
+    self.checkConsistentOpponents(movement, 12, 3)
+    self.checkHandsPlayedRightNumberOfTimes(movement, 12, 3)
+    self.checkTableConsistency(movement, 12, 3)
+    self.checkPrepareHands(movement, 12, 21)
+    self.checkNumRounds(movement, 12, 6)
+
+  def testConsistentOpponents_twelve_two_six(self):
+    movement = movements.Movement.CreateMovement(12, 2, 6)
+    self.checkConsistentSchedule(movement, 12, 2)
+    self.checkConsistentOpponents(movement, 12, 2)
+    self.checkHandsPlayedRightNumberOfTimes(movement, 12, 2)
+    self.checkTableConsistency(movement, 12, 2)
+    self.checkPrepareHands(movement, 12, 14)
+    self.checkNumRounds(movement, 12, 6)
 
   def testConsistentOpponents_eleven_two_seven_max_six(self):
     movement = movements.Movement.CreateMovement(11, 2, 6)
@@ -184,8 +202,8 @@ class MovementTest(unittest.TestCase):
         round_no = round.round
         self.assertIsNotNone(round_no)
         self.assertFalse(round_no in rounds_played,
-                         msg="Round {} for pair {} is played more than " + 
-                             "once".format(round_no, i + 1))
+                         msg="Round {} for pair {} is played more than once".format(
+                             round_no, i + 1))
         rounds_played.add(round_no)
 
         hands = round.hands
