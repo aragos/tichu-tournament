@@ -59,13 +59,21 @@ class Movement:
     pair_dict: Dictionary from pair number to movement pair movement
       where pair movement is a list MovementRounds.
   '''
-  def __init__(self, no_pairs, no_hands_per_round, no_rounds=None):
+  def __init__(self, no_pairs, no_hands_per_round, no_rounds=None,
+               legacy_version_id=None):
     ''' Initializes the movement for this configuration.
 
         Raises:
           ValueError if we do not have a defined movement for this configuration.
     '''
-    if no_hands_per_round == 3 and no_pairs == 10 and no_rounds == 7:
+    if legacy_version_id == 1:
+      if no_hands_per_round == 2 and no_pairs == 7 and no_rounds == 7:
+        json_data=open(os.path.join(os.getcwd(), 
+                       'api/src/movement_files/7_pair_2_hands_7_rounds_legacy1.txt')).read()
+      elif no_hands_per_round == 3 and no_pairs == 10 and no_rounds == 7:
+        json_data=open(os.path.join(os.getcwd(), 
+                       'api/src/movement_files/10_pair_3_hands_legacy1.txt')).read()
+    elif no_hands_per_round == 3 and no_pairs == 10 and no_rounds == 7:
       json_data=open(os.path.join(os.getcwd(), 
                      'api/src/movement_files/10_pair_3_hands.txt')).read()
     elif no_hands_per_round == 2 and no_pairs == 10 and no_rounds == 7:
@@ -146,12 +154,14 @@ class Movement:
     self._CalculateSuggestedPrep()
 
   @classmethod
-  def CreateMovement(cls, no_pairs, no_hands_per_round, no_rounds=None):
+  def CreateMovement(cls, no_pairs, no_hands_per_round, no_rounds=None,
+                     legacy_version_id=None):
     ''' Static factory method to create and cache movements '''
-    key = (no_pairs, no_hands_per_round, no_rounds)
+    key = (no_pairs, no_hands_per_round, no_rounds, legacy_version_id)
     if _MOVEMENTS.get(key):
       return _MOVEMENTS.get(key)
-    movement = Movement(no_pairs, no_hands_per_round, no_rounds)
+    movement = Movement(no_pairs, no_hands_per_round, no_rounds, 
+                        legacy_version_id)
     _MOVEMENTS[key] = movement
     return movement
 

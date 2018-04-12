@@ -54,7 +54,8 @@ def CheckValidHandPlayersCombinationAndMaybeSetStatus(response, tourney,
 
   # Now check if they make sense in this tournament setup.
   movements = BuildMovementAndMaybeSetStatus(response, tourney.no_pairs,
-                                             tourney.no_boards)
+                                             tourney.no_boards,
+                                             tourney.legacy_version_id)
   if not movements:
     SetErrorStatus(response, 400, error, 
                    ("Tournament config with {} pairs and {} boards is not" +
@@ -63,7 +64,8 @@ def CheckValidHandPlayersCombinationAndMaybeSetStatus(response, tourney,
   return CheckValidMatchupForMovementAndMaybeSetStatus(response, movements,
       int(board_no), int(ns_pair), int(ew_pair))
 
-def BuildMovementAndMaybeSetStatus(response, no_pairs, no_boards):
+def BuildMovementAndMaybeSetStatus(response, no_pairs, no_boards,
+                                   legacy_version_id=None):
   ''' Build a unique valid Movement for this tourney.
    
   Args:
@@ -83,7 +85,8 @@ def BuildMovementAndMaybeSetStatus(response, no_pairs, no_boards):
   no_hands_per_round, no_rounds = Movement.NumBoardsPerRoundFromTotal(
       no_pairs, no_boards)
   try:
-    movements = Movement.CreateMovement(no_pairs, no_hands_per_round, no_rounds)
+    movements = Movement.CreateMovement(no_pairs, no_hands_per_round,
+                                        no_rounds, legacy_version_id)
   except ValueError:
     SetErrorStatus(response, 400, "Invalid Tournament Config",
                    "No valid configuration {} pairs and {} boards".format(

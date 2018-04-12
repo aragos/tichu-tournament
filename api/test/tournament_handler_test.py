@@ -3,6 +3,8 @@ import unittest
 import webtest
 import os
 
+import test_utils
+
 from google.appengine.ext import ndb
 from google.appengine.ext import testbed
 from api.src import main
@@ -104,6 +106,35 @@ class AppTest(unittest.TestCase):
     params3.update({"ns_pair" : 7, "ew_pair" : 5, "board_no" : 1})
     self.assertEqual(params3, hands[2])
     
+  def testGetTournament_Hands_legacy(self):
+    self.loginUser()
+    params = {'name': 'name', 'no_pairs': 7, 'no_boards': 14,
+              'players': [{'pair_no': 2, 'name': "My name", 'email': "My email"},
+                          {'pair_no': 7}]}
+    response = self.testapp.post_json("/api/tournaments", params)
+    self.assertNotEqual(response.body, '')
+    response_dict = json.loads(response.body)
+    id = response_dict['id']
+    self.assertIsNotNone(id)
+    test_utils.setLegacyId(id, 1)
+
+    params1 = {'ns_score' : 'AVG',
+              'ew_score' : 'AVG+'}
+    response = self.testapp.put_json(
+        "/api/tournaments/{}/hands/1/7/1".format(id), params1)
+    params2 = {'ns_score' : 'AVG--',
+               'ew_score' : 'AVG-'}
+    response = self.testapp.put_json(
+        "/api/tournaments/{}/hands/2/7/1".format(id), params2)
+    params3 = {'calls': { 'north': "T" }, 
+              'ns_score': 75,
+              'ew_score': 125,
+              'notes': 'I am a note'}
+    response = self.testapp.put_json("/api/tournaments/{}/hands/3/7/2".format(id),
+                                     params3)
+    response = self.testapp.get("/api/tournaments/{}".format(id))
+    self.assertEqual(response.status_int, 200)
+
   def testGetTournament_pair_ids(self):
     self.loginUser()
     id = self.AddBasicTournament()
@@ -230,6 +261,33 @@ class AppTest(unittest.TestCase):
     self.assertEqual(1, response_dict['players'][0]["pair_no"])
     self.assertEqual("other name", response_dict['players'][0]["name"])
     self.assertEqual(9, len(json.loads(self.testapp.get(
+        "/api/tournaments/{}/pairids".format(id)).body)["pair_ids"]))
+        
+  def testPutTournament_legacy(self):
+    self.loginUser()
+    params = {'name': 'name', 'no_pairs': 7, 'no_boards': 14,
+              'players': [{'pair_no': 2, 'name': "My name", 'email': "My email"},
+                          {'pair_no': 7}]}
+    response = self.testapp.post_json("/api/tournaments", params)
+    self.assertNotEqual(response.body, '')
+    response_dict = json.loads(response.body)
+    id = response_dict['id']
+    self.assertIsNotNone(id)
+    test_utils.setLegacyId(id, 1)
+    
+    params = {'name': 'name2', 'no_pairs': 7, 'no_boards': 14, 
+              'players' : [{ "pair_no": 1, "name": "other name" }]}
+    self.testapp.put_json("/api/tournaments/{}".format(id), params)
+    response = self.testapp.get("/api/tournaments/{}".format(id))
+    self.assertEqual(response.status_int, 200)
+    response_dict = json.loads(response.body)
+    self.assertEqual('name2', response_dict['name'])
+    self.assertEqual(7, response_dict['no_pairs'])
+    self.assertEqual(14, response_dict['no_boards'])
+    self.assertEqual(1, len(response_dict['players']))
+    self.assertEqual(1, response_dict['players'][0]["pair_no"])
+    self.assertEqual("other name", response_dict['players'][0]["name"])
+    self.assertEqual(7, len(json.loads(self.testapp.get(
         "/api/tournaments/{}/pairids".format(id)).body)["pair_ids"]))
     
   def testPutTournament_override_num_pairs_fewer(self):

@@ -72,7 +72,8 @@ class TourneyHandler(GenericHandler):
     player_list = request_dict.get('players')
     if not self._CheckValidTournamentInfoAndMaybeSetStatus(name, no_pairs,
                                                            no_boards,
-                                                           player_list):
+                                                           player_list,
+                                                           tourney.legacy_version_id):
       return
     if ((tourney.no_pairs != no_pairs or tourney.no_boards != no_boards) and
          len(tourney.GetScoredHandList()) != 0):
@@ -137,7 +138,8 @@ class TourneyHandler(GenericHandler):
 
 
   def _CheckValidTournamentInfoAndMaybeSetStatus(self, name, no_pairs,
-                                                 no_boards, players=None):
+                                                 no_boards, players=None, 
+                                                 legacy_version_id=None):
     ''' Checks if the input is valid and sane. 
         If not sets the response with the appropriate status and error message.
         Assumes no_pairs and no_boards are integers.
@@ -162,4 +164,4 @@ class TourneyHandler(GenericHandler):
                              player['pair_no']))
           return False
     return BuildMovementAndMaybeSetStatus(
-        self.response, no_pairs, no_boards) is not None
+        self.response, no_pairs, no_boards, legacy_version_id) is not None

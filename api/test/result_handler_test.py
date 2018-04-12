@@ -2,12 +2,11 @@ import json
 import unittest
 import webtest
 import os
+import sys
+import test_utils
 
 from google.appengine.ext import testbed
-
-
 from api.src import main
-
 
 class AppTest(unittest.TestCase):
   def setUp(self):
@@ -53,6 +52,12 @@ class AppTest(unittest.TestCase):
     expected_dict = json.loads(open(os.path.join(os.getcwd(), 
                               'api/test/example_tournament_results.txt')).read())
     self.assertEqual(expected_dict, response_dict)
+
+  def testScoreTournament_legacy(self):
+    self.loginUser()
+    id = self.buildFullTournament(True)
+    response = self.testapp.get("/api/tournaments/{}/results".format(id))
+    self.assertEqual(response.status_int, 200)
 
   def testCheckCompleteScoring_not_logged_in(self):
     self.loginUser()
@@ -129,13 +134,22 @@ class AppTest(unittest.TestCase):
     self.assertIsNotNone(id)
     return id
 
-  def buildFullTournament(self):
-    params = {'name' : 'Test Tournament', 'no_pairs': 7, 'no_boards': 21}
-    response = self.testapp.post_json("/api/tournaments", params)
-    response_dict = json.loads(response.body)
-    id = response_dict['id']
-    json_data=open(os.path.join(os.getcwd(), 
-                   'api/test/example_tournament.txt')).read();
+  def buildFullTournament(self, legacy=False):
+    if legacy:
+      params = {'name' : 'Test Tournament', 'no_pairs': 7, 'no_boards': 14}
+      response = self.testapp.post_json("/api/tournaments", params)
+      response_dict = json.loads(response.body)
+      id = response_dict['id']
+      test_utils.setLegacyId(id, 1)
+      json_data=open(os.path.join(os.getcwd(), 
+                     'api/test/example_tournament_legacy.txt')).read();
+    else:
+      params = {'name' : 'Test Tournament', 'no_pairs': 7, 'no_boards': 21}
+      response = self.testapp.post_json("/api/tournaments", params)
+      response_dict = json.loads(response.body)
+      id = response_dict['id']
+      json_data=open(os.path.join(os.getcwd(), 
+                     'api/test/example_tournament.txt')).read();
     tourney_dict = json.loads(json_data)
     for hand in tourney_dict['hands']:
       params = {'calls' : hand['calls'],

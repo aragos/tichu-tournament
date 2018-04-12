@@ -20,11 +20,15 @@ class Tournament(ndb.Model):
     name: name of the tournament. Required.
     no_boards: Number of boards in the tournament. Required.
     no_pairs: Number of pairs in the tournament. Required.
+    legacy_version_id: A legacy version of a movement used to make sure old
+                       tournaments do not crash after movement changes. Usually
+                       unset. 
   '''
   owner_id = ndb.StringProperty()
   name = ndb.StringProperty()
   no_boards = ndb.IntegerProperty()
   no_pairs = ndb.IntegerProperty()
+  legacy_version_id = ndb.IntegerProperty()
 
   @classmethod
   def CreateAndPersist(cls, boards, **kwargs):
