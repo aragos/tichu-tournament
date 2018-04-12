@@ -4,8 +4,8 @@
     "no_boards": 21,
     "hands": [{
         "board_no": 1,
-        "ns_pair": 7,
-        "ew_pair": 1,
+        "ns_pair": 1,
+        "ew_pair": 7,
         "calls": {
             "north": "",
             "east": "",
@@ -18,8 +18,8 @@
     },
     {
         "board_no": 1,
-        "ns_pair": 6,
-        "ew_pair": 5,
+        "ns_pair": 5,
+        "ew_pair": 6,
         "calls": {
             "north": "",
             "east": "T",
@@ -44,8 +44,8 @@
     },
     {
         "board_no": 2,
-        "ns_pair": 7,
-        "ew_pair": 1,
+        "ns_pair": 1,
+        "ew_pair": 7,
         "calls": {
             "north": "",
             "east": "",
@@ -57,8 +57,8 @@
     },
     {
         "board_no": 2,
-        "ns_pair": 6,
-        "ew_pair": 5,
+        "ns_pair": 5,
+        "ew_pair": 6,
         "calls": {
             "north": "",
             "east": "",
@@ -83,8 +83,8 @@
     },
     {
         "board_no": 3,
-        "ns_pair": 7,
-        "ew_pair": 1,
+        "ns_pair": 1,
+        "ew_pair": 7,
         "calls": {
             "north": "",
             "east": "",
@@ -96,8 +96,8 @@
     },
     {
         "board_no": 3,
-        "ns_pair": 6,
-        "ew_pair": 5,
+        "ns_pair": 5,
+        "ew_pair": 6,
         "calls": {
             "north": "",
             "east": "T",
@@ -122,8 +122,8 @@
     },
     {
         "board_no": 4,
-        "ns_pair": 7,
-        "ew_pair": 2,
+        "ns_pair": 2,
+        "ew_pair": 7,
         "calls": {
             "north": "GT",
             "east": "",
@@ -161,8 +161,8 @@
     },
     {
         "board_no": 5,
-        "ns_pair": 7,
-        "ew_pair": 2,
+        "ns_pair": 2,
+        "ew_pair": 7,
         "calls": {
             "north": "T",
             "east": "",
@@ -200,8 +200,8 @@
     },
     {
         "board_no": 6,
-        "ns_pair": 7,
-        "ew_pair": 2,
+        "ns_pair": 2,
+        "ew_pair": 7,
         "calls": {
             "north": "",
             "east": "",
@@ -265,8 +265,8 @@
     },
     {
         "board_no": 10,
-        "ns_pair": 2,
-        "ew_pair": 1,
+        "ns_pair": 1,
+        "ew_pair": 2,
         "calls": {
             "north": "GT",
             "east": "",
@@ -304,8 +304,8 @@
     },
     {
         "board_no": 11,
-        "ns_pair": 2,
-        "ew_pair": 1,
+        "ns_pair": 1,
+        "ew_pair": 2,
         "calls": {
             "north": "",
             "east": "",
@@ -343,8 +343,8 @@
     },
     {
         "board_no": 12,
-        "ns_pair": 2,
-        "ew_pair": 1,
+        "ns_pair": 1,
+        "ew_pair": 2,
         "calls": {
             "north": "GT",
             "east": "",
@@ -356,8 +356,8 @@
     },
     {
         "board_no": 19,
-        "ns_pair": 5,
-        "ew_pair": 4,
+        "ns_pair": 4,
+        "ew_pair": 5,
         "calls": {
             "north": "",
             "east": "GT",
@@ -369,8 +369,8 @@
     },
     {
         "board_no": 19,
-        "ns_pair": 3,
-        "ew_pair": 1,
+        "ns_pair": 1,
+        "ew_pair": 3,
         "calls": {
             "north": "",
             "east": "GT",
@@ -395,8 +395,8 @@
     },
     {
         "board_no": 20,
-        "ns_pair": 5,
-        "ew_pair": 4,
+        "ns_pair": 4,
+        "ew_pair": 5,
         "calls": {
             "north": "",
             "east": "",
@@ -408,8 +408,8 @@
     },
     {
         "board_no": 20,
-        "ns_pair": 3,
-        "ew_pair": 1,
+        "ns_pair": 1,
+        "ew_pair": 3,
         "calls": {
             "north": "",
             "east": "",
@@ -434,8 +434,8 @@
     },
     {
         "board_no": 21,
-        "ns_pair": 5,
-        "ew_pair": 4,
+        "ns_pair": 4,
+        "ew_pair": 5,
         "calls": {
             "north": "",
             "east": "",
@@ -447,8 +447,8 @@
     },
     {
         "board_no": 21,
-        "ns_pair": 3,
-        "ew_pair": 1,
+        "ns_pair": 1,
+        "ew_pair": 3,
         "calls": {
             "north": "",
             "east": "",
@@ -486,8 +486,8 @@
     },
     {
         "board_no": 13,
-        "ns_pair": 3,
-        "ew_pair": 2,
+        "ns_pair": 2,
+        "ew_pair": 3,
         "calls": {
             "north": "",
             "east": "",
@@ -512,8 +512,8 @@
     },
     {
         "board_no": 16,
-        "ns_pair": 5,
-        "ew_pair": 1,
+        "ns_pair": 1,
+        "ew_pair": 5,
         "calls": {
             "north": "",
             "east": "T",
@@ -525,8 +525,8 @@
     },
     {
         "board_no": 16,
-        "ns_pair": 7,
-        "ew_pair": 6,
+        "ns_pair": 6,
+        "ew_pair": 7,
         "calls": {
             "north": "",
             "east": "T",
@@ -538,8 +538,8 @@
     },
     {
         "board_no": 16,
-        "ns_pair": 4,
-        "ew_pair": 3,
+        "ns_pair": 3,
+        "ew_pair": 4,
         "calls": {
             "north": "",
             "east": "T",
@@ -551,8 +551,8 @@
     },
     {
         "board_no": 8,
-        "ns_pair": 7,
-        "ew_pair": 3,
+        "ns_pair": 3,
+        "ew_pair": 7,
         "calls": {
             "north": "T",
             "east": "",
@@ -564,8 +564,8 @@
     },
     {
         "board_no": 8,
-        "ns_pair": 6,
-        "ew_pair": 4,
+        "ns_pair": 4,
+        "ew_pair": 6,
         "calls": {
             "north": "GT",
             "east": "",
@@ -590,8 +590,8 @@
     },
     {
         "board_no": 7,
-        "ns_pair": 7,
-        "ew_pair": 3,
+        "ns_pair": 3,
+        "ew_pair": 7,
         "calls": {
             "north": "GT",
             "east": "",
@@ -603,8 +603,8 @@
     },
     {
         "board_no": 7,
-        "ns_pair": 6,
-        "ew_pair": 4,
+        "ns_pair": 4,
+        "ew_pair": 6,
         "calls": {
             "north": "",
             "east": "",
@@ -629,8 +629,8 @@
     },
     {
         "board_no": 9,
-        "ns_pair": 7,
-        "ew_pair": 3,
+        "ns_pair": 3,
+        "ew_pair": 7,
         "calls": {
             "north": "",
             "east": "",
@@ -642,8 +642,8 @@
     },
     {
         "board_no": 9,
-        "ns_pair": 6,
-        "ew_pair": 4,
+        "ns_pair": 4,
+        "ew_pair": 6,
         "calls": {
             "north": "",
             "east": "",
@@ -681,8 +681,8 @@
     },
     {
         "board_no": 14,
-        "ns_pair": 3,
-        "ew_pair": 2,
+        "ns_pair": 2,
+        "ew_pair": 3,
         "calls": {
             "north": "",
             "east": "",
@@ -720,8 +720,8 @@
     },
     {
         "board_no": 15,
-        "ns_pair": 3,
-        "ew_pair": 2,
+        "ns_pair": 2,
+        "ew_pair": 3,
         "calls": {
             "north": "",
             "east": "GT",
@@ -746,8 +746,8 @@
     },
     {
         "board_no": 17,
-        "ns_pair": 5,
-        "ew_pair": 1,
+        "ns_pair": 1,
+        "ew_pair": 5,
         "calls": {
             "north": "GT",
             "east": "",
@@ -759,8 +759,8 @@
     },
     {
         "board_no": 17,
-        "ns_pair": 7,
-        "ew_pair": 6,
+        "ns_pair": 6,
+        "ew_pair": 7,
         "calls": {
             "north": "GT",
             "east": "",
@@ -772,8 +772,8 @@
     },
     {
         "board_no": 17,
-        "ns_pair": 4,
-        "ew_pair": 3,
+        "ns_pair": 3,
+        "ew_pair": 4,
         "calls": {
             "north": "GT",
             "east": "",
@@ -785,8 +785,8 @@
     },
     {
         "board_no": 18,
-        "ns_pair": 5,
-        "ew_pair": 1,
+        "ns_pair": 1,
+        "ew_pair": 5,
         "calls": {
             "north": "",
             "east": "",
@@ -798,8 +798,8 @@
     },
     {
         "board_no": 18,
-        "ns_pair": 7,
-        "ew_pair": 6,
+        "ns_pair": 6,
+        "ew_pair": 7,
         "calls": {
             "north": "T",
             "east": "",
@@ -811,8 +811,8 @@
     },
     {
         "board_no": 18,
-        "ns_pair": 4,
-        "ew_pair": 3,
+        "ns_pair": 3,
+        "ew_pair": 4,
         "calls": {
             "north": "",
             "east": "",
