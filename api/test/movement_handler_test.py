@@ -83,7 +83,7 @@ class AppTest(unittest.TestCase):
                                      params)
     # Team 2 is N team 7 is E. Playing hand 22 in Round 2.
     params = {'calls': {}, 'ns_score': 100, 'ew_score': 0}
-    response = self.testapp.put_json("/api/tournaments/{}/hands/22/2/7".format(id),
+    response = self.testapp.put_json("/api/tournaments/{}/hands/22/7/2".format(id),
                                      params)
     # Team 2 is N team 3 is E. Playing hand 16 in Round 4.
     params = {'calls': {}, 'ns_score': "avg--", 'ew_score': "avg++"}
@@ -97,9 +97,9 @@ class AppTest(unittest.TestCase):
     
     # Team 5's hand. Add it and then delete it.
     params = {'calls': {}, 'ns_score': 125, 'ew_score': -25}
-    response = self.testapp.put_json("/api/tournaments/{}/hands/1/5/6".format(id),
+    response = self.testapp.put_json("/api/tournaments/{}/hands/1/6/5".format(id),
                                      params)
-    self.testapp.delete("/api/tournaments/{}/hands/1/5/6".format(id))
+    self.testapp.delete("/api/tournaments/{}/hands/1/6/5".format(id))
     
     # Another tournament with same basic parameters. Team two has one different
     # score.
