@@ -20,7 +20,7 @@
         16
       ], 
       "opponent": 3, 
-      "position": "1N", 
+      "position": "1E", 
       "relay_table": false, 
       "round": 2
     }, 
@@ -70,7 +70,7 @@
         16
       ], 
       "opponent": 5, 
-      "position": "2N", 
+      "position": "2E", 
       "relay_table": false, 
       "round": 1
     }, 
@@ -82,7 +82,7 @@
         8
       ], 
       "opponent": 6, 
-      "position": "2N", 
+      "position": "2E", 
       "relay_table": false, 
       "round": 2
     }, 
@@ -94,7 +94,7 @@
         4
       ], 
       "opponent": 4, 
-      "position": "2E", 
+      "position": "2N", 
       "relay_table": false, 
       "round": 3
     }, 
@@ -118,7 +118,7 @@
         20
       ], 
       "opponent": 3, 
-      "position": "2E", 
+      "position": "2N", 
       "relay_table": true, 
       "round": 5
     }
@@ -144,7 +144,7 @@
         16
       ], 
       "opponent": 1, 
-      "position": "1E", 
+      "position": "1N", 
       "relay_table": false, 
       "round": 2
     }, 
@@ -156,7 +156,7 @@
         12
       ], 
       "opponent": 6, 
-      "position": "3E", 
+      "position": "3N", 
       "relay_table": false, 
       "round": 3
     }, 
@@ -180,7 +180,7 @@
         20
       ], 
       "opponent": 2, 
-      "position": "2N", 
+      "position": "2E", 
       "relay_table": true, 
       "round": 5
     }
@@ -218,7 +218,7 @@
         4
       ], 
       "opponent": 2, 
-      "position": "2N", 
+      "position": "2E", 
       "relay_table": false, 
       "round": 3
     }, 
@@ -256,7 +256,7 @@
         16
       ], 
       "opponent": 2, 
-      "position": "2E", 
+      "position": "2N", 
       "relay_table": false, 
       "round": 1
     }, 
@@ -304,7 +304,7 @@
         20
       ], 
       "opponent": 6, 
-      "position": "3N", 
+      "position": "3E", 
       "relay_table": true, 
       "round": 5
     }
@@ -330,7 +330,7 @@
         8
       ], 
       "opponent": 2, 
-      "position": "2E", 
+      "position": "2N", 
       "relay_table": false, 
       "round": 2
     }, 
@@ -342,7 +342,7 @@
         12
       ], 
       "opponent": 3, 
-      "position": "3N", 
+      "position": "3E", 
       "relay_table": false, 
       "round": 3
     }, 
@@ -366,7 +366,7 @@
         20
       ], 
       "opponent": 5, 
-      "position": "3E", 
+      "position": "3N", 
       "relay_table": true, 
       "round": 5
     }
