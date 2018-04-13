@@ -158,8 +158,8 @@ class Movement:
                      legacy_version_id=None):
     ''' Static factory method to create and cache movements '''
     key = (no_pairs, no_hands_per_round, no_rounds, legacy_version_id)
-    #if _MOVEMENTS.get(key):
-    #  return _MOVEMENTS.get(key)
+    if _MOVEMENTS.get(key):
+      return _MOVEMENTS.get(key)
     movement = Movement(no_pairs, no_hands_per_round, no_rounds, 
                         legacy_version_id)
     _MOVEMENTS[key] = movement
