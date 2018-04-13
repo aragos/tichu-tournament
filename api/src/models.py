@@ -157,9 +157,12 @@ class Tournament(ndb.Model):
     ret = []
     for i in range(num_ids):
       id = None
-      while (not id) or (id in seen):
+      player_pairs = []
+      while (not id) or (id in seen) or player_pairs:
         id = ''.join(
             random.choice('ABCDEFGHIJKLMNOPQRSTUVWXYZ') for j in range(4))
+        player_pairs = PlayerPair._query(ndb.GenericProperty('id') == id).fetch(
+            keys_only=True, limit=1)
       seen.add(id)
       ret.append(id)
     return ret
