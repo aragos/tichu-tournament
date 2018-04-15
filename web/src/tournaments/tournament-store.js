@@ -32,6 +32,14 @@
      * @private
      */
     this._tournamentCache = $cacheFactory("Tournaments");
+    
+     /**
+     * The cache of TournamentStatus instances.
+     *
+     * @type {angular.$cacheFactory.Cache}
+     * @private
+     */
+    this._tournamentStatusCache = $cacheFactory("TournamentStatuses");
   }
 
   /**
@@ -85,6 +93,29 @@
       this._tournamentCache.put(id, tournament);
     }
     return tournament;
+  };
+
+  /**
+   * Returns whether the tournament status exists in the cache or not without creating it.
+   * @param {string} id The ID of the tournament status to retrieve or create.
+   * @returns {boolean}
+   */
+  TichuTournamentStore.prototype.hasTournamentStatus = function hasTournamentStatus(id) {
+    return !!this._tournamentStatusCache.get(id);
+  };
+  
+  /**
+   * Retrieves or creates a status in the cache, and updates its fields if requested.
+   * @param {string} id The ID of the tournament status to retrieve or create.
+   * @returns {tichu.TournamentStatus}
+   */
+  TichuTournamentStore.prototype.getOrCreateTournamentStatus = function getOrCreateTournamentStatus(id) {
+    var status = this._tournamentStatusCache.get(id);
+    if (!status) {
+      status = new tichu.TournamentStatus();
+      this._tournamentStatusCache.put(id, status);
+    }
+    return status;
   };
 
   angular.module("tichu-tournament-store", ["ng"])

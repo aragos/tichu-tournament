@@ -13,7 +13,7 @@
    * @param {!{failure: ?tichu.RpcError, id: ?string, tournamentStatus: ?tichu.TournamentStatus}} loadResults
    * @ngInject
    */
-  function TournamentStatusController($scope, TichuTournamentService, $mdDialog, $window, $location, $route, loadResults) {
+  function TournamentStatusController($scope, TichuTournamentService, $mdDialog, $log, $window, $location, $route, loadResults) {
     var backPath = "/tournaments" + (loadResults.id ? "/" + loadResults.id + "/view" : "");
     $scope.appController.setPageHeader({
       header: loadResults.failure
@@ -37,6 +37,13 @@
      */
     this.failure = loadResults.failure;
     
+    /** 
+     * The tournament id of the tournament we're looking up.
+     *
+     * @type {string}
+     */
+    this.tournamentId = loadResults.id;
+    
     /**
      * The status of all hands in the tournament.
      *
@@ -44,11 +51,25 @@
      */
     this.tournamentStatus = loadResults.tournamentStatus
 
+    /**
+     * The logging service injected at creation.
+     * @type {$log}
+     * @private
+     */
+    this._$log = $log;
+
     /** The location service injected at creation. */
     this._$location = $location;
 
     /** The scope this controller exists in. */
     this._$scope = $scope;
+    
+    /**
+     * Whether a dialog is currently visible.
+     * @type {boolean}
+     * @private
+     */
+    this._showingDialog = false;
 
     /**
      * The dialog service injected at creation.
@@ -89,6 +110,52 @@
       });
     }
   }
+
+  /**
+   * Launches a dialog to edit the given hand.
+   * @param {number} hand_no Hand number of the hand to edit.
+   * @param {number} ns_pair Pair sitting in the North/South position for this hand.
+   * @param {number} ew_pair Pair sitting in the East/West position for this hand.
+   */
+  TournamentStatusController.prototype.editHand = function editHand(hand_no, ns_pair, ew_pair) {
+    if (this._showingDialog) {
+      return;
+    }
+    this._showingDialog = true;
+    var $mdDialog = this._$mdDialog;
+    var self = this;
+    var $q = this._$q;
+    var $log = this._$log;
+    var tournamentId = this.tournamentId;
+    this._tournamentService.getHand(tournamentId, hand_no, ns_pair, ew_pair)
+    .then(function(this_hand) {
+      $mdDialog.show({
+        controller: 'ScoreDetailController',
+        controllerAs: 'scoreDetailController',
+        templateUrl: 'src/movements/score-detail.html',
+        locals: {
+          loadResults: {
+            hand: this_hand,
+            tournamentId: tournamentId
+          }
+        },
+        clickOutsideToClose: false,
+        escapeToClose: false,
+        fullscreen: true
+      }).catch(function(rejection) {
+        if (!rejection) {
+          /* The dialog was canceled or auto-hidden. That's okay. */
+          return;
+        }
+        $log.error("Something went wrong while showing the score detail: " + rejection);
+      }).finally(function() {
+        self._showingDialog = false;
+      })
+    }).catch(function(/** tichu.RpcError */ error) {
+      return $q.reject(error);
+    });
+  };
+
 
   /**
    * Asynchronously loads the requested tournament status.

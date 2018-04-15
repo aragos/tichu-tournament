@@ -134,6 +134,12 @@
       headers: pairCode ? {'X-tichu-pair-code': pairCode} : {}
     }).then(function onSuccess() {
       self._movementStore.getOrCreateHand(tournamentId, nsPair, ewPair, handNo).score = score;
+      if (self._tournamentStore.hasTournamentStatus(tournamentId)) {
+        roundStatus = self._tournamentStore.getOrCreateTournamentStatus(tournamentId).roundStatus;
+        roundStatus.forEach(function(round){
+          self._changeHandStatus(handNo, nsPair, ewPair, round.unscoredHands, round.scoredHands);
+        });
+      }
     }, ServiceHelpers.handleErrorIn($q, $log, path, true));
   };
 
@@ -159,6 +165,12 @@
       headers: pairCode ? {'X-tichu-pair-code': pairCode} : {}
     }).then(function onSuccess() {
       self._movementStore.getOrCreateHand(tournamentId, nsPair, ewPair, handNo).score = null;
+      if (self._tournamentStore.hasTournamentStatus(tournamentId)) {
+        roundStatus = self._tournamentStore.getOrCreateTournamentStatus(tournamentId).roundStatus;
+        roundStatus.forEach(function(round) {
+          self._changeHandStatus(handNo, nsPair, ewPair, round.scoredHands, round.unscoredHands);
+        });
+      }
     }, ServiceHelpers.handleErrorIn($q, $log, path, true));
   };
 
@@ -312,6 +324,43 @@
     movement.rounds = convertedRounds;
     return movement;
   };
+
+  /**
+   * Moves a hand status from the from_hands array to the to_hands array.
+   * @param {number} handNo The number of the han to move.
+   * @param {number} nsPair The number of the pair in North/South position of the hand to move.
+   * @param {number} ewPair The number of the pair in East/West position of the hand to move.
+   * @param {tichu.HandIdentifier[]} from_hands Array of hands the hand should be removed from.
+   * @param {tichu.HandIdentifier[]} to_hands Array of hands the hand should added to.
+   * @private
+   */
+  TichuMovementService.prototype._changeHandStatus = function _changeHandStatus(handNo, nsPair, ewPair, from_hands, to_hands) {
+    var found = from_hands.find(function(handId) {
+      return handId.handNo == handNo &&
+             handId.northSouthPair == nsPair &&
+             handId.eastWestPair == ewPair;
+      });
+    if (found !== undefined) {
+      to_hands.push(found);
+      to_hands.sort(function(handId1, handId2) {
+        var primary = handId1.handNo - handId2.handNo;
+        if (primary == 0) {
+          return handId1.tableNo - handId2.tableNo;
+        }
+        return primary;
+      });
+      var j = 0;
+      from_hands.forEach(function(handId, i) {
+        if (handId.handNo != handNo ||
+            handId.northSouthPair != nsPair ||
+            handId.eastWestPair != ewPair) {
+          if (i !== j) from_hands[j] = handId;
+          j++;
+        }
+      });
+      from_hands.length = j
+    }
+  }
 
   angular.module("tichu-movement-service", ["ng", "tichu-tournament-store", "tichu-movement-store"])
       .service("TichuMovementService", TichuMovementService);

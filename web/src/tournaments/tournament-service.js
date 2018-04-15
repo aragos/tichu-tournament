@@ -68,6 +68,14 @@
     this._tournamentStatusPromises = $cacheFactory("TournamentStatusPromises");
 
     /**
+     * The current outstanding promise(s) for loading hand results.
+     *
+     * @type {angular.$cacheFactory.Cache}
+     * @private
+     */
+    this._handPromises = $cacheFactory("HandPromises");
+
+    /**
      * The cache of tournament headers in the order they were received from the server.
      *
      * @type {tichu.TournamentHeader[]}
@@ -206,7 +214,7 @@
         url: path
       }).then(function onSuccess(response) {
         try {
-          return self._parseTournamentStatus(response.data);
+          return self._parseTournamentStatus(id, response.data);
         } catch (ex) {
           $log.error(
               "Malformed response from " + path + " (" + response.status + " " + response.statusText + "):\n"
@@ -224,16 +232,18 @@
     }
     return this._tournamentStatusPromises.get(id);
   };
-  
+
   /**
    * Converts the given tournament hand status from the server into a TournamentStatus.
-   * @param {*} data
+   # @param {string} id Id of the tournament whose status we are parsing
+   * @param {*} data Response data with tournament hand statuses
    * @private
    * @returns {tichu.TournamentStatus}
    */
-  TichuTournamentService.prototype._parseTournamentStatus = function _parseTournamentStatus(data) {
-    var tournamentStatus = new tichu.TournamentStatus();
+  TichuTournamentService.prototype._parseTournamentStatus = function _parseTournamentStatus(id, data) {
+   var tournamentStatus = this._tournamentStore.getOrCreateTournamentStatus(id);
     tournamentStatus.roundStatus = data["rounds"].map(this._parseRoundStatus.bind(this));
+    tournamentStatus = this._tournamentStore.getOrCreateTournamentStatus(id);
     return tournamentStatus;
   }
   
@@ -250,7 +260,98 @@
     roundStatus.scoredHands = data["scored_hands"].map(this._parseHandIdentifier.bind(this));
     return roundStatus;
   }
+
+
+  /**
+   * Retrieves the score and calls of a specific hand.
+   * @param {string} id The ID of the tournament to be retrieved.
+   * @param {number} hand_no The hand number of the hand to be retrieved.
+   * @param {number} ns_pair The North/South pair number
+   * @param {number} ew_pair The East/West pair number
+   * @returns {angular.$q.Promise<tichu.Hand>}
+   */
+  TichuTournamentService.prototype.getHand = function getHand(id, handNo, nsPair, ewPair) {
+    var $q = this._$q;
+    var $log = this._$log;
+    var promiseCacheKey =
+        encodeURIComponent(id) + "/" + encodeURIComponent(handNo.toString())
+        + "/" + encodeURIComponent(nsPair);
+    if (!this._handPromises.get(promiseCacheKey)) {
+      var self = this;
+      var path = "/api/tournaments/" + encodeURIComponent(id) + "/hands/" + 
+        encodeURIComponent(handNo.toString()) + "/" +
+        encodeURIComponent(nsPair.toString()) + "/" +
+        encodeURIComponent(ewPair.toString());;
+      this._handPromises.put(promiseCacheKey, this._$http({
+        method: 'GET',
+        url: path
+      }).then(function onSuccess(response) {
+        try {
+          return self._parseHandScore(response.status, handNo, nsPair, ewPair, response.data);
+        } catch (ex) {
+          $log.error(
+              "Malformed response from " + path + " (" + response.status + " " + response.statusText + "):\n"
+              + ex + "\n\n"
+              + JSON.stringify(response.data));
+          var rejection = new tichu.RpcError();
+          rejection.redirectToLogin = false;
+          rejection.error = "Invalid response from server";
+          rejection.detail = "The server sent confusing data for hand score.";
+          return $q.reject(rejection);
+        }
+      }, ServiceHelpers.handleErrorIn($q, $log, path)
+      ).finally(function afterResolution() {
+        self._handPromises.remove(promiseCacheKey);
+      }));
+    }
+    return this._handPromises.get(promiseCacheKey);
+  };
   
+  /**
+   * Converts the given tournament hand status from the server into a TournamentStatus.
+   * @param {*} data
+   * @private
+   * @returns {tichu.TournamentStatus}
+   */
+  TichuTournamentService.prototype._parseHandScore = function _parseHandScore(status, handNo, nsPair, ewPair, data) {
+    var hand = new tichu.Hand(nsPair, ewPair, handNo);
+    var handContext = 'hand score';
+    if (status == 204) {
+      return hand;
+    }
+    var score = new tichu.HandScore();
+    var callData = ServiceHelpers.assertType(handContext + " calls", data['calls'], "object", true);
+    if (callData) {
+      score.calls = Object.keys(tichu.Position).map(function (positionKey) {
+        var position = tichu.Position[positionKey];
+        var call = ServiceHelpers.assertType(
+            handContext + " " + position + " call", callData[position], "string", true);
+        if (!call) {
+          return null;
+        }
+        if (!tichu.isValidCall(call)) {
+          throw new Error(handContext + " " + position + " call was not a valid call");
+        }
+        return {
+          side: position,
+          call: call
+        };
+      }).filter(function(call) {
+        return call !== null;
+      });
+    } else {
+      score.calls = [];
+    }
+    score.northSouthScore = ServiceHelpers.assertType(
+        handContext + " north/south score", data['ns_score'], "number|string");
+    score.eastWestScore = ServiceHelpers.assertType(
+        handContext + " east/west score", data['ew_score'], "number|string");
+    score.notes = ServiceHelpers.assertType(
+        handContext + " scoring notes", data['notes'], "string", true) || null;
+    hand.score = score;
+    return hand;
+  }
+
   /**
    * Converts the given hand status from the server into a HandIdentifier.
    * @param {*} data
@@ -363,21 +464,44 @@
    * Updates a tournament on the server, and returns a promise for the resulting Tournament object.
    * @param {string} id
    * @param {tichu.TournamentRequest} request
-   * @returns {angular.$q.Promise<tichu.Tournament>}
+   * @returns {angular.$q.Promise<angular.$q.Promise<tichu.Tournament>>}
    */
   TichuTournamentService.prototype.editTournament = function editTournament(id, request) {
     var path = "/api/tournaments/" + encodeURIComponent(id);
     var $q = this._$q;
     var $log = this._$log;
+    var $http = this._$http;
     var self = this;
     return this._$http({
       method: 'PUT',
       url: path,
       data: request
     }).then(function onSuccess() {
-      return self._saveRequestedTournament(id, request);
+      return self._getPairdIdsAndSaveTournament(id, request);
     }, ServiceHelpers.handleErrorIn($q, $log, path));
   };
+
+  /**
+   * Gets pair id codes from the server and returns a promise for the resulting Tournament object.
+   * @param {string} id
+   * @param {tichu.TournamentRequest} request
+   * @returns {angular.$q.Promise<tichu.Tournament>}
+   */
+  TichuTournamentService.prototype._getPairdIdsAndSaveTournament = function _getPairdIdsAndSaveTournament(id, request) {
+    var ids_path = "/api/tournaments/" + encodeURIComponent(id) + "/pairids";
+    var $q = this._$q;
+    var $log = this._$log;
+    var $http = this._$http;
+    var self = this;
+    return $http({
+      method: 'GET',
+      url: ids_path
+    }).then(function onSuccess(response) {
+      ServiceHelpers.assertType('received player ids', response.data, 'object', false);
+      var pair_ids = ServiceHelpers.assertType('player ids', response.data['pair_ids'], 'array', false);
+      return self._saveRequestedTournament(id, request, pair_ids);
+    }, ServiceHelpers.handleErrorIn($q, $log, ids_path));
+  }
 
   /**
    * Converts the given tournament request into an actual, cached tournament.

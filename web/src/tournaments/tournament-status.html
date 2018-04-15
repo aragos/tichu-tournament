@@ -17,6 +17,7 @@
             <md-list style="padding-bottom: 0" class="md-dense"
                      ng-if="round.scoredHands.length != 0">
                 <md-list-item ng-repeat="hand in round.scoredHands"
+                              ng-click="tournamentStatusController.editHand(hand.handNo, hand.northSouthPair, hand.eastWestPair)"
                               ng-style="{'background-color': '#eeeeee'}">
                     <md-icon class="md-avatar-icon"
                              md-font-set="material-icons"
@@ -34,7 +35,8 @@
             </md-card-header>
             <md-list style="padding-bottom: 0" class="md-dense"
                      ng-if="round.unscoredHands.length != 0">
-                <md-list-item ng-repeat="hand in round.unscoredHands">
+                <md-list-item ng-repeat="hand in round.unscoredHands"
+                              ng-click="tournamentStatusController.editHand(hand.handNo, hand.northSouthPair, hand.eastWestPair)">
                     <md-icon class="md-avatar-icon"
                              md-font-set="material-icons"
                              style="margin-left: 0">assignment</md-icon>
