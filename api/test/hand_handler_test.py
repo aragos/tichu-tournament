@@ -92,7 +92,79 @@ class AppTest(unittest.TestCase):
     self.AddBasicHand(id)
     response = self.testapp.head("/api/tournaments/{}/hands/1/2/3".format(id))
     self.assertEqual(response.status_int, 200)
+   
+  def testGet_bad_id(self):
+    self.loginUser()
+    id = self.AddBasicTournament()
+    self.AddBasicHand(id)
+    self.logoutUser()
+    response = self.testapp.head("/api/tournaments/{}a/hands/1/2/3".format(id),
+                                 expect_errors=True)
+    self.assertEqual(response.status_int, 404)
+
+  def testGet_bad_parameters(self):
+    self.loginUser()
+    id = self.AddBasicTournament()
+    self.AddBasicHand(id)
+    self.logoutUser()
+    response = self.testapp.get("/api/tournaments/{}/hands/1a/2/3".format(id),
+                                 expect_errors=True)
+    self.assertEqual(response.status_int, 404)
+    response = self.testapp.get("/api/tournaments/{}/hands/0/2/3".format(id),
+                                 expect_errors=True)
+    self.assertEqual(response.status_int, 404)
+    response = self.testapp.get("/api/tournaments/{}/hands/25/2/3".format(id),
+                                 expect_errors=True)
+    self.assertEqual(response.status_int, 404)
+    response = self.testapp.get("/api/tournaments/{}/hands/1/2a/3".format(id),
+                                 expect_errors=True)
+    self.assertEqual(response.status_int, 404)
+    response = self.testapp.get("/api/tournaments/{}/hands/1/0/3".format(id),
+                                 expect_errors=True)
+    self.assertEqual(response.status_int, 404)
+    response = self.testapp.get("/api/tournaments/{}/hands/1/9/3".format(id),
+                                 expect_errors=True)
+    self.assertEqual(response.status_int, 404)
+    response = self.testapp.get("/api/tournaments/{}/hands/1/2/3a".format(id),
+                                 expect_errors=True)
+    self.assertEqual(response.status_int, 404)
+    response = self.testapp.get("/api/tournaments/{}/hands/1/2/0".format(id),
+                                 expect_errors=True)
+    self.assertEqual(response.status_int, 404)
+    response = self.testapp.get("/api/tournaments/{}/hands/1/2/9".format(id),
+                                 expect_errors=True)
+    self.assertEqual(response.status_int, 404) 
     
+  def testGet_not_present(self):
+    self.loginUser()
+    id = self.AddBasicTournament()
+    self.AddBasicHand(id)
+    self.logoutUser()
+    response = self.testapp.get("/api/tournaments/{}/hands/2/2/3".format(id))
+    self.assertEqual(response.status_int, 204)
+    self.assertEqual(response.body, '')
+
+  def testGet_deleted(self):
+    self.loginUser()
+    id = self.AddBasicTournament()
+    self.AddBasicHand(id)
+    response = self.testapp.delete("/api/tournaments/{}/hands/1/2/3".format(id))
+    response = self.testapp.get("/api/tournaments/{}/hands/1/2/3".format(id))
+    self.assertEqual(response.status_int, 204)
+    self.assertEqual(response.body, '')
+    self.AddBasicHand(id)
+    response = self.testapp.get("/api/tournaments/{}/hands/1/2/3".format(id))
+    self.assertEqual(response.status_int, 200)
+
+  def testGet(self):
+    self.loginUser()
+    id = self.AddBasicTournament()
+    self.AddBasicHand(id)
+    response = self.testapp.get("/api/tournaments/{}/hands/1/2/3".format(id))
+    self.assertEqual(response.status_int, 200)
+    response_dict = json.loads(response.body)
+    self.assertEqual(75, response_dict['ns_score'])
+    self.assertEqual(25, response_dict['ew_score'])
 
   def testPut_bad_id(self):
     self.loginUser()

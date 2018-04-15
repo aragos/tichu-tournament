@@ -503,6 +503,52 @@ Checks if the given hand was already scored.
 * **404**: The tournament with the given ID does not exist, or the board/pair numbers are invalid.
 * **500**: Server failed to determine the hand's/tournament's existence (or lack thereof).
 
+### Get information on a possibly played hand (GET /api/tournaments/:id/hands/:board_no/:ns_pair/:ew_pair)
+
+#### Request
+
+* `id`: String. An opaque, unique ID returned from `GET /tournaments` or `POST /tournaments`.
+* `board_no`: Integer. The board number for this hand. Must be between 1 and `no_boards`,
+  inclusive.
+* `ns_pair`: Integer. The number of the north-south pair. Must be between 1 and `no_pairs`,
+  inclusive.
+* `ew_pair`: Integer. The number of the east-west pair. Must be between 1 and `no_pairs`,
+  inclusive.
+
+#### Status codes
+
+* **200**: The hand has been scored and results were retrieved.
+* **204**: The hand does not exist or was deleted, but the tournament does.
+* **404**: The tournament with the given ID does not exist, or the board/pair numbers are invalid.
+* **500**: Server failed to retrieve the hand or tournaments.
+
+#### Response
+
+<!-- time 4 code -->
+    {
+        "calls": {
+            "north": "T",
+            "east": "GT",
+            "west": "",
+            "south": ""
+        },
+        "ns_score": 150,
+        "ew_score": -150,
+        "notes": "hahahahahaha what a fool"
+    }
+
+
+* `calls`: Object. Calls made by players. May have entries for `north`, `east`, `west`, `south`.
+  Each entry may be `"T"`, indicating a call of Tichu, `"GT"`, indicating a call of Grand Tichu,
+  or `""`, indicating no call. If an entry is absent, it is assumed to mean no call. Required.
+* `ns_score`: Integer or string. The score of the north-south pair, including Tichu bonuses and
+  penalties. May also be the string "AVG", "AVG+", "AVG++", "AVG-", or "AVG--". Required.
+* `ew_score`: Integer or string. The score of the east-west pair, including Tichu bonuses and
+  penalties. May also be the string "AVG", "AVG+", "AVG++", "AVG-", or "AVG--". Required.
+* `notes`: String. Any additional notes about the hand added by the scorer or the director.
+  Required.
+
+
 ### Submit score for hand (PUT /api/tournaments/:id/hands/:board_no/:ns_pair/:ew_pair)
 
 **Requires that the user is authenticated and owns this tournament or the request

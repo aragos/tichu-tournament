@@ -50,6 +50,40 @@ class HandHandler(GenericHandler):
       return 
     self.response.set_status(204)
 
+  def get(self, id, board_no, ns_pair, ew_pair):
+    ''' Gets the information about a particular hand in the tournament.
+
+    Args:
+      id: String. Tournament id. 
+      board_no: Integer. Hand number.
+      ns_pair: Integer. Pair number of team playing North/South.
+      ew_pair: Integer. Pair number of team playing East/West.
+
+    See api for request and response documentation.
+    '''
+    tourney = GetTourneyWithIdAndMaybeReturnStatus(self.response, id)
+    if not tourney:
+      return
+
+    if not CheckValidHandPlayersCombinationAndMaybeSetStatus(
+        self.response, tourney, board_no, ns_pair, ew_pair):
+      return
+
+    hand_score = HandScore.GetByHandParams(tourney, board_no, ns_pair, ew_pair)
+    if hand_score:
+      response = {
+            'calls' : hand_score.calls_dict(),
+            'ns_score' : hand_score.get_ns_score(),
+            'ew_score' : hand_score.get_ew_score(),
+            'notes' : hand_score.notes,
+      }
+      self.response.headers['Content-Type'] = 'application/json'
+      self.response.set_status(200)
+      self.response.out.write(json.dumps(response, indent=2))
+    else:
+      self.response.set_status(204)
+
+
   def put(self, id, board_no, ns_pair, ew_pair):
     ''' Add a scored hand to the tournament with this id. 
 
