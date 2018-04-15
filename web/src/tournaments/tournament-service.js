@@ -241,9 +241,8 @@
    * @returns {tichu.TournamentStatus}
    */
   TichuTournamentService.prototype._parseTournamentStatus = function _parseTournamentStatus(id, data) {
-   var tournamentStatus = this._tournamentStore.getOrCreateTournamentStatus(id);
+    var tournamentStatus = this._tournamentStore.getOrCreateTournamentStatus(id);
     tournamentStatus.roundStatus = data["rounds"].map(this._parseRoundStatus.bind(this));
-    tournamentStatus = this._tournamentStore.getOrCreateTournamentStatus(id);
     return tournamentStatus;
   }
   

@@ -50,6 +50,25 @@ describe("tournament-store module", function() {
         expect(pairB).not.toBe(pairA);
       });
     });
+    
+    describe("getOrCreateTournamentStatus", function() {
+      it("creates a new object if one wasn't in the cache", function() {
+        expect(store.hasTournamentStatus("12345")).toBe(false);
+        var tournamentStatus = store.getOrCreateTournamentStatus("12345");
+        expect(store.hasTournamentStatus("12345")).toBe(true);
+      });
+
+      it("stores the object and returns it on subsequent calls", function() {
+        var tournamentStatus = store.getOrCreateTournamentStatus("9999");
+        expect(store.getOrCreateTournamentStatus("9999")).toBe(tournamentStatus);
+      });
+
+      it("returns different objects for different IDs", function() {
+        var tournamentStatusA = store.getOrCreateTournamentStatus("6969");
+        var tournamentStatusB = store.getOrCreateTournamentStatus("9696");
+        expect(tournamentStatusA).not.toBe(tournamentStatusB);
+      });
+    });
 
     describe("getOrCreateTournament", function() {
       it("creates a new object if one wasn't in the cache", function() {

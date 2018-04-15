@@ -395,6 +395,11 @@ describe("movement-service module", function() {
     });
 
     describe("recordScore", function() {
+      var tournamentService;
+      beforeEach(inject(function (TichuTournamentService) {
+        tournamentService = TichuTournamentService;
+        runPromise = promiseHelper($rootScope, $httpBackend);
+      }));
       it("uses the first four parameters as tournament ID, pair numbers, and board", function() {
         $httpBackend.expectPUT('/api/tournaments/999000/hands/6/2/4')
             .respond(200, "");
@@ -512,7 +517,65 @@ describe("movement-service module", function() {
 
         expect(movement.rounds[0].hands[0].score).toBe(handScore);
       });
+      
+      it("updates the tournaments status in the store on success", function() {
+        $httpBackend.expectGET('/api/tournaments/6969/handStatus')
+            .respond(200, {
+              "rounds": [{
+                "round": 2,
+                "scored_hands": [],
+                "unscored_hands": [{
+                     "hand" : 8,
+                     "ew_pair" : 9,
+                     "ns_pair" : 6,
+                     "table" : 12,
+                 }]}]
+            });
+        var tournamentStatus = runPromise(tournamentService.getTournamentStatus("6969"),
+                                          {flushHttp: true, expectSuccess:true})
 
+        $httpBackend.expectPUT('/api/tournaments/6969/hands/8/6/9').respond(200, "");
+
+        var handScore = new tichu.HandScore();
+        var result = runPromise(
+            service.recordScore("6969", 6, 9, 8, handScore),
+            {flushHttp: true, expectSuccess: true});
+        expect(tournamentStatus.roundStatus[0].scoredHands.length).toBe(1);
+        expect(tournamentStatus.roundStatus[0].unscoredHands.length).toBe(0);
+        expect(tournamentStatus.roundStatus[0].scoredHands[0].northSouthPair).toBe(6);
+        expect(tournamentStatus.roundStatus[0].scoredHands[0].eastWestPair).toBe(9);
+        expect(tournamentStatus.roundStatus[0].scoredHands[0].tableNo).toBe(12);
+      });
+      
+      it("updates the tournaments status in the store on success, handles already scored hand", function() {
+        $httpBackend.expectGET('/api/tournaments/6969/handStatus')
+            .respond(200, {
+              "rounds": [{
+                "round": 2,
+                "unscored_hands": [],
+                "scored_hands": [{
+                     "hand" : 8,
+                     "ew_pair" : 9,
+                     "ns_pair" : 6,
+                     "table" : 12,
+                 }]}]
+            });
+        var tournamentStatus = runPromise(tournamentService.getTournamentStatus("6969"),
+                                          {flushHttp: true, expectSuccess:true})
+
+        $httpBackend.expectPUT('/api/tournaments/6969/hands/8/6/9').respond(200, "");
+
+        var handScore = new tichu.HandScore();
+        var result = runPromise(
+            service.recordScore("6969", 6, 9, 8, handScore),
+            {flushHttp: true, expectSuccess: true});
+        expect(tournamentStatus.roundStatus[0].scoredHands.length).toBe(1);
+        expect(tournamentStatus.roundStatus[0].unscoredHands.length).toBe(0);
+        expect(tournamentStatus.roundStatus[0].scoredHands[0].northSouthPair).toBe(6);
+        expect(tournamentStatus.roundStatus[0].scoredHands[0].eastWestPair).toBe(9);
+        expect(tournamentStatus.roundStatus[0].scoredHands[0].tableNo).toBe(12);
+      });
+      
       it("does not set the score on the shared hand in associated movements to the input on failure", function() {
         $httpBackend.expectGET('/api/tournaments/6969/movement/9')
             .respond(200, {
@@ -549,6 +612,11 @@ describe("movement-service module", function() {
     });
 
     describe("clearScore", function() {
+      var tournamentService;
+      beforeEach(inject(function (TichuTournamentService) {
+        tournamentService = TichuTournamentService;
+        runPromise = promiseHelper($rootScope, $httpBackend);
+      }));
       it("uses the first four parameters as tournament ID, pair numbers, and board", function() {
         $httpBackend.expectDELETE('/api/tournaments/999000/hands/6/2/4')
             .respond(200, "");
@@ -676,6 +744,33 @@ describe("movement-service module", function() {
             {flushHttp: true, expectFailure: true});
 
         expect(movement.rounds[0].hands[0].score).toBe(originalScore);
+      });
+      
+      it("updates the deleted tournaments status in the store on success", function() {
+        $httpBackend.expectGET('/api/tournaments/6969/handStatus')
+            .respond(200, {
+              "rounds": [{
+                "round": 2,
+                "unscored_hands": [],
+                "scored_hands": [{
+                     "hand" : 8,
+                     "ew_pair" : 9,
+                     "ns_pair" : 6,
+                     "table" : 12,
+                 }]}]
+            });
+        var tournamentStatus = runPromise(tournamentService.getTournamentStatus("6969"),
+                                          {flushHttp: true, expectSuccess:true})
+
+        $httpBackend.expectDELETE('/api/tournaments/6969/hands/8/6/9').respond(200, "");
+
+        var result = runPromise(service.clearScore("6969", 6, 9, 8),
+                                {flushHttp: true, expectSuccess: true});
+        expect(tournamentStatus.roundStatus[0].unscoredHands.length).toBe(1);
+        expect(tournamentStatus.roundStatus[0].scoredHands.length).toBe(0);
+        expect(tournamentStatus.roundStatus[0].unscoredHands[0].northSouthPair).toBe(6);
+        expect(tournamentStatus.roundStatus[0].unscoredHands[0].eastWestPair).toBe(9);
+        expect(tournamentStatus.roundStatus[0].unscoredHands[0].tableNo).toBe(12);
       });
     });
   });

@@ -70,6 +70,12 @@ describe("ServiceHelpers", function() {
       correctExamples: [undefined],
       incorrectExamples: [true, 1, [], {}, null, 'abc']
     }));
+    
+    describe('string|number', typeAssertionSuite({
+      type: 'string|number',
+      correctExamples: [1, 'hello', '', 1.5, -2],
+      incorrectExamples: [NaN, true, [], {}, null, undefined]
+    }));
 
     /**
      * Generates a test suite for assertType.

@@ -135,7 +135,7 @@
     }).then(function onSuccess() {
       self._movementStore.getOrCreateHand(tournamentId, nsPair, ewPair, handNo).score = score;
       if (self._tournamentStore.hasTournamentStatus(tournamentId)) {
-        roundStatus = self._tournamentStore.getOrCreateTournamentStatus(tournamentId).roundStatus;
+        var roundStatus = self._tournamentStore.getOrCreateTournamentStatus(tournamentId).roundStatus;
         roundStatus.forEach(function(round){
           self._changeHandStatus(handNo, nsPair, ewPair, round.unscoredHands, round.scoredHands);
         });
@@ -166,7 +166,7 @@
     }).then(function onSuccess() {
       self._movementStore.getOrCreateHand(tournamentId, nsPair, ewPair, handNo).score = null;
       if (self._tournamentStore.hasTournamentStatus(tournamentId)) {
-        roundStatus = self._tournamentStore.getOrCreateTournamentStatus(tournamentId).roundStatus;
+        var roundStatus = self._tournamentStore.getOrCreateTournamentStatus(tournamentId).roundStatus;
         roundStatus.forEach(function(round) {
           self._changeHandStatus(handNo, nsPair, ewPair, round.scoredHands, round.unscoredHands);
         });
@@ -330,18 +330,27 @@
    * @param {number} handNo The number of the han to move.
    * @param {number} nsPair The number of the pair in North/South position of the hand to move.
    * @param {number} ewPair The number of the pair in East/West position of the hand to move.
-   * @param {tichu.HandIdentifier[]} from_hands Array of hands the hand should be removed from.
+   * @param {tichu.HandIdentifier[]} from_hands Array of hands the hand should be removed from. Expected sorted.
    * @param {tichu.HandIdentifier[]} to_hands Array of hands the hand should added to.
    * @private
    */
   TichuMovementService.prototype._changeHandStatus = function _changeHandStatus(handNo, nsPair, ewPair, from_hands, to_hands) {
-    var found = from_hands.find(function(handId) {
-      return handId.handNo == handNo &&
-             handId.northSouthPair == nsPair &&
-             handId.eastWestPair == ewPair;
-      });
-    if (found !== undefined) {
-      to_hands.push(found);
+    var found = -1;
+    // Find is undefined for testing. I have to do manual search.
+    for (var i = 0; i < from_hands.length; i++) {
+      var handId = from_hands[i];
+      if (handId.handNo == handNo &&
+          handId.northSouthPair == nsPair &&
+          handId.eastWestPair == ewPair) {
+        found = i;
+        break;
+      } else if (handId.handNo > handNo) {
+        break;
+      }
+    }
+    
+    if (found > -1) {
+      to_hands.push(from_hands[found]);
       to_hands.sort(function(handId1, handId2) {
         var primary = handId1.handNo - handId2.handNo;
         if (primary == 0) {
@@ -349,16 +358,7 @@
         }
         return primary;
       });
-      var j = 0;
-      from_hands.forEach(function(handId, i) {
-        if (handId.handNo != handNo ||
-            handId.northSouthPair != nsPair ||
-            handId.eastWestPair != ewPair) {
-          if (i !== j) from_hands[j] = handId;
-          j++;
-        }
-      });
-      from_hands.length = j
+      from_hands.splice(found, 1);
     }
   }
 
