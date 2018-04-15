@@ -4,7 +4,6 @@ import json
 from generic_handler import GenericHandler
 from google.appengine.api import users
 from google.appengine.ext import ndb
-from handler_utils import BuildMovementAndMaybeSetStatus
 from handler_utils import CheckUserOwnsTournamentAndMaybeReturnStatus
 from handler_utils import GetTourneyWithIdAndMaybeReturnStatus
 from handler_utils import is_int

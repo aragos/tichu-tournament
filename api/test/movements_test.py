@@ -15,6 +15,15 @@ class MovementTest(unittest.TestCase):
     self.checkPrepareHands(movement, 10, 24)
     self.checkNumRounds(movement, 10, 7)
 
+  def testConsistentOpponents_ten_three_legacy(self):
+    movement = movements.Movement.CreateMovement(10, 3, 7, 1)
+    self.checkConsistentSchedule(movement, 10, 3)
+    self.checkConsistentOpponents(movement, 10, 3)
+    self.checkHandsPlayedRightNumberOfTimes(movement, 10, 3)
+    self.checkTableConsistency(movement, 10, 3)
+    self.checkPrepareHands(movement, 10, 24)
+    self.checkNumRounds(movement, 10, 7)
+
   def testConsistentOpponents_ten_two(self):
     movement = movements.Movement.CreateMovement(10, 2, 7)
     self.checkConsistentSchedule(movement, 10, 2)
@@ -79,6 +88,15 @@ class MovementTest(unittest.TestCase):
     self.checkNumRounds(movement, 8, 6)
  
   def testConsistentOpponents_seven_two_seven(self):
+    movement = movements.Movement.CreateMovement(7, 2, 7, 1)
+    self.checkConsistentSchedule(movement, 7, 2)
+    self.checkConsistentOpponents(movement, 7, 2)
+    self.checkHandsPlayedRightNumberOfTimes(movement, 7, 2)
+    self.checkTableConsistency(movement, 7, 2)
+    self.checkPrepareHands(movement, 7, 14)
+    self.checkNumRounds(movement, 7, 7)
+
+  def testConsistentOpponents_seven_two_seven_legacy(self):
     movement = movements.Movement.CreateMovement(7, 2, 7)
     self.checkConsistentSchedule(movement, 7, 2)
     self.checkConsistentOpponents(movement, 7, 2)
@@ -113,6 +131,33 @@ class MovementTest(unittest.TestCase):
     self.checkTableConsistency(movement, 11, 3)
     self.checkPrepareHands(movement, 11, 21)
     self.checkNumRounds(movement, 11, 7)
+    
+  def testConsistentOpponents_twelve_three_five(self):
+    movement = movements.Movement.CreateMovement(12, 3, 5)
+    self.checkConsistentSchedule(movement, 12, 3)
+    self.checkConsistentOpponents(movement, 12, 3)
+    self.checkHandsPlayedRightNumberOfTimes(movement, 12, 3)
+    self.checkTableConsistency(movement, 12, 3)
+    self.checkPrepareHands(movement, 12, 18)
+    self.checkNumRounds(movement, 12, 5)
+    
+  def testConsistentOpponents_twelve_three_six(self):
+    movement = movements.Movement.CreateMovement(12, 3, 6)
+    self.checkConsistentSchedule(movement, 12, 3)
+    self.checkConsistentOpponents(movement, 12, 3)
+    self.checkHandsPlayedRightNumberOfTimes(movement, 12, 3)
+    self.checkTableConsistency(movement, 12, 3)
+    self.checkPrepareHands(movement, 12, 21)
+    self.checkNumRounds(movement, 12, 6)
+
+  def testConsistentOpponents_twelve_two_six(self):
+    movement = movements.Movement.CreateMovement(12, 2, 6)
+    self.checkConsistentSchedule(movement, 12, 2)
+    self.checkConsistentOpponents(movement, 12, 2)
+    self.checkHandsPlayedRightNumberOfTimes(movement, 12, 2)
+    self.checkTableConsistency(movement, 12, 2)
+    self.checkPrepareHands(movement, 12, 14)
+    self.checkNumRounds(movement, 12, 6)
 
   def testConsistentOpponents_eleven_two_seven_max_six(self):
     movement = movements.Movement.CreateMovement(11, 2, 6)
@@ -175,8 +220,8 @@ class MovementTest(unittest.TestCase):
         round_no = round.round
         self.assertIsNotNone(round_no)
         self.assertFalse(round_no in rounds_played,
-                         msg="Round {} for pair {} is played more than " + 
-                             "once".format(round_no, i + 1))
+                         msg="Round {} for pair {} is played more than once".format(
+                             round_no, i + 1))
         rounds_played.add(round_no)
 
         hands = round.hands

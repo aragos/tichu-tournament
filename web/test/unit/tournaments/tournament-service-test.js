@@ -133,7 +133,8 @@ describe("tournament-service module", function() {
                 {"pair_no": 1, "name": "Player 1.2", "email": "player1-2@email.example"},
                 {"pair_no": 5, "name": "Player 5.1", "email": "player5-1@email.example"}
               ],
-              "hands": []
+              "hands": [],
+              pair_ids: ["ABCD", "BCDE", "CDEF", "DEFG", "EFGH", "FGHI", "GHIJ", "HIJK"]
             });
 
         var tournament = runPromise(service.getTournament("123456"), {
@@ -178,7 +179,8 @@ describe("tournament-service module", function() {
                 "ns_score": 150,
                 "ew_score": -150,
                 "notes": "hahahahahaha what a fool"
-              }]
+              }],
+              pair_ids: ["ABCD", "BCDE", "CDEF", "DEFG", "EFGH", "FGHI", "GHIJ", "HIJK"]
             });
 
         var tournament = runPromise(service.getTournament("123456"), {
@@ -210,7 +212,8 @@ describe("tournament-service module", function() {
                 {"pair_no": 1, "name": "Player 1.2", "email": "player1-2@email.example"},
                 {"pair_no": 5, "name": "Player 5.1", "email": "player5-1@email.example"}
               ],
-              "hands": []
+              "hands": [],
+              pair_ids: ["ABCD", "BCDE", "CDEF", "DEFG", "EFGH", "FGHI", "GHIJ", "HIJK"]
             });
 
         var firstTournament = runPromise(service.getTournament("123456"), {expectSuccess: true, flushHttp: true});
@@ -265,7 +268,8 @@ describe("tournament-service module", function() {
                 {"pair_no": 1, "name": "Player 1.2", "email": "player1-2@email.example"},
                 {"pair_no": 5, "name": "Player 5.1", "email": "player5-1@email.example"}
               ],
-              "hands": []
+              "hands": [],
+              pair_ids: ["ABCD", "BCDE", "CDEF", "DEFG", "EFGH", "FGHI", "GHIJ", "HIJK"]
             });
 
         runPromise(service.getTournament("123456"), {expectSuccess: true, flushHttp: true});
@@ -282,7 +286,8 @@ describe("tournament-service module", function() {
                 {"pair_no": 1, "name": "Player 1.2", "email": "player1-2@email.example"},
                 {"pair_no": 5, "name": "Player 5.1", "email": "player5-1@email.example"}
               ],
-              "hands": []
+              "hands": [],
+              pair_ids: ["ABCD", "BCDE", "CDEF", "DEFG", "EFGH", "FGHI", "GHIJ", "HIJK"]
             });
 
         var firstPromise = service.getTournament("123456");
@@ -309,7 +314,8 @@ describe("tournament-service module", function() {
                 {"pair_no": 1, "name": "Player 1.2", "email": "player1-2@email.example"},
                 {"pair_no": 5, "name": "Player 5.1", "email": "player5-1@email.example"}
               ],
-              "hands": []
+              "hands": [],
+              pair_ids: ["ABCD", "BCDE", "CDEF", "DEFG", "EFGH", "FGHI", "GHIJ", "HIJK"]
             });
 
         var firstTournament = runPromise(service.getTournament("123456"), {
@@ -327,7 +333,8 @@ describe("tournament-service module", function() {
                 {"pair_no": 1, "name": "Player 1.2", "email": "player1-2@email.example"},
                 {"pair_no": 5, "name": "Player 5.1", "email": "player5-1@email.example"}
               ],
-              "hands": []
+              "hands": [],
+              pair_ids: ["ABCD", "BCDE", "CDEF", "DEFG", "EFGH", "FGHI", "GHIJ", "HIJK"]
             });
 
         var secondTournament = runPromise(service.getTournament("123456", true), {
@@ -350,7 +357,8 @@ describe("tournament-service module", function() {
                 {"pair_no": 1, "name": "Player 1.2", "email": "player1-2@email.example"},
                 {"pair_no": 5, "name": "Player 5.1", "email": "player5-1@email.example"}
               ],
-              "hands": []
+              "hands": [],
+              pair_ids: ["ABCD", "BCDE", "CDEF", "DEFG", "EFGH", "FGHI", "GHIJ", "HIJK"]
             });
 
         var firstPromise = service.getTournament("123456");
@@ -366,7 +374,7 @@ describe("tournament-service module", function() {
         expect(secondTournament).toBe(firstTournament);
       });
 
-      it("updates its title when the tournament list is downloaded", function () {
+      it("updates its title when the tournament list is downloaded", function () {    
         $httpBackend.expectGET('/api/tournaments/123456')
             .respond(200, {
               "name": "My Cool Tournament",
@@ -377,7 +385,8 @@ describe("tournament-service module", function() {
                 {"pair_no": 1, "name": "Player 1.2", "email": "player1-2@email.example"},
                 {"pair_no": 5, "name": "Player 5.1", "email": "player5-1@email.example"}
               ],
-              "hands": []
+              "hands": [],
+              pair_ids: ["ABCD", "BCDE", "CDEF", "DEFG", "EFGH", "FGHI", "GHIJ", "HIJK"]
             });
         var tournament = runPromise(service.getTournament("123456"), {expectSuccess: true, flushHttp: true});
 
@@ -411,7 +420,8 @@ describe("tournament-service module", function() {
                 {"pair_no": 1, "name": "Player 1.2", "email": "player1-2@email.example"},
                 {"pair_no": 5, "name": "Player 5.1", "email": "player5-1@email.example"}
               ],
-              "hands": []
+              "hands": [],
+              pair_ids: ["ABCD", "BCDE", "CDEF", "DEFG", "EFGH", "FGHI", "GHIJ", "HIJK"]
             });
         runPromise(service.getTournament("123456"), {expectSuccess: true, flushHttp: true});
 
@@ -451,6 +461,10 @@ describe("tournament-service module", function() {
       it("returns a Tournament object representing the created tournament on success", function() {
         $httpBackend.expectPOST("/api/tournaments").respond(200, {
           "id": "0912348"
+        });
+        $httpBackend.expectGET('/api/tournaments/0912348/pairids')
+            .respond(200, {
+              "pair_ids": ["ABCD", "BCDE", "CDEF", "DEFG", "EFGH", "FGHI", "GHIJ", "HIJK"]
         });
 
         var tournament = runPromise(service.createTournament(makeTournamentRequest({
@@ -517,7 +531,11 @@ describe("tournament-service module", function() {
         $httpBackend.expectPOST("/api/tournaments").respond(200, {
           "id": "231"
         });
-
+        $httpBackend.expectGET('/api/tournaments/231/pairids')
+            .respond(200, {
+              "pair_ids": ["ABCD", "BCDE", "CDEF", "DEFG", "EFGH", "FGHI", "GHIJ", "HIJK"]
+        });
+    
         var tournament = runPromise(service.createTournament(makeTournamentRequest({
           name: "Tichu of the Damned"
         })), {expectSuccess: true, flushHttp: true});
@@ -528,6 +546,10 @@ describe("tournament-service module", function() {
       it("does not create a tournament list cache if there was not one", function() {
         $httpBackend.expectPOST("/api/tournaments").respond(200, {
           "id": "231"
+        });
+        $httpBackend.expectGET('/api/tournaments/231/pairids')
+            .respond(200, {
+              "pair_ids": ["ABCD", "BCDE", "CDEF", "DEFG", "EFGH", "FGHI", "GHIJ", "HIJK"]
         });
 
         var tournament = runPromise(service.createTournament(makeTournamentRequest({
@@ -553,6 +575,10 @@ describe("tournament-service module", function() {
       it("puts the tournament in the cache for getTournament on success", function() {
         $httpBackend.expectPOST("/api/tournaments").respond(200, {
           "id": "231"
+        });
+        $httpBackend.expectGET('/api/tournaments/231/pairids')
+            .respond(200, {
+              "pair_ids": ["ABCD", "BCDE", "CDEF", "DEFG", "EFGH", "FGHI", "GHIJ", "HIJK"]
         });
 
         var createdTournament = runPromise(service.createTournament(makeTournamentRequest({
@@ -603,7 +629,8 @@ describe("tournament-service module", function() {
             pair_no: 3,
             name: "Alucard",
             email: "noone@castlevania.example"
-          }]
+          }],
+          pair_ids: ["ABCD", "BCDE", "CDEF", "DEFG", "EFGH", "FGHI"]
         });
 
         var originalTournament = runPromise(service.getTournament("98021"), {
@@ -612,6 +639,10 @@ describe("tournament-service module", function() {
         });
 
         $httpBackend.expectPUT("/api/tournaments/98021").respond(201, "");
+        $httpBackend.expectGET('/api/tournaments/98021/pairids')
+            .respond(200, {
+              "pair_ids": ["ABCD", "BCDE", "CDEF", "DEFG", "EFGH", "FGHI", "GHIJ", "HIJK"]
+            });
 
         var tournament = runPromise(service.editTournament("98021", makeTournamentRequest({
           name: "Tichu of the Damned",
@@ -671,13 +702,17 @@ describe("tournament-service module", function() {
                 {"id": "321", "name": "My Other Tournament"}
               ]
             });
-
+        
         var tournamentList = runPromise(service.getTournaments(), {
           flushHttp: true,
           expectSuccess: true
         });
 
         $httpBackend.expectPUT("/api/tournaments/123").respond(201);
+        $httpBackend.expectGET('/api/tournaments/123/pairids')
+            .respond(200, {
+              "pair_ids": ["ABCD", "BCDE", "CDEF", "DEFG", "EFGH", "FGHI", "GHIJ", "HIJK"]
+            });
 
         runPromise(service.editTournament("123", makeTournamentRequest({
           name: "Tichu of the Damned"

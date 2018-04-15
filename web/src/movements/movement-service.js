@@ -100,7 +100,7 @@
           var rejection = new tichu.RpcError();
           rejection.redirectToLogin = false;
           rejection.error = "Invalid response from server";
-          rejection.detail = "The server sent confusing data for the movement.";
+          rejection.detail = "The server sent confusing data for the movement." + ex;
           return $q.reject(rejection);
         }
       }, ServiceHelpers.handleErrorIn($q, $log, path, true)).finally(function afterResolution() {

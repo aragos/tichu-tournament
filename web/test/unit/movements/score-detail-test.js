@@ -105,8 +105,8 @@ describe("tichu-score-detail module", function () {
       var hand = new tichu.Hand(1, 2, 3);
       var controller = loadController({hand: hand});
 
-      expect(typeof controller.score.northSouthScore).toBe("number");
-      expect(typeof controller.score.eastWestScore).toBe("number");
+      expect(typeof controller.score.northSouthScore).toBe("string");
+      expect(typeof controller.score.eastWestScore).toBe("string");
       expect(typeof controller.score.notes).toBe("string");
       expect(typeof controller.score.calls).toBe("object");
     });
@@ -125,8 +125,8 @@ describe("tichu-score-detail module", function () {
       expectedCalls[tichu.Position.EAST] = tichu.Call.TICHU;
       expect(controller.score).not.toBe(score);
       expect(controller.score).toEqual({
-        northSouthScore: 25,
-        eastWestScore: 175,
+        northSouthScore: "25",
+        eastWestScore: "175",
         calls: expectedCalls,
         notes: "what a call"
       });

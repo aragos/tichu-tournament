@@ -115,13 +115,15 @@ describe("movement-service module", function() {
                       "ew_score": 85
                     }
                   },
-                ]
+                ],
+                "opponent_names": ["Alpha", "Beta"]
               }, {
                 "round": 2,
                 "position": "2N",
                 "opponent": 7,
                 "relay_table": false,
-                "hands": [{"hand_no": 5}]
+                "hands": [{"hand_no": 5}],
+                "opponent_names": []
               }, {
                 "round": 3
               }]
@@ -251,13 +253,15 @@ describe("movement-service module", function() {
                 "position": "1E",
                 "opponent": 9,
                 "relay_table": false,
-                "hands": [{"hand_no": 8}, {"hand_no": 3}]
+                "hands": [{"hand_no": 8}, {"hand_no": 3}],
+                "opponent_names": ["Alpha", "Beta"]
               }, {
                 "round": 2,
                 "position": "2E",
                 "opponent": 7,
                 "relay_table": true,
-                "hands": [{"hand_no": 5}]
+                "hands": [{"hand_no": 5}],
+                "opponent_names": ["Delta", "Gamma"]
               }]
             });
         var firstResult = runPromise(service.getMovement("6969", 6), {flushHttp: true, expectSuccess: true});
@@ -270,13 +274,15 @@ describe("movement-service module", function() {
                 "position": "1N",
                 "opponent": 6,
                 "relay_table": false,
-                "hands": [{"hand_no": 8}, {"hand_no": 3}]
+                "hands": [{"hand_no": 8}, {"hand_no": 3}],
+                "opponent_names": ["Alpha", "Beta"]
               }, {
                 "round": 2,
                 "position": "1N",
                 "opponent": 1,
                 "relay_table": true,
-                "hands": [{"hand_no": 5}]
+                "hands": [{"hand_no": 5}],
+                "opponent_names": ["Delta", "Gamma"]
               }]
             });
         var secondResult = runPromise(service.getMovement("6969", 9), {flushHttp: true, expectSuccess: true});
@@ -301,7 +307,8 @@ describe("movement-service module", function() {
                 "no_boards": 24,
                 "no_pairs": 8,
                 "players": [],
-                "hands": []
+                "hands": [],
+                "pair_ids": ["ABCD", "BCDE", "CDEF", "DEFG", "EFGH", "FGHI", "GHIJ", "HIJK"]
               });
           var tournament = runPromise(tournamentService.getTournament("444"), {flushHttp: true, expectSuccess: true});
           $httpBackend.expectGET('/api/tournaments/444/movement/4')
@@ -329,7 +336,8 @@ describe("movement-service module", function() {
                 "no_boards": 24,
                 "no_pairs": 8,
                 "players": [],
-                "hands": []
+                "hands": [],
+                "pair_ids": ["ABCD", "BCDE", "CDEF", "DEFG", "EFGH", "FGHI", "GHIJ", "HIJK"]
               });
           var tournament = runPromise(tournamentService.getTournament("444"), {flushHttp: true, expectSuccess: true});
           expect(tournament._header).toBe(movement.tournamentId);
@@ -344,7 +352,8 @@ describe("movement-service module", function() {
                 "no_pairs": 1,
                 "players": [
                   {"pair_no": 1, "name": "definitely not the same player", "email": "stillnottelling@duh.example"}],
-                "hands": []
+                "hands": [],
+                "pair_ids": ["ABCD"]
               });
           var tournament = runPromise(tournamentService.getTournament("444"), {flushHttp: true, expectSuccess: true});
           $httpBackend.expectGET('/api/tournaments/444/movement/1')
@@ -374,6 +383,7 @@ describe("movement-service module", function() {
                 "no_pairs": 1,
                 "players": [
                     {"pair_no": 1, "name": "definitely not the same player", "email": "stillnottelling@duh.example"}],
+                "pair_ids": ["ABCD"],
                 "hands": []
               });
           var tournament = runPromise(tournamentService.getTournament("444"), {flushHttp: true, expectSuccess: true});
@@ -483,7 +493,8 @@ describe("movement-service module", function() {
                 "position": "1E",
                 "opponent": 6,
                 "relay_table": false,
-                "hands": [{"hand_no": 8}]
+                "hands": [{"hand_no": 8}],
+                "opponent_names": ["Alpha", "Beta"],
               }]
             });
 
@@ -512,7 +523,8 @@ describe("movement-service module", function() {
                 "position": "1N",
                 "opponent": 6,
                 "relay_table": false,
-                "hands": [{"hand_no": 8}]
+                "hands": [{"hand_no": 8}],
+                "opponent_names": ["Alpha", "Beta"]
               }]
             });
 
@@ -614,8 +626,9 @@ describe("movement-service module", function() {
                 "position": "1E",
                 "opponent": 6,
                 "relay_table": false,
-                "hands": [{"hand_no": 8}]
-              }]
+                "hands": [{"hand_no": 8}],
+                "opponent_names": ["Alpha", "Beta"]
+              }],
             });
 
         var movement = runPromise(
@@ -642,7 +655,8 @@ describe("movement-service module", function() {
                 "position": "1N",
                 "opponent": 6,
                 "relay_table": false,
-                "hands": [{"hand_no": 8}]
+                "hands": [{"hand_no": 8}],
+                "opponent_names": ["Alpha", "Beta"]
               }]
             });
 

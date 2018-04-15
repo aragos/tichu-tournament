@@ -65,9 +65,24 @@
    */
   TichuFakeBackends.prototype.install = function install() {
     this._$httpBackend.whenPOST("/api/tournaments").respond(this._handleCreateTournament.bind(this));
+    this._$httpBackend.whenGET(/\/api\/tournaments\/([^/]+)\/pairids/).respond(this._handleGetPairIds.bind(this));
     this._$httpBackend.whenPUT(/\/api\/tournaments\/([^/]+)/, undefined, undefined, ["id"])
         .respond(this._handleEditTournament.bind(this));
   };
+
+  /**
+   * Handler for returning pair_ids from a tournament. Always returns a set of 8 ids.
+   * @private
+   * @param {string} method
+   * @param {string} url
+   * @param {*} data
+   * @param {object} headers
+   * @param {object} params
+   * @returns {[number,*,object,string]}
+   */
+  TichuFakeBackends.prototype._handleGetPairIds = function getPairIds(method, url, data, headers, params) {
+    return [200, {"pair_ids": ["ABCD", "BCDE", "CDEF", "DEFG", "EFGH", "FGHI", "GHIJ", "HIJK"]}, {}, "No Content"];
+  }
 
   /**
    * Handler for editing a tournament.

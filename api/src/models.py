@@ -20,11 +20,15 @@ class Tournament(ndb.Model):
     name: name of the tournament. Required.
     no_boards: Number of boards in the tournament. Required.
     no_pairs: Number of pairs in the tournament. Required.
+    legacy_version_id: A legacy version of a movement used to make sure old
+                       tournaments do not crash after movement changes. Usually
+                       unset. 
   '''
   owner_id = ndb.StringProperty()
   name = ndb.StringProperty()
   no_boards = ndb.IntegerProperty()
   no_pairs = ndb.IntegerProperty()
+  legacy_version_id = ndb.IntegerProperty()
 
   @classmethod
   def CreateAndPersist(cls, boards, **kwargs):
@@ -51,7 +55,7 @@ class Tournament(ndb.Model):
     ''' Create a new PlayerPair Entity corresponding to each player pair for 
         pair numbers 1 ... no_pairs saving any useful information from 
         player_list and put it into Datastore as a child of this Tournament.
-        Also, the no_players has changed, generates a unique 
+        Also, if the no_players has changed, generates a unique 
         (for this tournament) id associated with each pair.
 
     Args:
@@ -72,27 +76,28 @@ class Tournament(ndb.Model):
 
     player_list = PlayerPair.query(ancestor=self.key).fetch()
 
+    old_no_pairs = len(player_list)
     # If the number of players doesn't change, we just override some fields
     # in existing pairs. Otherwise, we delete existing pairs and create new 
     # ones.
-    override_existing = len(player_list) == no_pairs
-    if not override_existing:
-      random_ids = self._RandomId(no_pairs)
-      ndb.delete_multi([p.key for p in player_list])
-    else:
-      player_list.sort(key = lambda pp : pp.pair_no)
+    if (no_pairs > old_no_pairs):
+      random_ids = self._RandomId(no_pairs - old_no_pairs)
+    elif (no_pairs < old_no_pairs):
+      ndb.delete_multi([p.key for p in player_list if p.pair_no > no_pairs])
+
+    player_list.sort(key = lambda pp : pp.pair_no)
     
     # The create a PlayerPair and put it into Datastore for each possible
     # number.
     for i in range(1, no_pairs + 1):
       pair_members = pair_dict.get(i) 
       str_pair_members = json.dumps(pair_members) if pair_members else ''
-      if override_existing:
+      if i <= old_no_pairs:
           player_pair = player_list[i-1]
           player_pair.players = str_pair_members
       else:
         player_pair = PlayerPair(players=str_pair_members,
-                                 pair_no=i, id=random_ids[i-1],
+                                 pair_no=i, id=random_ids[i-1-old_no_pairs],
                                  parent=self.key)
       player_pair.key = PlayerPair.CreateKey(self, i)
       player_pair.put()
@@ -152,9 +157,12 @@ class Tournament(ndb.Model):
     ret = []
     for i in range(num_ids):
       id = None
-      while (not id) or (id in seen):
+      player_pairs = []
+      while (not id) or (id in seen) or player_pairs:
         id = ''.join(
             random.choice('ABCDEFGHIJKLMNOPQRSTUVWXYZ') for j in range(4))
+        player_pairs = PlayerPair._query(ndb.GenericProperty('id') == id).fetch(
+            keys_only=True, limit=1)
       seen.add(id)
       ret.append(id)
     return ret

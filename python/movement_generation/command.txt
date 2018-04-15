@@ -1,0 +1,4 @@
+solve;
+display Comparison;
+display NumComparisons;
+display AbsolutePosition;

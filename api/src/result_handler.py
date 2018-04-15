@@ -29,7 +29,8 @@ class CompleteScoringHandler(GenericHandler):
       return
     
     movement = BuildMovementAndMaybeSetStatus(
-        self.response, tourney.no_pairs, tourney.no_boards)
+        self.response, tourney.no_pairs, tourney.no_boards,
+        tourney.legacy_version_id)
     if not movement:
       return
     

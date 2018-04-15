@@ -2,6 +2,7 @@ import json
 import unittest
 import webtest
 import os
+import test_utils
 
 from api.src import main
 from google.appengine.ext import ndb
@@ -83,7 +84,7 @@ class AppTest(unittest.TestCase):
                                      params)
     # Team 2 is N team 7 is E. Playing hand 22 in Round 2.
     params = {'calls': {}, 'ns_score': 100, 'ew_score': 0}
-    response = self.testapp.put_json("/api/tournaments/{}/hands/22/2/7".format(id),
+    response = self.testapp.put_json("/api/tournaments/{}/hands/22/7/2".format(id),
                                      params)
     # Team 2 is N team 3 is E. Playing hand 16 in Round 4.
     params = {'calls': {}, 'ns_score': "avg--", 'ew_score': "avg++"}
@@ -97,9 +98,9 @@ class AppTest(unittest.TestCase):
     
     # Team 5's hand. Add it and then delete it.
     params = {'calls': {}, 'ns_score': 125, 'ew_score': -25}
-    response = self.testapp.put_json("/api/tournaments/{}/hands/1/5/6".format(id),
+    response = self.testapp.put_json("/api/tournaments/{}/hands/1/6/5".format(id),
                                      params)
-    self.testapp.delete("/api/tournaments/{}/hands/1/5/6".format(id))
+    self.testapp.delete("/api/tournaments/{}/hands/1/6/5".format(id))
     
     # Another tournament with same basic parameters. Team two has one different
     # score.
@@ -266,6 +267,169 @@ class AppTest(unittest.TestCase):
                           "Round 1, Tourney 2, Hand 13, Team 2 vs 1")
     self.assertScoresNotPresent(response_dict['movement'],
                                 Set([2, 3, 4, 5, 6, 7]), "Team 2 Tourney 2")
+
+  def testGetMovement_scores_legacy(self):
+    self.loginUser()
+    id = self.AddBasicTournament()
+    test_utils.setLegacyId(id, 1)
+
+    # Team 2 is E team 1 is N. Playing hands 13-14 in Round 1.
+    params = {'calls': {}, 'ns_score': 20, 'ew_score': 80}
+    response = self.testapp.put_json("/api/tournaments/{}/hands/13/1/2".format(id),
+                                     params)
+    params = {'calls': {}, 'ns_score': 10, 'ew_score': 90}
+    response = self.testapp.put_json("/api/tournaments/{}/hands/14/1/2".format(id),
+                                     params)
+    # Team 2 is N team 7 is E. Playing hand 22 in Round 2.
+    params = {'calls': {}, 'ns_score': 100, 'ew_score': 0}
+    response = self.testapp.put_json("/api/tournaments/{}/hands/22/2/7".format(id),
+                                     params)
+    # Team 2 is N team 3 is E. Playing hand 16 in Round 4.
+    params = {'calls': {}, 'ns_score': "avg--", 'ew_score': "avg++"}
+    response = self.testapp.put_json("/api/tournaments/{}/hands/16/2/3".format(id),
+                                     params)
+
+    # Team 4 is N team 7 is E. Playing hand 13 in Round 1.
+    params = {'calls': {}, 'ns_score': 125, 'ew_score': -25}
+    response = self.testapp.put_json("/api/tournaments/{}/hands/13/4/7".format(id),
+                                     params)
+    
+    # Team 5's hand. Add it and then delete it.
+    params = {'calls': {}, 'ns_score': 125, 'ew_score': -25}
+    response = self.testapp.put_json("/api/tournaments/{}/hands/1/5/6".format(id),
+                                     params)
+    self.testapp.delete("/api/tournaments/{}/hands/1/5/6".format(id))
+    
+    # Another tournament with same basic parameters. Team two has one different
+    # score.
+    id2 = self.AddBasicTournament()
+    # Team 2 is E team 1 is N. Playing hands 13-15 in Round 1.
+    params = {'calls': {'south' : "T"}, 'ns_score': 120, 'ew_score': 80}
+    response = self.testapp.put_json("/api/tournaments/{}/hands/13/1/2".format(id2),
+                                     params)
+    
+    response = self.testapp.get("/api/tournaments/{}/pairids/1".format(id))
+    opaque_id_team1_tourney1 = json.loads(response.body)['pair_id']
+    response = self.testapp.get("/api/tournaments/{}/pairids/2".format(id))
+    opaque_id_team2_tourney1 = json.loads(response.body)['pair_id']
+    response = self.testapp.get("/api/tournaments/{}/pairids/4".format(id))
+    opaque_id_team4_tourney1 = json.loads(response.body)['pair_id']
+    response = self.testapp.get("/api/tournaments/{}/pairids/5".format(id))
+    opaque_id_team5_tourney1 = json.loads(response.body)['pair_id']
+    response = self.testapp.get("/api/tournaments/{}/pairids/6".format(id))
+    opaque_id_team6_tourney1 = json.loads(response.body)['pair_id']
+    response = self.testapp.get("/api/tournaments/{}/pairids/7".format(id))
+    opaque_id_team7_tourney1 = json.loads(response.body)['pair_id']
+    response = self.testapp.get("/api/tournaments/{}/pairids/1".format(id2))
+    opaque_id_team1_tourney2 = json.loads(response.body)['pair_id']
+    response = self.testapp.get("/api/tournaments/{}/pairids/2".format(id2))
+    opaque_id_team2_tourney2 = json.loads(response.body)['pair_id']
+    
+    ##### Output Testing #####
+    self.logoutUser()
+    # Team 1
+    response = self.testapp.get(
+        "/api/tournaments/{}/movement/1".format(id),
+        headers={'X-tichu-pair-code' : str(opaque_id_team1_tourney1)})
+    self.assertEqual(response.status_int, 200)
+    response_dict = json.loads(response.body)
+    self.assertEqual([], response_dict['players'])
+    self.assertEqual('name', response_dict['name'])
+    self.assertEqual(7, len(response_dict['movement']))
+    expected_hands = [
+        {"hand_no" : 13, "score"  : { "ns_score" : 20, "calls" : {}, "ew_score" : 80 }},
+        {"hand_no" : 14, "score"  : { "ns_score" : 10, "calls" : {}, "ew_score" : 90 }}, 
+        {"hand_no" : 15}]
+    self.assertHandEquals(response_dict['movement'], 1, expected_hands,
+                          "Round 1, Tourney 1, Hands 13-15, Team 1 vs 2")
+    self.assertScoresNotPresent(response_dict['movement'],
+                                Set([2, 3, 4, 5, 6, 7]), "Team 1")
+    
+    # Team 2
+    response = self.testapp.get(
+        "/api/tournaments/{}/movement/2".format(id),
+        headers={'X-tichu-pair-code' : str(opaque_id_team2_tourney1)})
+    self.assertEqual(response.status_int, 200)
+    response_dict = json.loads(response.body)
+    self.assertEqual([{"email": "My email", "name": "My name"}],
+                     response_dict['players'])
+    self.assertEqual('name', response_dict['name'])
+    self.assertEqual(7, len(response_dict['movement']))
+    expected_hands = [
+        {"hand_no" : 13, "score"  : { "calls" : {}, "ns_score" : 20, "ew_score" : 80 }},
+        {"hand_no" : 14}, {"hand_no" : 15}]
+    self.assertHandEquals(response_dict['movement'], 1, expected_hands,
+                          "Round 1, Tourney 1, Hands 13-15, Team 2 vs 1")
+    expected_hands = [
+        {"hand_no" : 22, "score"  : { "calls" : {}, "ns_score" : 100, "ew_score" : 0 }},
+        {"hand_no" : 23}, {"hand_no" : 24}]
+    self.assertHandEquals(response_dict['movement'], 2, expected_hands,
+                          "Round 2, Tourney 1, Hands 22-24, Team 2 vs 7")
+    expected_hands = [
+        {"hand_no" : 16, "score"  : { "calls" : {}, "ns_score" : 'AVG--',
+             "ew_score" : 'AVG++' }},
+        {"hand_no" : 17}, {"hand_no" : 18}]
+    self.assertHandEquals(response_dict['movement'], 4, expected_hands,
+                          "Round 4, Tourney 1, Hands 16-18, Team 2 vs 3")
+    self.assertScoresNotPresent(response_dict['movement'],
+                                Set([3, 5, 6, 7]), "Team 2")
+    
+    # Team 4                            
+    response = self.testapp.get(
+        "/api/tournaments/{}/movement/4".format(id),
+        headers={'X-tichu-pair-code' : str(opaque_id_team4_tourney1)})
+    self.assertEqual(response.status_int, 200)
+    response_dict = json.loads(response.body)
+    self.assertEqual([], response_dict['players'])
+    self.assertEqual('name', response_dict['name'])
+    self.assertEqual(7, len(response_dict['movement']))
+    expected_hands = [
+        {"hand_no" : 13, "score"  : { "calls" : {}, "ns_score" : 125, "ew_score" : -25 }},
+        {"hand_no" : 14}, {"hand_no" : 15}]
+    self.assertHandEquals(response_dict['movement'], 1, expected_hands,
+                          "Round 1, Tourney 1, Hands 13-15, Team 4 vs 7")
+    self.assertScoresNotPresent(response_dict['movement'],
+                                Set([3, 4, 5, 6, 7]), "Team 4")
+    
+    # Team 5                        
+    response = self.testapp.get(
+        "/api/tournaments/{}/movement/5".format(id),
+        headers={'X-tichu-pair-code' : str(opaque_id_team5_tourney1)})
+    self.assertEqual(response.status_int, 200)
+    response_dict = json.loads(response.body)
+    self.assertEqual([], response_dict['players'])
+    self.assertEqual('name', response_dict['name'])
+    self.assertEqual(7, len(response_dict['movement']))
+    self.assertScoresNotPresent(response_dict['movement'],
+                                Set([1, 2, 3, 4, 5, 6, 7]), "Team 5")
+                                
+
+    # Team 7
+    response = self.testapp.get(
+        "/api/tournaments/{}/movement/7".format(id),
+        headers={'X-tichu-pair-code' : str(opaque_id_team7_tourney1)})
+    self.assertEqual(response.status_int, 200)
+    response_dict = json.loads(response.body)
+    self.assertEqual([], response_dict['players'])
+    self.assertEqual('name', response_dict['name'])
+    movement_dict = response_dict['movement']
+    self.assertEqual(7, len(movement_dict))
+    expected_hands = [
+        {"hand_no" : 13, "score"  : { "calls" : {}, "ns_score" : 125, "ew_score" : -25 }},
+        {"hand_no" : 14}, {"hand_no" : 15}]
+    self.assertHandEquals(movement_dict, 1, expected_hands,
+                          "Round 1, Tourney 1, Hand 13, Team 7 vs 4")
+    expected_hands = [
+        {"hand_no" : 22, "score"  : { "calls" : {}, "ns_score" : 100, "ew_score" : 0 }},
+        {"hand_no" : 23}, {"hand_no" : 24}]
+    self.assertHandEquals(movement_dict, 2, expected_hands,
+                          "Round 2 Tourney 1, Hands 22-24, Team 7 vs 2")
+    self.assertEqual(
+        ["My name"],
+        self.getRoundFromMovementDict(movement_dict, 2)['opponent_names'])
+    self.assertScoresNotPresent(response_dict['movement'],
+                                Set([3, 4, 5, 6, 7]), "Team 7")
+
 
   def assertScoresNotPresent(self, movement, rounds, handmsg=None):
     for round in movement:

@@ -223,11 +223,14 @@
    * @returns {!tichu.HandScore}
    */
   function convertEditableToScore(editable) {
+    if (!editable) {
+      return null;
+    }
     var score = new tichu.HandScore();
     var parsedNorthSouthScore = parseInt(editable.northSouthScore);
     var parsedEastWestScore = parseInt(editable.eastWestScore);
-    score.northSouthScore = Number.isNaN(parsedNorthSouthScore) ? editable.northSouthScore : parsedNorthSouthScore;
-    score.eastWestScore = Number.isNaN(parsedEastWestScore) ? editable.eastWestScore : parsedEastWestScore;
+    score.northSouthScore = isNaN(parsedNorthSouthScore) ? editable.northSouthScore : parsedNorthSouthScore;
+    score.eastWestScore = isNaN(parsedEastWestScore) ? editable.eastWestScore : parsedEastWestScore;
     score.notes = editable.notes;
     Object.keys(tichu.Position).forEach(function (key) {
       var side = tichu.Position[key];

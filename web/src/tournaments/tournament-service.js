@@ -436,6 +436,7 @@
     var path = "/api/tournaments";
     var $q = this._$q;
     var $log = this._$log;
+    var $http = this._$http;
     var self = this;
     return this._$http({
       method: 'POST',
@@ -445,7 +446,7 @@
       try {
         ServiceHelpers.assertType('created tournament data', response.data, 'object', false);
         var id = ServiceHelpers.assertType('created tournament id', response.data['id'], 'string', false);
-        return self._saveRequestedTournament(id, request);
+        return self._getPairdIdsAndSaveTournament(id, request);
       } catch (ex) {
         $log.error(
             "Malformed response from " + path + " (" + response.status + " " + response.statusText + "):\n"
@@ -507,10 +508,11 @@
    * Converts the given tournament request into an actual, cached tournament.
    * @param {string} id
    * @param {tichu.TournamentRequest} request
+   * @param {string} pair_ids. Array of pair ids for the pairs in this tournament.
    * @returns {tichu.Tournament}
    * @private
    */
-  TichuTournamentService.prototype._saveRequestedTournament = function _saveRequestedTournament(id, request) {
+  TichuTournamentService.prototype._saveRequestedTournament = function _saveRequestedTournament(id, request, pair_ids) {
     var playerLists = [];
     for (var i = 0; i < request.noPairs; i += 1) {
       playerLists[i] = [];
@@ -532,6 +534,7 @@
         this._tournamentStore.getOrCreateTournamentPair.bind(this._tournamentStore, id));
     tournament.pairs.forEach(function(pair, index) {
       pair.setPlayers(playerLists[index]);
+      pair.setPairId(pair_ids[index]);
     });
     if (this._tournamentList !== null) {
       this._tournamentList.push(this._tournamentStore.getOrCreateTournamentHeader(id));

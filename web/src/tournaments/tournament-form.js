@@ -93,6 +93,24 @@
      */
     this.boardPresets = [
       {
+        noPairs: 12,
+        noBoards: 21,
+        noHands: 3,
+        noRounds: 6
+      },
+      {
+        noPairs: 12,
+        noBoards: 14,
+        noHands: 2,
+        noRounds: 6
+      },
+      {
+        noPairs: 12,
+        noBoards: 18,
+        noHands: 3,
+        noRounds: 5
+      },
+      {
         noPairs: 11,
         noBoards: 14,
         noHands: 2,

@@ -47,8 +47,8 @@ class MovementHandler(GenericHandler):
         tourney.no_pairs, tourney.no_boards)
     try:
       movement = Movement.CreateMovement(
-          tourney.no_pairs, no_hands_per_round, no_rounds).GetMovement(
-              int(pair_no))
+          tourney.no_pairs, no_hands_per_round, no_rounds,
+          tourney.legacy_version_id).GetMovement(int(pair_no))
     except ValueError:
       SetErrorStatus(self.response, 500, "Corrupted Data",
                      "No valid movement for this tourney's config")
