@@ -44,7 +44,7 @@
                 </h2>
                 <span flex></span>
                 <md-button class="md-icon-button"
-                           ng-if="!scoreDetailController.pairCode && !scoreDetailController.deleting && scoreDetailController.hand.score"
+                           ng-if="!scoreDetailController.pairCode && !scoreDetailController.deleting && scoreDetailController.hand.score && !scoreDetailController.changeLog"
                            ng-click="scoreDetailController.deleting = true">
                     <md-icon>delete</md-icon>
                 </md-button>
@@ -62,7 +62,25 @@
                  flex>
                 <span>This hand's score will be deleted.</span>
             </div>
-            <div class="md-dialog-content" layout="column" ng-if="!scoreDetailController.deleting">
+            <div class="md-list" layout="column" 
+                 layout-align="center start" 
+                 flex="150"
+                 stlye="width:40em;"
+                 ng-if="!scoreDetailController.saving && scoreDetailController.changeLog">
+              <md-list-item ng-repeat="change in scoreDetailController.changeLog.changes" layout-align="center start">
+                 <md-icon class="md-avatar-icon" md-font-set="material-icons">border_color</md-icon>
+                 <div class="md-list-item-text">
+                   <p ng-if="!!change.handScore">
+                     {{change.timestamp}}: [N] {{change.handScore.northSouthScore}} vs. [E] {{change.handScore.eastWestScore}}
+                     by {{change.changedBy == 0 ? "Admin" : "Pair #"}}{{change.changedBy == 0 ? "" : change.changedBy}}
+                   </p>
+                   <p ng-if="!change.handScore">
+                     {{change.timestamp}}: Deleted by {{change.changedBy == 0 ? "Admin" : "Pair #"}}{{change.changedBy == 0 ? "" : change.changedBy}}
+                   </p>
+                 </div>
+               </md-list-item>
+            </div>
+            <div class="md-dialog-content" layout="column" ng-if="!scoreDetailController.deleting && !scoreDetailController.changeLog">
                 <div layout="column"
                      style="padding: 0; margin: 0"
                      layout-align="center center"
@@ -165,10 +183,21 @@
         </md-dialog-content>
 
         <md-dialog-actions layout="row" layout-align="end center">
-            <md-button ng-click="scoreDetailController.deleting ? scoreDetailController.deleting = false : scoreDetailController.cancel()">
+            <md-button ng-if="!scoreDetailController.changeLog"
+                       ng-click="scoreDetailController.deleting ? scoreDetailController.deleting = false : scoreDetailController.cancel()">
                 Cancel
             </md-button>
-            <md-button ng-class="{'md-warn': scoreDetailController.deleting}"
+            <md-button ng-if="!scoreDetailController.pairCode && !scoreDetailController.changeLog"
+                       ng-disabled="scoreDetailController.saving || scoreDetailController.loadingChangeLog"
+                       ng-click="scoreDetailController.loadChangeLog()">
+                Change Log
+            </md-button>
+            <md-button ng-if="scoreDetailController.changeLog"
+                       ng-click="scoreDetailController.closeChangeLog()">
+                Close Change Log
+            </md-button>
+            <md-button ng-if="!scoreDetailController.changeLog"
+                       ng-class="{'md-warn': scoreDetailController.deleting}"
                        ng-click="scoreDetailController.save()"
                        ng-disabled="scoreForm.$invalid || (!scoreDetailController.deleting && scoreForm.$pristine) || (scoreDetailController.hand.score && !scoreDetailController.overwriting && !scoreDetailController.deleting)">
                 <span ng-if="!scoreDetailController.deleting && scoreDetailController.hand.score">

@@ -124,6 +124,29 @@ tichu.HandIdentifier = function HandIdentifier() {
 }
 
 /**
+ * Holder for all tracked changes to a specific hand.
+ * @param {[tichu.Change]} changes list of changes associated with this hand.
+ * @constructor 
+ */
+tichu.ChangeLog = function ChangeLog() {
+  this.changes = [];
+};
+
+/**
+ * Holder for one change to a hand score.
+ * @param {tichu.HandScore} handScore score in this change
+ * @param {number} changedBy pair that made this change. 0 for administrator.
+ * @param {string} timestamp YYYY-DD-MM HH:MM formatted time string.
+ * @constructor 
+ */
+tichu.Change = function Change(handScore, changedBy, timestamp) {
+  this.handScore = handScore;
+  this.changedBy = changedBy;
+  this.timestamp = timestamp;
+}
+
+
+/**
  * The tournament object, containing the full details about the tournament and related objects.
  * @param {!tichu.TournamentHeader} header The header object this tournament is associated with.
  * @constructor

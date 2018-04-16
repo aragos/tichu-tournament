@@ -21,12 +21,12 @@
     this._$scope = $scope;
 
     /**
-     * Whether a pair code was used.
+     * Pair code used.
      * @type {?string}
      * @export
      */
     this.pairCode = loadResults.pairCode;
-
+    
     /**
      * The hand being displayed.
      * @type {!tichu.Hand}
@@ -40,6 +40,8 @@
      * @export
      */
     this.position = loadResults.position;
+
+    this.changeLog = null;
 
     /**
      * The tournament ID this dialog is editing a score from.
@@ -82,6 +84,8 @@
      * @export
      */
     this.saveError = null;
+    
+    this.loadingChangeLog = false;
 
     /**
      * The dialog service used to close the dialog.
@@ -128,7 +132,8 @@
    * @export
    */
   ScoreDetailController.prototype.save = function save() {
-    if (this.saving || this.saveFailure || (this.hand.score && !this.deleting && !this.overwriting)) {
+    if (this.saving || this.loadingChangeLog || this.saveFailure || 
+        (this.hand.score && !this.deleting && !this.overwriting)) {
       return;
     }
     this.saving = true;
@@ -158,6 +163,26 @@
       self.saveError = rejection;
     });
   };
+
+  ScoreDetailController.prototype.loadChangeLog = function loadChangeLog() {
+    if (this.saving || this.loadingChangeLog) {
+      return;
+    }
+    this.loadingChangeLog = true;
+    var self = this;
+    this._movementService.getChangeLog(this._tournamentId,
+    								   this.hand.handNo,
+                                       this.hand.northSouthPair, 
+                                       this.hand.eastWestPair)
+        .then(function(response) {
+          self.loadingChangeLog = false;
+          self.changeLog = response;
+        });
+  }
+  
+  ScoreDetailController.prototype.closeChangeLog = function closeChangeLog() {
+    this.changeLog = null;
+  }
 
   /**
    * Sends the browser back to the home page.

@@ -361,7 +361,82 @@
       from_hands.splice(found, 1);
     }
   }
-
+  
+  /**
+   * Makes a request for the change log specified by the tournament ID, hand no, and pair numbers.
+   *
+   * @param {string} tournamentId The tournament ID to get a movement from.
+   * @param {number} handNo The pair number whose movement should be retrieved.
+   * @param {number} ewPair The pair number whose movement should be retrieved.
+   * @param {number} nsPair The pair number whose movement should be retrieved.
+   * @returns {angular.$q.Promise<tichu.ChangeLog>}
+   */
+  TichuMovementService.prototype.getChangeLog = function getChangeLog(tournamentId, handNo, nsPair, ewPair) {
+    var $q = this._$q;
+    var $log = this._$log;
+    var path = "/api/tournaments/" + encodeURIComponent(tournamentId) +
+               "/hands/changelog/" + encodeURIComponent(handNo.toString()) + "/" +
+               encodeURIComponent(nsPair.toString()) + "/" + 
+               encodeURIComponent(ewPair.toString());
+    var self = this;
+    return this._$http({
+      method: 'GET',
+      url: path
+    }).then(function onSuccess(response) {
+      try {
+        return self._parseChangeLog(response.data);
+      } catch (ex) {
+          $log.error(
+              "Malformed response from " + path + " (" + response.status + " " + response.statusText + "):\n"
+              + ex + "\n\n"
+              + JSON.stringify(response.data));
+          var rejection = new tichu.RpcError();
+          rejection.redirectToLogin = false;
+          rejection.error = "Invalid response from server";
+          rejection.detail = "The server sent confusing data for the changes in hand." + ex;
+          return $q.reject(rejection);
+        }
+      }, ServiceHelpers.handleErrorIn($q, $log, path, true));
+  };
+  
+  
+  /**
+   * Parses a specific change returned by the server.
+   *
+   * @param {*} data Data corresponding to a single change returned by the server.
+   * @returns tichu.Change
+   */
+  TichuMovementService.prototype._parseChange = function _parseChange(data) {
+    ServiceHelpers.assertType("change log timestamp", data["timestamp_sec"], "string");
+    var date = new Date(parseInt(data["timestamp_sec"] * 1000));
+    var timestamp = date.getFullYear() + "-" + (date.getMonth() < 9 ? "0" + (date.getMonth() + 1) : (date.getMonth() + 1)) + "-" + date.getDate() + " " + date.getHours() + ":" + date.getMinutes();
+    ServiceHelpers.assertType("change log changedby", data["changed_by"], "number");
+    var changedBy = data["changed_by"];
+    ServiceHelpers.assertType("change log change", data["change"], "object");
+    var change;
+    if (data["change"]["ns_score"] === null && data["change"]["ew_score"] === null) {
+      change = null;
+    } else {
+      change = this._parseHandScore("change log change", data["change"]);
+    }
+    return new tichu.Change(change, changedBy, timestamp);
+  }
+  
+  /**
+   * Parses a the changelog returned by the server.
+   *
+   * @param {*} data Data returned by the server.
+   * @returns tichu.ChangeLog
+   */
+  TichuMovementService.prototype._parseChangeLog = function _parseChangeLog(data) {
+    ServiceHelpers.assertType("change log data", data, "object");
+    ServiceHelpers.assertType("changes", data["changes"], "array");
+    var changeLog = new tichu.ChangeLog();
+    changeLog.changes = data["changes"].map(this._parseChange.bind(this));
+    return changeLog;
+  }
+  
+  
   angular.module("tichu-movement-service", ["ng", "tichu-tournament-store", "tichu-movement-store"])
       .service("TichuMovementService", TichuMovementService);
 })(angular);
