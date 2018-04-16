@@ -35,9 +35,16 @@
         <md-toolbar>
             <div class="md-toolbar-tools">
                 <md-button class="md-icon-button"
-                           ng-if="!scoreDetailController.pairCode"
-                           ng-click="scoreDetailController.cancel()">
+                           ng-if="!scoreDetailController.pairCode && !scoreDetailController.deleting && !scoreDetailController.changeLog"
+                           ng-disabled="scoreDetailController.saving"
+                           ng-click="scoreDetailController.loadChangeLog()">
                     <md-icon>history</md-icon>
+                </md-button>
+                <md-button class="md-icon-button"
+                           ng-if="!scoreDetailController.pairCode && !scoreDetailController.deleting && scoreDetailController.changeLog"
+                           ng-disabled="scoreDetailController.saving"
+                           ng-click="scoreDetailController.closeChangeLog()">
+                    <md-icon>rotate_right</md-icon>
                 </md-button>
                 <h2>
                     Board #{{ scoreDetailController.hand.handNo }}
@@ -53,7 +60,6 @@
                 </md-button>
             </div>
         </md-toolbar>
-
         <md-dialog-content>
             <div class="md-dialog-content"
                  ng-if="scoreDetailController.deleting"
@@ -182,22 +188,8 @@
             </div>
         </md-dialog-content>
 
-        <md-dialog-actions layout="row" layout-align="end center">
-            <md-button ng-if="!scoreDetailController.changeLog"
-                       ng-click="scoreDetailController.deleting ? scoreDetailController.deleting = false : scoreDetailController.cancel()">
-                Cancel
-            </md-button>
-            <md-button ng-if="!scoreDetailController.pairCode && !scoreDetailController.changeLog"
-                       ng-disabled="scoreDetailController.saving || scoreDetailController.loadingChangeLog"
-                       ng-click="scoreDetailController.loadChangeLog()">
-                Change Log
-            </md-button>
-            <md-button ng-if="scoreDetailController.changeLog"
-                       ng-click="scoreDetailController.closeChangeLog()">
-                Close Change Log
-            </md-button>
-            <md-button ng-if="!scoreDetailController.changeLog"
-                       ng-class="{'md-warn': scoreDetailController.deleting}"
+        <md-dialog-actions layout="row" layout-align="end center" ng-if="!scoreDetailController.changeLog">
+            <md-button ng-class="{'md-warn': scoreDetailController.deleting}"
                        ng-click="scoreDetailController.save()"
                        ng-disabled="scoreForm.$invalid || (!scoreDetailController.deleting && scoreForm.$pristine) || (scoreDetailController.hand.score && !scoreDetailController.overwriting && !scoreDetailController.deleting)">
                 <span ng-if="!scoreDetailController.deleting && scoreDetailController.hand.score">
@@ -207,6 +199,9 @@
                     Submit Score
                 </span>
                 <span ng-if="scoreDetailController.deleting">Delete Score</span>
+            </md-button>
+            <md-button ng-click="scoreDetailController.deleting ? scoreDetailController.deleting = false : scoreDetailController.cancel()">
+                Cancel
             </md-button>
         </md-dialog-actions>
     </form>
