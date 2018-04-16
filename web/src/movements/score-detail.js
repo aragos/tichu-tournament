@@ -164,6 +164,9 @@
     });
   };
 
+  /**
+   * Loads the changeLog for a hand.
+   */
   ScoreDetailController.prototype.loadChangeLog = function loadChangeLog() {
     if (this.saving || this.loadingChangeLog) {
       return;
@@ -180,6 +183,9 @@
         });
   }
   
+  /**
+   * Clears changeLog info for this hand.
+   */
   ScoreDetailController.prototype.closeChangeLog = function closeChangeLog() {
     this.changeLog = null;
   }
