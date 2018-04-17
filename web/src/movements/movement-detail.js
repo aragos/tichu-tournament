@@ -25,6 +25,14 @@
       showHeader: true,
       refresh: loadResults.failure ? null : this._refresh.bind(this)
     });
+    
+    $scope.$on('$locationChangeStart', 
+      function(event) {
+        if (angular.element(document.body).hasClass('md-dialog-is-showing')) {
+          event.preventDefault();
+          $mdDialog.cancel();
+        }
+      });
 
     /**
      * The movement being displayed.
@@ -239,6 +247,7 @@
       }
     });
   }
+
 
   /**
    * Configures the routing provider to load the movement detail page at its path.

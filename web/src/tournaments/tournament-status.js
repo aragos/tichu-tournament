@@ -23,6 +23,14 @@
       showHeader: true
     });
 
+    $scope.$on('$locationChangeStart', 
+      function(event) {
+        if (angular.element(document.body).hasClass('md-dialog-is-showing')) {
+          event.preventDefault();
+          $mdDialog.cancel();
+       }
+     });
+
     /**
      * The tournament service injected at creation.
      * @type {TichuTournamentService}
