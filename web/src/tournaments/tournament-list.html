@@ -11,8 +11,13 @@
                   href="/tournaments/{{tournament.id}}/view"
                   ng-repeat="tournament in tournamentListController.tournaments">
         <md-icon class="md-avatar-icon" md-font-set="material-icons">call_split</md-icon>
-        <div class="md-list-item-text">
+        <div class="md-list-item-text"
+             style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; width: 100px">
             <h3>{{tournament.name}}</h3>
         </div>
+        <md-icon class="md-secondary md-warn" 
+                 ng-click="tournamentListController.deleteTournament(tournament.id, tournament.name)">
+                 delete
+        </md-icon>
     </md-list-item>
 </md-list>

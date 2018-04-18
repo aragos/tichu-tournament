@@ -129,6 +129,28 @@
     }
     return this._tournamentListPromise;
   };
+  
+  /**
+   * Deletes a specific tournament from the server. Updating all the caches that
+   * might contain it.
+   * @returns {angular.$q.Promise<tichu.TournamentHeader[]>} The remaining tournaments.
+   */
+   TichuTournamentService.prototype.deleteTournament = function deleteTournament(tournamentId) {
+     var $q = this._$q;
+     var $log = this._$log;
+     var path = "/api/tournaments/" + encodeURIComponent(tournamentId);
+     var self = this;
+     return this._$http({
+        method: 'DELETE',
+        url: path
+      }).then(function onSuccess() {
+        self._tournamentStore.deleteTournament(tournamentId);
+        self._tournamentList = self._tournamentList.filter(function(header) {
+          return header.id != tournamentId;
+        });
+        return self._tournamentList;
+      }, ServiceHelpers.handleErrorIn($q, $log, path));
+    }
 
   /**
    * Converts the given tournament header from the server into a TournamentHeader,

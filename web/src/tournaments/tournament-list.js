@@ -4,6 +4,7 @@
    * Main controller for the tournament list page.
    *
    * @constructor
+   * @param {$log} $log
    * @param {!angular.Scope} $scope
    * @param {!angular.$window} $window
    * @param {!$route} $route
@@ -12,12 +13,40 @@
    * @param {!{failure: ?tichu.RpcError, tournaments: ?tichu.TournamentHeader[]}} loadResults
    * @ngInject
    */
-  function TournamentListController($scope, $window, $route, $location, $mdDialog, loadResults) {
+  function TournamentListController($log, $scope, $window, $route, $location, $mdDialog, TichuTournamentService, loadResults) {
     $scope.appController.setPageHeader({
       header: "Tournaments",
       backPath: "/home",
       showHeader: true
     });
+
+    /**
+     * The dialog service injected at creation.
+     * @type {$mdDialog}
+     * @private
+     */
+    this._$mdDialog = $mdDialog;
+
+    /**
+     * The routing service injected at creation.
+     * @type {$route}
+     * @private
+     */
+    this._$route = $route;
+
+    /**
+     * The logging service injected at creation.
+     * @type {$log}
+     * @private
+     */
+    this._$log = $log;
+
+    /**
+     * The tournament service injected at creation.
+     * @type {TichuTournamentService}
+     * @private
+     */
+    this._tournamentService = TichuTournamentService;
 
     /**
      * List of tournaments to be displayed to the user.
@@ -36,7 +65,7 @@
 
     if (this.failure) {
       var redirectToLogin = this.failure.redirectToLogin;
-      var dialog = $mdDialog.confirm()
+      var dialog = this._$mdDialog.confirm()
           .title(this.failure.error)
           .textContent(this.failure.detail);
       if (redirectToLogin) {
@@ -48,7 +77,7 @@
             .ok("Try again")
             .cancel("Never mind");
       }
-      $mdDialog.show(dialog).then(function() {
+      this._$mdDialog.show(dialog).then(function() {
         if (redirectToLogin) {
           // use $window.location since we're going out of the Angular app
           $window.location.href = '/api/login?then=' + encodeURIComponent($location.url())
@@ -62,9 +91,38 @@
       });
 
       $scope.$on("$destroy", function() {
-        $mdDialog.cancel(true);
+        this._$mdDialog.cancel(true);
       });
     }
+  }
+
+  /** 
+   * Deletes the selected tournament.
+   */
+  TournamentListController.prototype.deleteTournament = function deleteTournament(id, tournamentName) {
+    var dialog = this._$mdDialog.confirm()
+          .title("Confirm Deletion")
+          .textContent("Permanently delete \"" + tournamentName + "\"?")
+          .ok("CONFIRM")
+          .cancel("CANCEL");
+    $log = this._$log;
+    $route = this._$route;
+    self = this;
+    tournamentService = this._tournamentService;
+    this._$mdDialog.show(dialog).then(function(){
+      tournamentService.deleteTournament(id).then(function(results) {
+        self.tournaments = results;
+      }, function(rejection) {
+        $log.error("Something went wrong while deleting the tournament: " + rejection);
+        $route.reload();
+      });
+    }).catch(function(rejection) {
+      if (!rejection) {
+        /* The dialog was canceled or auto-hidden. That's okay. */
+        return;
+      }
+      $log.error("Something went wrong while deleting the tournament: " + rejection);
+    });
   }
 
   /**

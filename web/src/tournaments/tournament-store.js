@@ -94,6 +94,15 @@
     }
     return tournament;
   };
+  
+  /**
+   * Deletes tournament with this ID from the store. Deletes the header as well.
+   * @param {string} id The ID of the tournament to delete.
+   */
+  TichuTournamentStore.prototype.deleteTournament = function deleteTournament(id) {
+    this._tournamentCache.remove(id);
+    this._tournamentHeaderCache.remove(id);
+  };
 
   /**
    * Returns whether the tournament status exists in the cache or not without creating it.
