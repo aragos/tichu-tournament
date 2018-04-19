@@ -7,10 +7,11 @@
    * @param {!angular.Scope} $scope
    * @param {!angular.$location} $location
    * @param {!$mdDialog} $mdDialog
+   * @param {!$cookies} $cookies
    * @param {!TichuCodeService} TichuCodeService
    * @ngInject
    */
-  function HomeController($scope, $location, $mdDialog, TichuCodeService) {
+  function HomeController($scope, $location, $mdDialog, $cookies, TichuCodeService) {
     $scope.appController.setPageHeader({
       showHeader: false
     });
@@ -30,12 +31,22 @@
     this._$mdDialog = $mdDialog;
 
     /**
+     * The cookie service used to persist the code.
+     * @type {$cookies}
+     * @private
+     */
+    this._$cookies = $cookies;
+
+     /**
      * The code the user has currently entered.
      *
      * @export
      * @type {string}
      */
     this.code = "";
+    if (this._$cookies.get("playerCode") != "") {
+      this.code = this._$cookies.get("playerCode");
+    }
 
     /**
      * The code service used to request the movement information from the server.
@@ -73,6 +84,8 @@
     var code = this.code;
     var self = this;
 
+    self._$cookies.put("playerCode", code);
+
     this._codeService.getMovementForCode(code).then(function(result) {
       self._$location
           .path("/tournaments/" + encodeURIComponent(result.tournamentId)
@@ -80,6 +93,7 @@
           .search({playerCode: code.toUpperCase()});
     }).catch(function(failure) {
       self.loading = false;
+      self._$cookies.put("playerCode", "");
       var alert = self._$mdDialog.alert()
           .title(failure.error)
           .textContent(failure.detail)
@@ -111,7 +125,7 @@
         });
   }
 
-  angular.module("tichu-home", ["ng", "ngRoute", "ngMaterial", "tichu-code-service"])
+  angular.module("tichu-home", ["ng", "ngRoute", "ngMaterial", "ngCookies", "tichu-code-service"])
       .controller("HomeController", HomeController)
       .config(mapRoute);
 })(angular);
