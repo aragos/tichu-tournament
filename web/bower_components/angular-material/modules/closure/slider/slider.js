@@ -1,8 +1,8 @@
 /*!
- * Angular Material Design
+ * AngularJS Material Design
  * https://github.com/angular/material
  * @license MIT
- * v1.1.1
+ * v1.1.8
  */
 goog.provide('ngmaterial.components.slider');
 goog.require('ngmaterial.core');
@@ -10,7 +10,7 @@ goog.require('ngmaterial.core');
    * @ngdoc module
    * @name material.components.slider
    */
-SliderDirective.$inject = ["$$rAF", "$window", "$mdAria", "$mdUtil", "$mdConstant", "$mdTheming", "$mdGesture", "$parse", "$log", "$timeout"];
+SliderDirective['$inject'] = ["$$rAF", "$window", "$mdAria", "$mdUtil", "$mdConstant", "$mdTheming", "$mdGesture", "$parse", "$log", "$timeout"];
   angular.module('material.components.slider', [
     'material.core'
   ])
@@ -181,7 +181,7 @@ function SliderDirective($$rAF, $window, $mdAria, $mdUtil, $mdConstant, $mdThemi
 
     if (tAttrs.disabled || tAttrs.ngDisabled) wrapper.attr('tabindex', -1);
 
-    wrapper.attr('role', 'slider');
+    tElement.attr('role', 'slider');
 
     $mdAria.expect(tElement, 'aria-label');
 
