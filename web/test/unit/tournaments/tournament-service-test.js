@@ -605,11 +605,104 @@ describe("tournament-service module", function() {
             }
           ]
         }).respond(201, "");
+        $httpBackend.expectGET("/api/tournaments/120839/pairids").respond(200, {
+          pair_ids: ["ABCD", "BCDE", "CDEF", "DEFG", "EFGH", "FGHI", "GHIJ", "HIJK"]
+        });
 
         runPromise(service.editTournament("120839", makeTournamentRequest({
           name: "Tichu of the Damned",
           noBoards: 24,
           noPairs: 8,
+          players: [
+            makePlayerRequest({
+              name: "Dracula",
+              email: "master@castlevania.example",
+              pairNo: 4
+            })
+          ]
+        })), {expectSuccess: true, flushHttp: true});
+      });
+
+      it("sends the JSONified tournament request to the server and requests pairids the first time but not the second", function () {
+        $httpBackend.expectPUT("/api/tournaments/120839", {
+          name: "Tichu of the Damned",
+          no_boards: 21,
+          no_pairs: 12,
+          players: [
+            {
+              name: "Dracula",
+              email: "master@castlevania.example",
+              pair_no: 4
+            }
+          ]
+        }).respond(201, "");
+        $httpBackend.expectGET("/api/tournaments/120839/pairids").respond(200, {
+          pair_ids: ["ABCD", "BCDE", "CDEF", "DEFG", "EFGH", "FGHI", "GHIJ", 
+                     "HIJK", "LMOP", "QRST", "UVWX", "YZAB"]
+        });
+
+        runPromise(service.editTournament("120839", makeTournamentRequest({
+          name: "Tichu of the Damned",
+          noBoards: 21,
+          noPairs: 12,
+          players: [
+            makePlayerRequest({
+              name: "Dracula",
+              email: "master@castlevania.example",
+              pairNo: 4
+            })
+          ]
+        })), {flushHttp: true});
+
+        $httpBackend.expectPUT("/api/tournaments/120839", {
+          name: "Tichu of the Damned Again",
+          no_boards: 21,
+          no_pairs: 12,
+          players: [
+            {
+              name: "Dracula The Second",
+              email: "master@castlevania.example",
+              pair_no: 4
+            }
+          ]
+        }).respond(201, "");
+
+        runPromise(service.editTournament("120839", makeTournamentRequest({
+          name: "Tichu of the Damned Again",
+          noBoards: 21,
+          noPairs: 12,
+          players: [
+            makePlayerRequest({
+              name: "Dracula The Second",
+              email: "master@castlevania.example",
+              pairNo: 4
+            })
+          ]
+        })), {flushHttp: true});
+      });
+
+      it("sends the JSONified tournament request to the server and requests pairids", function () {
+        $httpBackend.expectPUT("/api/tournaments/120839", {
+          name: "Tichu of the Damned",
+          no_boards: 21,
+          no_pairs: 12,
+          players: [
+            {
+              name: "Dracula",
+              email: "master@castlevania.example",
+              pair_no: 4
+            }
+          ]
+        }).respond(201, "");
+        $httpBackend.expectGET("/api/tournaments/120839/pairids").respond(200, {
+          pair_ids: ["ABCD", "BCDE", "CDEF", "DEFG", "EFGH", "FGHI", "GHIJ", 
+                     "HIJK", "LMOP", "QRST", "UVWX", "YZAB"]
+        });
+
+        runPromise(service.editTournament("120839", makeTournamentRequest({
+          name: "Tichu of the Damned",
+          noBoards: 21,
+          noPairs: 12,
           players: [
             makePlayerRequest({
               name: "Dracula",
@@ -655,7 +748,7 @@ describe("tournament-service module", function() {
               pairNo: 4
             })
           ]
-        })), {expectSuccess: true, flushHttp: true});
+        })), {flushHttp: true});
 
         expect(tournament).toBe(originalTournament);
         expect(tournament.id).toBe("98021");

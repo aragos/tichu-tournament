@@ -499,7 +499,8 @@
       url: path,
       data: request
     }).then(function onSuccess() {
-      return self._getPairdIdsAndSaveTournament(id, request);
+      var should_reload_pairids = self._tournamentStore.getOrCreateTournament(id).pairs.length !== request.noPairs; 
+      return should_reload_pairids ? self._getPairdIdsAndSaveTournament(id, request) : self._saveRequestedTournament(id, request, []);
     }, ServiceHelpers.handleErrorIn($q, $log, path));
   };
 
@@ -555,7 +556,9 @@
         this._tournamentStore.getOrCreateTournamentPair.bind(this._tournamentStore, id));
     tournament.pairs.forEach(function(pair, index) {
       pair.setPlayers(playerLists[index]);
-      pair.setPairId(pair_ids[index]);
+      if (pair_ids) {
+        pair.setPairId(pair_ids[index]);
+      }
     });
     if (this._tournamentList !== null) {
       this._tournamentList.push(this._tournamentStore.getOrCreateTournamentHeader(id));
