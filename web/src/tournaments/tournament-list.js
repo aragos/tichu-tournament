@@ -21,6 +21,14 @@
     });
 
     /**
+     * Whether to show the tournament delete button. Nonresponsive, if the
+     * client decides to resize, that's their problem.
+     * @type {bool}
+     * @private
+     */
+    this._showDelete = $window.innerWidth > 600;
+
+    /**
      * The dialog service injected at creation.
      * @type {$mdDialog}
      * @private
@@ -65,7 +73,7 @@
 
     if (this.failure) {
       var redirectToLogin = this.failure.redirectToLogin;
-      var dialog = this._$mdDialog.confirm()
+      var dialog = $mdDialog.confirm()
           .title(this.failure.error)
           .textContent(this.failure.detail);
       if (redirectToLogin) {
@@ -77,7 +85,7 @@
             .ok("Try again")
             .cancel("Never mind");
       }
-      this._$mdDialog.show(dialog).then(function() {
+      $mdDialog.show(dialog).then(function() {
         if (redirectToLogin) {
           // use $window.location since we're going out of the Angular app
           $window.location.href = '/api/login?then=' + encodeURIComponent($location.url())
@@ -91,7 +99,7 @@
       });
 
       $scope.$on("$destroy", function() {
-        this._$mdDialog.cancel(true);
+        $mdDialog.cancel(true);
       });
     }
   }

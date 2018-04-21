@@ -9,15 +9,32 @@
     <md-subheader ng-if="tournamentListController.tournaments">Active Tournaments</md-subheader>
     <md-list-item class="md-2-line"
                   href="/tournaments/{{tournament.id}}/view"
-                  ng-repeat="tournament in tournamentListController.tournaments">
+                  ng-repeat="tournament in tournamentListController.tournaments"
+                  ng-cloak>
         <md-icon class="md-avatar-icon" md-font-set="material-icons">call_split</md-icon>
         <div class="md-list-item-text"
              style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; width: 100px">
             <h3>{{tournament.name}}</h3>
         </div>
-        <md-icon class="md-secondary md-warn" 
-                 ng-click="tournamentListController.deleteTournament(tournament.id, tournament.name)">
-                 delete
-        </md-icon>
+        <md-button class="md-mini md-icon-button"
+                   ng-if="tournamentListController._showDelete"
+                   ng-click="tournamentListController.deleteTournament(tournament.id, tournament.name)" >
+            <md-icon>delete</md-icon>
+        </md-button>
+        <md-fab-speed-dial md-open="false" md-direction="left" class="custom-fab md-fling"
+                           ng-if="!tournamentListController._showDelete">
+            <md-fab-trigger>
+                <md-button class=md-icon-button
+                           ng-click="$mdOpenMenu()">
+                    <md-icon md-menu-origin>more_vert</md-icon>
+                </md-button>
+            </md-fab-trigger>
+            <md-fab-actions style="width: 0px;">
+                <md-button class="md-fab md-mini md-raised" style="margin: 0px"
+                           ng-click="tournamentListController.deleteTournament(tournament.id, tournament.name)" >
+                    <md-icon>delete</md-icon>
+                </md-button>
+            </md-fab-actions>
+        </md-fab-speed-dial>    
     </md-list-item>
 </md-list>

@@ -499,7 +499,7 @@
       url: path,
       data: request
     }).then(function onSuccess() {
-      var should_reload_pairids = self._tournamentStore.getOrCreateTournament(id).pairs.length !== request.noPairs; 
+      var should_reload_pairids = self._tournamentStore.getOrCreateTournament(id).pairs.length < request.noPairs; 
       return should_reload_pairids ? self._getPairdIdsAndSaveTournament(id, request) : self._saveRequestedTournament(id, request, []);
     }, ServiceHelpers.handleErrorIn($q, $log, path));
   };

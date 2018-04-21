@@ -3,3 +3,10 @@ md-input-container.no-error-spacer {
 }
 
 md-input-container.no-error-spacer .md-errors-spacer:empty { display: none; }
+
+.custom-fab md-fab-actions .md-fab-action-item {
+  transition: none;
+}
+.custom-fab:not(.md-is-open) md-fab-actions {
+  visibility: hidden;
+}
