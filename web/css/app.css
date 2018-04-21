@@ -6,7 +6,7 @@ md-input-container.no-error-spacer .md-errors-spacer:empty { display: none; }
 
 .custom-fab {
   justify-content: flex-end; 
-  width: 29px;
+  width: 30px;
 }
 
 .custom-fab md-fab-actions .md-fab-action-item {
@@ -19,7 +19,7 @@ md-input-container.no-error-spacer .md-errors-spacer:empty { display: none; }
 .custom-fab md-fab-trigger .md-button.md-icon-button {
   margin: 0px;
   padding: 0px;
-  width: 20px;
+  width: 30px;
 }
 
 .custom-fab md-fab-actions {
