@@ -23,14 +23,15 @@
         </md-button>
         <md-fab-speed-dial md-open="false" md-direction="left" class="custom-fab md-fling"
                            ng-if="!tournamentListController._showDelete">
-            <md-fab-trigger>
+            <md-fab-trigger  style="margin: 0px; padding:0px">
                 <md-button class=md-icon-button
+                           style="margin: 0px; padding:0px; width: 20px"
                            ng-click="$mdOpenMenu()">
-                    <md-icon md-menu-origin>more_vert</md-icon>
+                    <md-icon md-menu-origin style="margin:0px">more_vert</md-icon>
                 </md-button>
             </md-fab-trigger>
             <md-fab-actions style="width: 0px;">
-                <md-button class="md-fab md-mini md-raised" style="margin: 0px"
+                <md-button class="md-fab md-mini md-raised"
                            ng-click="tournamentListController.deleteTournament(tournament.id, tournament.name)" >
                     <md-icon>delete</md-icon>
                 </md-button>
