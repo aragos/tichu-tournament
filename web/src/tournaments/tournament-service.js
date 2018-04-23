@@ -556,7 +556,7 @@
         this._tournamentStore.getOrCreateTournamentPair.bind(this._tournamentStore, id));
     tournament.pairs.forEach(function(pair, index) {
       pair.setPlayers(playerLists[index]);
-      if (pair_ids) {
+      if (pair_ids.length) {
         pair.setPairId(pair_ids[index]);
       }
     });
