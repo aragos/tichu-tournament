@@ -105,7 +105,7 @@
                                    type="text"
                                    style="text-transform:uppercase"
                                    name="northSouthScore"
-                                   ng-pattern="/^-?([05]|([1-9][05])|([1-4][0-9][05]))$|^AVG([+-]{0,2})$/"
+                                   ng-pattern="/^-?([05]|([1-9][05])|([1-4][0-9][05]))$|^AVG([+-]{0,2})$|^A$|^AV$/"
                                    ng-model="scoreDetailController.score.northSouthScore"
                                    md-no-asterisk
                                    ng-disabled="scoreDetailController.hand.score && !scoreDetailController.overwriting"
@@ -146,7 +146,7 @@
                                    type="string"
                                    style="text-transform:uppercase"
                                    name="eastWestScore"
-                                   ng-pattern="/^-?([05]|([1-9][05])|([1-4][0-9][05]))$|^AVG([+-]{0,2})$/"
+                                   ng-pattern="/^-?([05]|([1-9][05])|([1-4][0-9][05]))$|^AVG([+-]{0,2})$|^A$|^AV$/"
                                    ng-model="scoreDetailController.score.eastWestScore"
                                    ng-disabled="scoreDetailController.hand.score && !scoreDetailController.overwriting"
                                    md-no-asterisk
