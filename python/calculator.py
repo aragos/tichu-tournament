@@ -281,15 +281,6 @@ class Board:
         max_rps = max(max_rps, bsl.ew_rps)
         max_rps = max(max_rps, bsl.ns_rps)
       return max_rps
-      
-    def _get_max_mps(self, side="n"):
-      max_mps = 0
-      for bsl in self._board_score:
-        if side == "n":
-          max_mps = max(max_mps, bsl.ns_mps)
-        else:
-          max_mps = max(max_mps, bsl.ew_mps)
-      return max_mps
 
     def _called_t(self, hand_result, position, call_to_check):
       calls = hand_result.calls()
@@ -299,21 +290,21 @@ class Board:
         return 1
       return 0
 
-    def _set_avg_mps_rps(self, side, avg_type, max_mps, max_rps, board_score_line):
+    def _set_avg_mps_rps(self, side, avg_type, avg_mps, max_rps, board_score_line):
       if avg_type == "AVG":
-        mps_val = max_mps / 2
+        mps_val = avg_mps
         rps_val = 0
       elif avg_type == "AVG+":
-        mps_val = max_mps * 0.6
+        mps_val = avg_mps * 1.2
         rps_val = 0.2 * max_rps
       elif avg_type == "AVG++":
-        mps_val = max_mps * 0.8
+        mps_val = avg_mps * 1.6
         rps_val = 0.6 * max_rps
       elif avg_type == "AVG-":
-        mps_val = max_mps * 0.4
+        mps_val = avg_mps * 0.8
         rps_val = -0.2 * max_rps
       else:
-        mps_val = max_mps * 0.2
+        mps_val = avg_mps * 0.4
         rps_val = -0.6 * max_rps
       if side == "n":
         board_score_line.ns_mps = mps_val
@@ -360,16 +351,16 @@ class Board:
             else:
               bs.ew_aps = 0
             self._board_score.append(bs)
-        # Calculate max rp, and max mps
+        
         max_rps = self._get_max_rps()
-        max_ns_mps = self._get_max_mps("n")
-        max_ew_mps = self._get_max_mps("e")
+        avg_ns_mps = sum([x.ns_mps for x in self._board_score])/ len(self._board_score)
+        avg_ew_mps = sum([x.ew_mps for x in self._board_score])/ len(self._board_score)
         for hr in iter:
           if (hr.diff() != "AVG"):
               continue
           bs = BoardScoreLine(hr)
-          self._set_avg_mps_rps("n", hr.ns_score(), max_ns_mps, max_rps, bs)
-          self._set_avg_mps_rps("e", hr.ew_score(), max_ew_mps, max_rps, bs)
+          self._set_avg_mps_rps("n", hr.ns_score(), avg_ns_mps, max_rps, bs)
+          self._set_avg_mps_rps("e", hr.ew_score(), avg_ew_mps, max_rps, bs)
           bs.ns_aps = 0
           bs.ew_aps = 0
           self._board_score.append(bs)
