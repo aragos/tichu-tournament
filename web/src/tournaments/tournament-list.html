@@ -1,11 +1,4 @@
 <md-list class="md-dense" flex="noshrink" ng-if="!tournamentListController.failure">
-    <md-list-item class="md-2-line"
-                  href="/tournaments/new">
-        <md-icon class="md-avatar-icon" md-font-set="material-icons">create</md-icon>
-        <div class="md-list-item-text">
-            <h3>New Tournament</h3>
-        </div>
-    </md-list-item>
     <md-subheader ng-if="tournamentListController.tournaments">Active Tournaments</md-subheader>
     <md-list-item class="md-2-line"
                   href="/tournaments/{{tournament.id}}/view"
@@ -38,3 +31,7 @@
         </md-fab-speed-dial>    
     </md-list-item>
 </md-list>
+<md-button class="md-fab md-raised md-fab-bottom-right md-icon-button md-primary" 
+            href="/tournaments/new" style="position: fixed; padding: 15px;"> 
+        <md-icon class="material-icons md-avatar-icon" md-font-set="material-icons">add</md-icon>
+</md-button>
