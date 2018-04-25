@@ -5,6 +5,7 @@
    *
    * @constructor
    * @param {!angular.Scope} $scope
+   * @param {$mdToast} $mdToast
    * @param {TichuTournamentService} TichuTournamentService
    * @param {$mdDialog} $mdDialog
    * @param {angular.$window} $window
@@ -13,14 +14,15 @@
    * @param {!{failure: ?tichu.RpcError, id: ?string, tournamentStatus: ?tichu.TournamentStatus}} loadResults
    * @ngInject
    */
-  function TournamentStatusController($scope, TichuTournamentService, $mdDialog, $log, $window, $location, $route, loadResults) {
+  function TournamentStatusController($scope, $mdToast, TichuTournamentService, $mdDialog, $log, $window, $location, $route, loadResults) {
     var backPath = "/tournaments" + (loadResults.id ? "/" + loadResults.id + "/view" : "");
     $scope.appController.setPageHeader({
       header: loadResults.failure
           ? "Tournament Error"
           : (loadResults.tournament ? "Editing " + loadResults.id : "Tournament Status"),
       backPath: backPath,
-      showHeader: true
+      showHeader: true,
+      refresh: loadResults.failure ? null : this._refresh.bind(this)
     });
 
     $scope.$on('$locationChangeStart', 
@@ -60,6 +62,20 @@
     this.tournamentStatus = loadResults.tournamentStatus
 
     /**
+     * Whether to show scored hands in the expander list or not. 
+     *
+     * @type {boolean[]}
+     */
+    this.showScored = []
+    
+    /**
+     * Whether to show unscored hands in the expander list or not. 
+     *
+     * @type {boolean[]}
+     */
+    this.showUnscored = []
+
+    /**
      * The logging service injected at creation.
      * @type {$log}
      * @private
@@ -78,6 +94,13 @@
      * @private
      */
     this._showingDialog = false;
+
+    /**
+     * The toast service injected at creation.
+     * @type {$mdToast}
+     * @private
+     */
+    this._$mdToast = $mdToast;
 
     /**
      * The dialog service injected at creation.
@@ -164,6 +187,25 @@
     });
   };
 
+  /**
+   * Updates the status with the latest data from the server.
+   */
+  TournamentStatusController.prototype._refresh = function refresh() {
+    var $mdToast = this._$mdToast;
+    var $q = this._$q;
+    var self = this;
+    return this._tournamentService.getTournamentStatus(
+        this.tournamentId).then(function() {
+      if (!self._destroyed) {
+        $mdToast.showSimple("Refreshed!");
+      }
+    }).catch(function(/** tichu.RpcError */ error) {
+      if (!self._destroyed) {
+        $mdToast.showSimple("Failed to refresh: " + error.error);
+      }
+      return $q.reject(error);
+    });
+  };
 
   /**
    * Asynchronously loads the requested tournament status.

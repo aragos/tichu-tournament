@@ -1,45 +1,58 @@
 <div layout="column" layout-align="start center">
     <div style="width: 30em" layout="column">
         <md-card flex="noshrink" ng-repeat="round in tournamentStatusController.tournamentStatus.roundStatus">
-            <md-card-header ng-if="round.scoredHands.length != 0"
-                            style="padding-top: 0.4em; padding-bottom: 0.8em">
-                <md-icon class="md-avatar-icon"
-                         ng-if="round.unscoredHands.length == 0"
-                         md-font-set="material-icons"
-                         style="margin-left: 0; margin-right: 0.8em; font-size: 44px; color: #43A047">
-                             check_circle
-                </md-icon>
-                <md-card-header-text>
-                    <span class="md-title" style="padding-top: 0.6em"
-                          >Round {{round.roundNo}}: Scored Hands</span>
-                </md-card-header-text>
-            </md-card-header>
-            <md-list style="padding-bottom: 0" class="md-dense"
-                     ng-if="round.scoredHands.length != 0">
-                <md-list-item ng-repeat="hand in round.scoredHands"
-                              ng-click="tournamentStatusController.editHand(hand.handNo, hand.northSouthPair, hand.eastWestPair)"
-                              ng-style="{'background-color': '#eeeeee'}">
+            <md-list ng-if="round.unscoredHands.length != 0" 
+                     class="md-dense"
+                     style="padding: 0">
+                <md-list-item style="padding-bottom: 0"
+                              ng-if="round.showUnscored.length != 0"
+                              ng-click="tournamentStatusController.showUnscored[round.roundNo - 1] = !tournamentStatusController.showUnscored[round.roundNo - 1]">
                     <md-icon class="md-avatar-icon"
                              md-font-set="material-icons"
-                             style="margin-left: 0">assignment_turned_in</md-icon>
+                             style="margin-left: 0; background-color: #f7d483">hourglass_empty</md-icon>
+                    <md-card-header-text>
+                        <span>Round {{round.roundNo}}: Unscored Hands</span>
+                    </md-card-header-text>
+                    <md-icon class = "md-secondary" ng-if="!tournamentStatusController.showUnscored[round.roundNo - 1]">expand_more</md-icon>
+                    <md-icon class = "md-secondary" ng-if="tournamentStatusController.showUnscored[round.roundNo - 1]">expand_less</md-icon>
+                </md-list-item>
+                <md-list-item ng-repeat="hand in round.unscoredHands"
+                              ng-click="tournamentStatusController.editHand(hand.handNo, hand.northSouthPair, hand.eastWestPair)"
+                              ng-if="tournamentStatusController.showUnscored[round.roundNo - 1]">
+                    <md-icon class="md-avatar-icon"
+                             md-font-set="material-icons"
+                             style="margin-left: 0">assignment</md-icon>
                     <div class="md-list-item-text">
                         <p>Board {{hand.handNo}} @ Table {{hand.tableNo}}</p>
                     </div>
                 </md-list-item>
             </md-list>
-            <md-card-header style="padding-bottom: 0"
-                            ng-if="round.unscoredHands.length != 0">
-                <md-card-header-text>
-                    <span class="md-title">Round {{round.roundNo}}: Unscored Hands</span>
-                </md-card-header-text>
-            </md-card-header>
-            <md-list style="padding-bottom: 0" class="md-dense"
-                     ng-if="round.unscoredHands.length != 0">
-                <md-list-item ng-repeat="hand in round.unscoredHands"
-                              ng-click="tournamentStatusController.editHand(hand.handNo, hand.northSouthPair, hand.eastWestPair)">
+            <md-divider ng-if="round.scoredHands.length != 0 && round.showScored.length != 0"></md-divider>
+            <md-list class="md-dense"
+                     style="padding: 0"
+                     ng-if="round.scoredHands.length != 0">
+                <md-list-item style="padding-bottom: 0"
+                              ng-if="round.scoredHands.length != 0"
+                              ng-click="tournamentStatusController.showScored[round.roundNo - 1] = !tournamentStatusController.showScored[round.roundNo - 1]">
+                    <md-icon class="md-avatar-icon material-icons"
+                             ng-class="{'completed-icon': round.unscoredHands.length == 0}"
+                             style="margin-left: 0px;"
+                             md-font-set="material-icons">
+                                 done
+                    </md-icon>
+                    <md-card-header-text>
+                        <span style="padding-top: 0.6em">Round {{round.roundNo}}: Scored Hands</span>
+                    </md-card-header-text>
+                    <md-icon class = "md-secondary" ng-if="!tournamentStatusController.showScored[round.roundNo - 1]">expand_more</md-icon>
+                    <md-icon class = "md-secondary" ng-if="tournamentStatusController.showScored[round.roundNo - 1]">expand_less</md-icon>
+                </md-list-item>
+                <md-list-item ng-repeat="hand in round.scoredHands"
+                              ng-click="tournamentStatusController.editHand(hand.handNo, hand.northSouthPair, hand.eastWestPair)"
+                              ng-style="{'background-color': '#eeeeee'}"
+                              ng-if="tournamentStatusController.showScored[round.roundNo - 1]">
                     <md-icon class="md-avatar-icon"
                              md-font-set="material-icons"
-                             style="margin-left: 0">assignment</md-icon>
+                             style="margin-left: 0">assignment_turned_in</md-icon>
                     <div class="md-list-item-text">
                         <p>Board {{hand.handNo}} @ Table {{hand.tableNo}}</p>
                     </div>
