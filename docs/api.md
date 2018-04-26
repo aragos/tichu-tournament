@@ -732,12 +732,14 @@ unscored status of all hands.
     {
         "rounds":  [
             {
-                "round_no": 1, 
+                "round": 1, 
                 "scored_hands": [
                      {
-                         "hand_no" : 13
+                         "hand" : 13
                          "ew_pair" : 1
+                         "ew_names": ["Anna", "Banana"]
                          "ns_pair" : 2
+                         "ns_names": ["Ewww", "I hate those"]
                          "table" : 12
                      }
                 ]
@@ -745,7 +747,9 @@ unscored status of all hands.
                      {
                          "hand_no" : 13
                          "ew_pair" : 1
+                         "ew_names": ["Blah", "blahblah"]
                          "ns_pair" : 2
+                         "ns_names": ["Names"]
                          "table" : 12
                      }
                 ]
@@ -756,15 +760,19 @@ unscored status of all hands.
 * `rounds`: List of objects. Each object contains the status of all hands in the round.
   Sorted in round order, where the number of objects is the number of rounds in the 
   tournament's movement.
-  * `round_no`: Integer. Number of the round. 
+  * `round`: Integer. Number of the round. 
   * `scored_hands`: List of objects. Each object is a hand that has already been
     scored in this round. Sorted in hand number, followed by table order.
-    * `hand_no` : Integer. Number of the hand. Must be between 1 and the number of hands
+    * `hand` : Integer. Number of the hand. Must be between 1 and the number of hands
       in this tournament configuration.
     * `ew_pair`: Integer. Number of the East/West pair in this matchup. Must be between 1
       and the number of pairs in the tournament configuration.
+    * `ew_names`: List of strings. Names of players playing East/West. Must have length
+      at most 2.
     * `ns_pair`: Integer. Number of the North/South pair in this matchup. Must be between 1
       and the number of pairs in the tournament configuration.
+    * `ns_names`: List of strings. Names of players playing North/South. Must have length
+      at most 2.
     * `table` : The table at which this hand is being played. Must be between 1 and
       the total number of tables in this tournament configuration.
   * `unscored_hands`: List of objects. Each object is a hand that has not yet been
@@ -773,8 +781,12 @@ unscored status of all hands.
       in this tournament configuration.
     * `ew_pair`: Integer. Number of the East/West pair in this matchup. Must be between 1
       and the number of pairs in the tournament configuration.
+    * `ew_names`: List of strings. Names of players playing East/West. Must have length
+      at most 2.
     * `ns_pair`: Integer. Number of the North/South pair in this matchup. Must be between 1
       and the number of pairs in the tournament configuration.
+    * `ns_names`: List of strings. Names of players playing North/South. Must have length
+      at most 2.
     * `table` : The table at which this hand is being played. Must be between 1 and
       the total number of tables in this tournament configuration.
 
