@@ -141,15 +141,15 @@
     if (this.deleting) {
       promise = this._movementService.clearScore(
           this._tournamentId,
-          this.hand.northSouthPair,
-          this.hand.eastWestPair,
+          this.hand.northSouthPair.pairNo,
+          this.hand.eastWestPair.pairNo,
           this.hand.handNo,
           this.pairCode);
     } else {
       promise = this._movementService.recordScore(
           this._tournamentId,
-          this.hand.northSouthPair,
-          this.hand.eastWestPair,
+          this.hand.northSouthPair.pairNo,
+          this.hand.eastWestPair.pairNo,
           this.hand.handNo,
           convertEditableToScore(this.score),
           this.pairCode);
@@ -174,9 +174,9 @@
     this.loadingChangeLog = true;
     var self = this;
     this._movementService.getChangeLog(this._tournamentId,
-    								   this.hand.handNo,
-                                       this.hand.northSouthPair, 
-                                       this.hand.eastWestPair)
+                                       this.hand.handNo,
+                                       this.hand.northSouthPair.pairNo, 
+                                       this.hand.eastWestPair.pairNo)
         .then(function(response) {
           self.loadingChangeLog = false;
           self.changeLog = response;

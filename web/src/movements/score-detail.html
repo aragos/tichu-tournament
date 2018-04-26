@@ -96,10 +96,17 @@
                 </div>
                 <div layout="row">
                     <div layout="column" style="width:10em;" flex="50">
-                        <h3 style="text-align: center;margin-top: 0">
-                            Pair #{{scoreDetailController.hand.northSouthPair}}
+                        <h3 style="text-align: center;margin-top: 0; margin-bottom: 0">
+                            Pair #{{scoreDetailController.hand.northSouthPair.pairNo}}
                         </h3>
-                        <md-input-container class="md-block">
+                        <md-card-header-text class="no-wrap" style="text-align:center;">
+                            <span>&ensp;<span>
+                            <span style="color: rgba(0, 0, 0, 0.5);"
+                                  ng-repeat="player in scoreDetailController.hand.northSouthPair.players">
+                                {{player.name}}<span ng-if="!$last">,&ensp;</span>
+                            </span>
+                        </md-card-header-text>
+                        <md-input-container class="md-block" style="margin: 20px 0 13px 0;">
                             <label for="northSouthScore">North/South</label>
                             <input id="northSouthScore"
                                    type="text"
@@ -137,10 +144,16 @@
                         </md-input-container>
                     </div>
                     <div layout="column" style="width:10em;" flex="50">
-                        <h3 style="text-align: center; margin-top: 0;">
-                            Pair #{{scoreDetailController.hand.eastWestPair}}
+                        <h3 style="text-align: center; margin-top: 0; margin-bottom:0;">
+                            Pair #{{scoreDetailController.hand.eastWestPair.pairNo}}
                         </h3>
-                        <md-input-container class="md-block">
+                        <md-card-header-text class="no-wrap" style="text-align:center;">
+                            <span>&ensp;<span>
+                            <span style="color: rgba(0, 0, 0, 0.5)" ng-repeat="player in scoreDetailController.hand.eastWestPair.players">
+                                {{player.name}}<span ng-if="!$last">,&ensp;</span>
+                            </span>
+                        </md-card-header-text>
+                        <md-input-container class="md-block" style="margin: 20px 0 13px 0;">
                             <label for="eastWestScore">East/West</label>
                             <input id="eastWestScore"
                                    type="string"

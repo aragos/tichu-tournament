@@ -114,13 +114,19 @@ tichu.RoundStatus = function RoundStatus() {
 
 /**
  * Holder for identifying a specific hand by participants, hand number, and table.
+ * 
+ * @param {tichu.TournamentPair} northSouthPair Pair playing North/South.
+ * @param {tichu.TournamentPair} eastWestPair Pair playing East/West.
+ * @param {number} tableNo Table at which this hand is being played.
+ * @param {number} handNo Hand number being played.
  * @constructor
  */
-tichu.HandIdentifier = function HandIdentifier() {
-  this.northSouthPair = 0;
-  this.eastWestPair = 0;
-  this.tableNo = 0;
-  this.handNo = 0;
+tichu.HandIdentifier = function HandIdentifier(northSouthPair, eastWestPair,
+                                               tableNo, handNo) {
+  this.northSouthPair = northSouthPair;
+  this.eastWestPair = eastWestPair;
+  this.tableNo = tableNo;
+  this.handNo = handNo;
 }
 
 /**
@@ -387,8 +393,8 @@ tichu.HandScore.prototype.toJSON = function toJSON() {
 /**
  * Structure containing information about a single hand, including its score (if any).
  * @constructor
- * @param {number} northSouthPair The north/south pair playing this hand.
- * @param {number} eastWestPair The east/west pair playing this hand.
+ * @param {tichu.TournamentPair} northSouthPair The north/south pair playing this hand.
+ * @param {tichu.TournamentPair} eastWestPair The east/west pair playing this hand.
  * @param {number} handNo The number of the hand.
  */
 tichu.Hand = function Hand(northSouthPair, eastWestPair, handNo) {
@@ -452,17 +458,11 @@ tichu.MovementRound = function MovementRound() {
    */
   this.side = tichu.PairPosition.NORTH_SOUTH;
 
-  /**
-   * The opposing pair number.
-   * @type {number}
+  /** 
+   * The opposition.
+   * @type (!tichu.TournamentPair} with pair_id unset.
    */
-  this.opponent = 0;
-
-  /**
-   * The names of the opponents.
-   * @type {string}
-   */
-  this.opponentNames = [];
+  this.opponent = null;
 
   /**
    * The hands contained within this movement, including scores if applicable.

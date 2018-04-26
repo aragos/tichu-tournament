@@ -220,8 +220,8 @@
   /**
    * Translates the given JSON object into a Hand.
    * @param {string} tournamentId The ID of the tournament this hand is for.
-   * @param {number} nsPair The north-south pair for this hand.
-   * @param {number} ewPair The east-west pair for this hand.
+   * @param {tichu.TournamentPair} nsPair The north-south pair for this hand.
+   * @param {tichu.TournamentPair} ewPair The east-west pair for this hand.
    * @param {string} roundContext The string context used for logging errors in parsing the hand.
    * @param {*} handData The JSON hand data to be parsed.
    * @param {number} handIndex The hand index used for logging errors in parsing the hand.
@@ -237,7 +237,9 @@
       throw new Error(handContext + " hand number was not a positive integer");
     }
     var score = this._parseHandScore(handContext, handData['score']);
-    var hand = this._movementStore.getOrCreateHand(tournamentId, nsPair, ewPair, handNo);
+    var hand = this._movementStore.getOrCreateHand(tournamentId, nsPair.pairNo, ewPair.pairNo, handNo);
+    hand.northSouthPair = nsPair;
+    hand.eastWestPair = ewPair;
     hand.score = score;
     return hand;
   };
@@ -245,14 +247,14 @@
   /**
    * Translates the given JSON object into a MovementRound.
    * @param {string} tournamentId The ID of the tournament this movement round is for.
-   * @param {number} pairNo The pair number this movement round is for.
+   * @param {tichu.TournamentPair} pair The pair this movement round is for.
    * @param {*} movementRound The JSON data for the current movement round.
    * @param {number} index The number of the current movement round, for logging purposes.
    * @returns {tichu.MovementRound}
    * @private
    */
   TichuMovementService.prototype._parseMovementRound = function _parseMovementRound(
-      tournamentId, pairNo, movementRound, index) {
+      tournamentId, pair, movementRound, index) {
     var context = "movement round[" + index + "]";
     ServiceHelpers.assertType(context , movementRound, "object");
     var round = new tichu.MovementRound();
@@ -263,12 +265,13 @@
     } else {
       round.isSitOut = false;
     }
-    round.opponent = ServiceHelpers.assertType(context + " opponent", movementRound['opponent'], 'number');
-    if (round.opponent <= 0 || Math.floor(round.opponent) !== round.opponent) {
+    round.opponent = new tichu.TournamentPair(
+        ServiceHelpers.assertType(context + " opponent", movementRound['opponent'], 'number'));
+    if (round.opponent.pairNo <= 0 || Math.floor(round.opponent.pairNo) !== round.opponent.pairNo) {
       throw new Error(context + " opponent was not a positive integer");
     }
-    ServiceHelpers.assertType(context + " opponent names", movementRound["opponent_names"], 'array');
-    round.opponentNames = movementRound["opponent_names"];
+    var opponent_names = ServiceHelpers.assertType(context + " opponent names", movementRound["opponent_names"], 'array');
+    round.opponent.setPlayers(opponent_names.map(function(n) {return {name: n};}));
     var position = ServiceHelpers.assertType(context + " position", movementRound['position'], "string");
     if (position.length <= 1) {
       throw new Error(context + " position was too short")
@@ -282,11 +285,11 @@
         context + " relay table", movementRound['relay_table'], "boolean");
     var nsPair, ewPair;
     if (round.position === tichu.PairPosition.NORTH_SOUTH) {
-      nsPair = pairNo;
+      nsPair = pair;
       ewPair = round.opponent;
     } else {
       nsPair = round.opponent;
-      ewPair = pairNo;
+      ewPair = pair;
     }
     ServiceHelpers.assertType(context + " hands", movementRound['hands'], 'array');
     round.hands = movementRound['hands'].map(this._parseHand.bind(this, tournamentId, nsPair, ewPair, context));
@@ -315,13 +318,13 @@
       });
     }
     ServiceHelpers.assertType("round list", data["movement"], "array");
-    var convertedRounds = data["movement"].map(this._parseMovementRound.bind(this, tournamentId, pairNo));
     var movement = this._movementStore.getOrCreateMovement(tournamentId, pairNo);
     movement.tournamentId.name = data["name"];
+    movement.pair.pairNo = pairNo;
     if (players) {
       movement.pair.setPlayers(players);
     }
-    movement.rounds = convertedRounds;
+    movement.rounds = data["movement"].map(this._parseMovementRound.bind(this, tournamentId, movement.pair));
     return movement;
   };
 

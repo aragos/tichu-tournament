@@ -287,8 +287,8 @@
    * Retrieves the score and calls of a specific hand.
    * @param {string} id The ID of the tournament to be retrieved.
    * @param {number} hand_no The hand number of the hand to be retrieved.
-   * @param {number} ns_pair The North/South pair number
-   * @param {number} ew_pair The East/West pair number
+   * @param {tichu.TournamentPair} ns_pair The North/South pair
+   * @param {tichu.TournamentPair} ew_pair The East/West pair
    * @returns {angular.$q.Promise<tichu.Hand>}
    */
   TichuTournamentService.prototype.getHand = function getHand(id, handNo, nsPair, ewPair) {
@@ -296,13 +296,13 @@
     var $log = this._$log;
     var promiseCacheKey =
         encodeURIComponent(id) + "/" + encodeURIComponent(handNo.toString())
-        + "/" + encodeURIComponent(nsPair);
+        + "/" + encodeURIComponent(nsPair.toString());
     if (!this._handPromises.get(promiseCacheKey)) {
       var self = this;
       var path = "/api/tournaments/" + encodeURIComponent(id) + "/hands/" + 
         encodeURIComponent(handNo.toString()) + "/" +
-        encodeURIComponent(nsPair.toString()) + "/" +
-        encodeURIComponent(ewPair.toString());;
+        encodeURIComponent(nsPair.pairNo.toString()) + "/" +
+        encodeURIComponent(ewPair.pairNo.toString());;
       this._handPromises.put(promiseCacheKey, this._$http({
         method: 'GET',
         url: path
@@ -380,12 +380,20 @@
    * @returns {tichu.HandIdentifier}
    */
   TichuTournamentService.prototype._parseHandIdentifier = function _parseHandIdentifier(data) {
-    var handId = new tichu.HandIdentifier();
-    handId.northSouthPair = data["ns_pair"];
-    handId.eastWestPair = data["ew_pair"];
-    handId.tableNo = data["table"];
-    handId.handNo = data["hand"]
-    return handId;
+    var nsPair = new tichu.TournamentPair(ServiceHelpers.assertType(
+        "parsing ns_pair", data["ns_pair"], "number"))
+    var ns_names = ServiceHelpers.assertType(
+        "parsing ns_names", data["ns_names"], "array")
+    nsPair.setPlayers(ns_names.map(function(n) { return {name: n}; }));
+    var ewPair = new tichu.TournamentPair(ServiceHelpers.assertType(
+        "parsing ew_pair", data["ew_pair"], "number"))
+    var ew_names = ServiceHelpers.assertType(
+        "parsing ew_names", data["ew_names"], "array")
+    ewPair.setPlayers(ew_names.map(function(n) {return {name: n} ;}));
+
+    return new tichu.HandIdentifier(nsPair, ewPair,
+        ServiceHelpers.assertType("parsing table", data["table"], "number"),
+        ServiceHelpers.assertType("parsing hand", data["hand"], "number"));
   }
 
   /**

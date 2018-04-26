@@ -33,3 +33,9 @@ md-list md-list-item .md-avatar-icon.completed-icon {
 .custom-fab md-fab-actions {
   width: 0px;
 }
+
+.no-wrap {
+  white-space: nowrap;
+  overflow-x: hidden;
+  text-overflow: ellipsis;
+}

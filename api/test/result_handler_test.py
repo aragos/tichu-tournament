@@ -111,14 +111,17 @@ class AppTest(unittest.TestCase):
     params = {'ns_score': 75,
               'ew_score': 25}
     response = self.testapp.put_json(
-        "/api/tournaments/{}/hands/10/1/3".format(id), params)
+        "/api/tournaments/{}/hands/7/2/7".format(id), params)
     response = self.testapp.get(
         "/api/tournaments/{}/handStatus".format(id))
     self.assertEqual(response.status_int, 200)
     response_dict = json.loads(response.body)
     num_unscored = sum([len(x['unscored_hands']) for x in response_dict['rounds']])
     num_scored = sum([len(x['scored_hands']) for x in response_dict['rounds']])
-    expected_scored = [{"hand": 10, "ns_pair": 1, "ew_pair" : 3, "table" : 1}]
+    expected_scored = [{"hand": 7, "ns_pair": 2,
+                        "ew_pair" : 7, "table" : 2,
+                        "ns_names": ["My name", None],
+                        "ew_names": [None, None]}]
     self.assertEqual(71, num_unscored)
     self.assertEqual(1, num_scored)
     self.assertEqual(expected_scored, response_dict['rounds'][0]['scored_hands'])
@@ -176,4 +179,3 @@ class AppTest(unittest.TestCase):
       user_id=id,
       user_is_admin='1' if is_admin else '0',
       overwrite=True)
-

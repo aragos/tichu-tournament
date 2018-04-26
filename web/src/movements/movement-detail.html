@@ -18,11 +18,11 @@
                             <span ng-switch-default>{{ round.position }}</span>
                         </span></span>
                     </span>
-                    <span class="md-subhead" ng-if="!round.isSitOut"
-                          style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; width: 300px">
-                        vs. Pair #{{round.opponent}}: 
-                        <span ng-repeat="player in round.opponentNames">
-                            {{player}}<span ng-if="!$last">,&ensp;
+                    <span class="md-subhead no-wrap" ng-if="!round.isSitOut"
+                          style="width: 21em">
+                        vs. Pair #{{round.opponent.pairNo}}: 
+                        <span ng-repeat="player in round.opponent.players">
+                            {{player.name}}<span ng-if="!$last">,&ensp;
                     </span>
                 </span>
                     </span>
@@ -47,10 +47,10 @@
                         <div class="md-list-item-text" layout="column">
                             <h3>Board #{{hand.handNo}}<span ng-if="round.isRelayTable">R</span></h3>
                             <p ng-if="hand.score">
-                                [#{{ round.position == "N" ? movementDetailController.movement.pair.pairNo : round.opponent }}]
+                                [#{{ round.position == "N" ? movementDetailController.movement.pair.pairNo : round.opponent.pairNo }}]
                                 {{hand.score.northSouthScore}}
                                 vs.
-                                [#{{ round.position == "N" ? round.opponent : movementDetailController.movement.pair.pairNo }}]
+                                [#{{ round.position == "N" ? round.opponent.pairNo : movementDetailController.movement.pair.pairNo }}]
                                 {{hand.score.eastWestScore}}
                             </p>
                             <p ng-if="!hand.score">Click to score hand</p>

@@ -16,6 +16,24 @@ from python.xlsxio import OutputWorkbookAsBytesIO
 from models import PlayerPair
 from models import Tournament
 
+def GetPlayerListForTourney(tourney):
+  ''' Returns a list of tuples of names for every pair.'''
+  name_list = range(1, tourney.no_pairs + 1)
+  for player_pair in PlayerPair.query(ancestor=tourney.key).fetch():
+    if player_pair.players:
+      player_list = player_pair.player_list()
+      if not player_list:
+        continue
+      elif len(player_list) == 1:
+        name_list[player_pair.pair_no - 1] = (player_list[0].get("name"),
+                                              None)
+      else:
+        name_list[player_pair.pair_no - 1] = (player_list[0].get("name"),
+                                              player_list[1].get("name"))
+    else:
+      name_list[player_pair.pair_no - 1] = (None, None)
+  return name_list
+
 class CompleteScoringHandler(GenericHandler):
   ''' Handles calls to /api/tournament/:id/handStatus '''
   
@@ -33,7 +51,8 @@ class CompleteScoringHandler(GenericHandler):
         tourney.legacy_version_id)
     if not movement:
       return
-    
+
+    name_list= GetPlayerListForTourney(tourney)
     scored_hands = self._TuplesToDict(tourney.ScoredHands())
     unscored_hands = []
     round_list = []
@@ -48,8 +67,11 @@ class CompleteScoringHandler(GenericHandler):
         if not hands or not round.is_north:
           continue
         for hand in hands:
-          hand_dict = {"hand" : hand, "ns_pair": team_no,
-                       "ew_pair" : round.opponent, "table" : round.table }
+          hand_dict = {"hand" : hand, "ns_pair": team_no, 
+                       "ns_names": list(name_list[team_no - 1]),
+                       "ew_pair" : round.opponent,
+                       "ew_names": list(name_list[round.opponent - 1]),
+                       "table" : round.table }
           if hand in scored_hands.get(team_no, []):
             scored_unscored = "scored_hands" 
           else: 
@@ -113,7 +135,7 @@ class XlxsResultHandler(GenericHandler):
     ap_summaries = summaries
     boards.sort(key=lambda bs : bs._board_no, reverse = False)
     wb = WriteResultsToXlsx(max_rounds, mp_summaries, ap_summaries, boards,
-                            name_list=self._GetPlayerListForTourney(tourney))
+                            name_list=GetPlayerListForTourney(tourney))
     self.response.out.write(OutputWorkbookAsBytesIO(wb).getvalue())
     self.response.headers['Content-Type'] = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     self.response.headers['Content-disposition'] = str('attachment; filename=' + 
@@ -121,21 +143,4 @@ class XlxsResultHandler(GenericHandler):
     self.response.headers['Content-Transfer-Encoding'] = 'Binary'
     self.response.set_status(200)
 
-
-  def _GetPlayerListForTourney(self, tourney):
-    name_list = range(1, tourney.no_pairs + 1)
-    for player_pair in PlayerPair.query(ancestor=tourney.key).fetch():
-      if player_pair.players:
-        player_list = player_pair.player_list()
-        if not player_list:
-          continue
-        elif len(player_list) == 1:
-          name_list[player_pair.pair_no - 1] = (player_list[0].get("name"),
-                                                None)
-        else:
-          name_list[player_pair.pair_no - 1] = (player_list[0].get("name"),
-                                                player_list[1].get("name"))
-      else:
-        name_list[player_pair.pair_no - 1] = (None, None)
-    return name_list
 
