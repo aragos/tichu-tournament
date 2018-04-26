@@ -343,8 +343,8 @@
     for (var i = 0; i < from_hands.length; i++) {
       var handId = from_hands[i];
       if (handId.handNo == handNo &&
-          handId.northSouthPair == nsPair &&
-          handId.eastWestPair == ewPair) {
+          handId.northSouthPair.pairNo == nsPair &&
+          handId.eastWestPair.pairNo == ewPair) {
         found = i;
         break;
       } else if (handId.handNo > handNo) {
