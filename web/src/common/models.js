@@ -179,6 +179,11 @@ tichu.Tournament = function Tournament(header) {
    * @type {boolean}
    */
   this.hasScoredHands = false;
+  /**
+   * Whether non administrators are allowed to overwrite scores.
+   * @type {boolean}
+   */
+  this.allow_score_overwrites = false;
 };
 
 Object.defineProperty(tichu.Tournament.prototype, "id", {
@@ -279,6 +284,11 @@ tichu.TournamentRequest = function TournamentRequest() {
    * @type {tichu.PlayerRequest[]}
    */
   this.players = [];
+  /**
+   * Whether non administrators are allowed to overwrite scores.
+   * @type {boolean}
+   */
+  this.allow_score_overwrites = false;
 };
 
 /** Converts the names of this TournamentRequest into the form the server expects. */
@@ -287,7 +297,8 @@ tichu.TournamentRequest.prototype.toJSON = function toJSON() {
     'name': this.name,
     'no_pairs': this.noPairs,
     'no_boards': this.noBoards,
-    'players': this.players
+    'players': this.players,
+    'allow_score_overwrites': this.allow_score_overwrites
   }
 };
 

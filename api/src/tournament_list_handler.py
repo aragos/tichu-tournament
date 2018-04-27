@@ -40,6 +40,7 @@ class TourneyListHandler(GenericHandler):
     no_pairs = request_dict['no_pairs']
     no_boards = request_dict['no_boards']
     player_list = request_dict.get('players')
+    allow_score_overwrites = request_dict.get('allow_score_overwrites', False)
     if not self._CheckValidTournamentInfoAndMaybeSetStatus(name, no_pairs,
                                                            no_boards,
                                                            player_list):
@@ -50,6 +51,11 @@ class TourneyListHandler(GenericHandler):
                                           no_pairs=no_pairs,
                                           no_boards=no_boards,
                                           boards=boardgenerator.GenerateBoards(35))
+    if allow_score_overwrites:
+      tourney.Unlock()
+    else:
+      tourney.MakeLockable()
+    
     tourney.PutPlayers(player_list, no_pairs)
     self.response.set_status(201)
     self.response.headers['Content-Type'] = 'application/json'

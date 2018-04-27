@@ -74,6 +74,7 @@
       this.tournament.name = this.original.name;
       this.tournament.noBoards = this.original.noBoards;
       this.tournament.noPairs = this.original.noPairs;
+      this.tournament.allow_score_overwrites = this.original.allow_score_overwrites
       var players = this.tournament.players;
       this.original.pairs.forEach(function(pair) {
         pair.players.forEach(function(player) {

@@ -34,10 +34,10 @@ class TourneyHandler(GenericHandler):
     if not CheckUserOwnsTournamentAndMaybeReturnStatus(self.response, user,
                                                        tourney):
       return
-
     combined_dict = {'no_pairs' : tourney.no_pairs,
                      'no_boards' :tourney.no_boards,
                      'name' : tourney.name,
+                     'allow_score_overwrites' : tourney.IsUnlocked(),
                      'hands' : tourney.GetScoredHandList()}
     player_pairs = PlayerPair.query(ancestor=tourney.key).fetch()
     player_pairs.sort(key = lambda p : p.pair_no)
@@ -70,6 +70,7 @@ class TourneyHandler(GenericHandler):
     no_pairs = request_dict['no_pairs']
     no_boards = request_dict['no_boards']
     player_list = request_dict.get('players')
+    allow_score_overwrites = request_dict.get('allow_score_overwrites', False)
     if not self._CheckValidTournamentInfoAndMaybeSetStatus(name, no_pairs,
                                                            no_boards,
                                                            player_list,
@@ -84,6 +85,10 @@ class TourneyHandler(GenericHandler):
     tourney.no_pairs = no_pairs
     tourney.no_boards = no_boards
     tourney.name = name
+    if allow_score_overwrites:
+      tourney.Unlock()
+    else:
+      tourney.MakeLockable()
     tourney_key = tourney.put()
     tourney.PutPlayers(player_list, no_pairs)
 

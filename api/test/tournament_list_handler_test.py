@@ -73,9 +73,26 @@ class AppTest(unittest.TestCase):
     params = {'name': 'name1', 'no_pairs': 8, 'no_boards': 21}
     response = self.testapp.post_json("/api/tournaments", params, expect_errors=True)
     self.assertEqual(response.status_int, 400)
-    
 
-  def testListTournaments_unauthorized(self):
+  def testCreateTournament_lock_state_lockable(self):
+    self.loginUser()
+    params = {'name': 'name', 'no_pairs': 8, 'no_boards': 24, 
+              'allow_score_overwrites': True}
+    response = self.testapp.post_json("/api/tournaments", params)
+    self.assertNotEqual(response.body, '')
+    response_dict = json.loads(response.body)
+    id = response_dict['id']
+    
+  def testCreateTournament_lock_state_unlocked(self):
+    self.loginUser()
+    params = {'name': 'name', 'no_pairs': 8, 'no_boards': 24, 
+              'allow_score_overwrites': False}
+    response = self.testapp.post_json("/api/tournaments", params)
+    self.assertNotEqual(response.body, '')
+    response_dict = json.loads(response.body)
+    id = response_dict['id']
+
+  def testCreateTournaments_unauthorized(self):
     response = self.testapp.get("/api/tournaments", expect_errors=True)
     self.assertEqual(response.status_int, 401)
 

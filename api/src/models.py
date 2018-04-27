@@ -11,6 +11,15 @@ AVGPP = 777
 AVGM = 888
 AVGMM = 999
 
+# Lock states. Internal codes for the lock state of the tournament.
+INVALID = -1
+# Teams involved in the hand can edit hand even if it's already been scored.
+UNLOCKED = 0
+# Teams involved in the hand can score a hand but cannot overwrite hands that
+# have already been scored.
+LOCKABLE = 1
+# Only administrators can score any hands.
+LOCKED = 2
 
 class Tournament(ndb.Model):
   ''' Model for all the information needed to describe a Tournament
@@ -23,12 +32,15 @@ class Tournament(ndb.Model):
     legacy_version_id: A legacy version of a movement used to make sure old
                        tournaments do not crash after movement changes. Usually
                        unset. 
+    lock_status: The amount of write access non-administrators have to score 
+                 hands. See full descriptions in constant definitions above.
   '''
   owner_id = ndb.StringProperty()
   name = ndb.StringProperty()
   no_boards = ndb.IntegerProperty()
   no_pairs = ndb.IntegerProperty()
   legacy_version_id = ndb.IntegerProperty()
+  lock_status = INVALID
 
   @classmethod
   def CreateAndPersist(cls, boards, **kwargs):
@@ -231,6 +243,65 @@ class Tournament(ndb.Model):
 
     return sorted(boards, key=lambda x: x.id)
 
+  def IsLocked(self):
+    if self.lock_status == INVALID:
+      ls = LockStatus.CreateKey(self).get()
+      self.lock_status = ls.lock_status if ls else INVALID
+    return self.lock_status == LOCKED
+    
+  def IsLockable(self):
+    if self.lock_status == INVALID:
+      ls = LockStatus.CreateKey(self).get()
+      self.lock_status = ls.lock_status if ls else INVALID
+    return self.lock_status == LOCKABLE
+    
+  def IsUnlocked(self):
+    if self.lock_status == INVALID:
+      ls = LockStatus.CreateKey(self).get()
+      self.lock_status = ls.lock_status if ls else INVALID
+    return (not self.lock_status) or self.lock_status == UNLOCKED
+  
+  def SetLockStatus(self):
+    lock_status = LockStatus(lock_status=self.lock_status, key=LockStatus.CreateKey(self))
+    lock_status.put()
+  
+  def Lock(self):
+    self.lock_status = LOCKED
+    self.SetLockStatus()
+      
+  def Unlock(self):
+    self.lock_status = UNLOCKED
+    self.SetLockStatus()
+    
+  def MakeLockable(self):
+    self.lock_status = LOCKABLE
+    self.SetLockStatus()
+
+class LockStatus(ndb.Model):
+  ''' Model for the status of lockability of a specific tournament.
+  
+  Refers to whether a tournament is locked (only administrator may edit hands),
+  lockable (a hand cannot be overwritten after scoring excpt by admin), or UNLOCKED
+  (can be overwritten any number of times). Must be a child of some tournament.
+  
+  Attributes:
+    lock_status: int defined in constants above.
+  '''
+  lock_status = ndb.IntegerProperty()
+  
+  @classmethod
+  def CreateKey(cls, parent_tourney):
+    ''' Create a key for a parent_tourney.
+
+    The id is always going to be 1 as there is at most 1 LockStatus per 
+    tournament.
+    Args:
+      parent_tourney: Tournament. Tournament in which this hand happened.
+
+    Returns:
+      ndb.Key that has parent_tourney as a parent.
+    '''
+    return ndb.Key(cls._get_kind(), 1, parent=parent_tourney.key)
 
 class PlayerPair(ndb.Model):
   ''' Model for all the information about a player pair in a specific tournament.

@@ -75,6 +75,42 @@ class AppTest(unittest.TestCase):
     self.assertEqual(1, response_dict['players'][0]["pair_no"])
     self.assertEqual("my name", response_dict['players'][0]["name"])
 
+  def testGetTournament_NoLockStatus(self):
+    self.loginUser()
+    id = self.AddBasicTournament()
+    response = self.testapp.get("/api/tournaments/{}".format(id))
+    self.assertEqual(response.status_int, 200)
+    response_dict = json.loads(response.body)
+    self.assertEqual(False, response_dict["allow_score_overwrites"])
+    
+  def testGetTournament_LockStatusLockable(self):
+    self.loginUser()
+    params = {'name': 'name', 'allow_score_overwrites': False,
+              'no_pairs': 9, 'no_boards': 27}
+    response = self.testapp.post_json("/api/tournaments", params)
+    response_dict = json.loads(response.body)
+    id = response_dict['id']
+    self.assertNotEqual(response.body, '')
+    response_dict = json.loads(response.body)
+    response = self.testapp.get("/api/tournaments/{}".format(id))
+    self.assertEqual(response.status_int, 200)
+    response_dict = json.loads(response.body)
+    self.assertEqual(False, response_dict["allow_score_overwrites"])
+
+  def testGetTournament_LockStatusUnlocked(self):
+    self.loginUser()
+    params = {'name': 'name', 'allow_score_overwrites': True,
+              'no_pairs': 9, 'no_boards': 27}
+    response = self.testapp.post_json("/api/tournaments", params)
+    response_dict = json.loads(response.body)
+    id = response_dict['id']
+    self.assertNotEqual(response.body, '')
+    response_dict = json.loads(response.body)
+    response = self.testapp.get("/api/tournaments/{}".format(id))
+    self.assertEqual(response.status_int, 200)
+    response_dict = json.loads(response.body)
+    self.assertEqual(True, response_dict["allow_score_overwrites"])
+
   def testGetTournament_Hands(self):
     self.loginUser()
     id = self.AddBasicTournament()
@@ -396,6 +432,28 @@ class AppTest(unittest.TestCase):
     new_ids = json.loads(self.testapp.get(
         "/api/tournaments/{}/pairids".format(id)).body)["pair_ids"]
     self.assertEqual(original_ids, new_ids)
+
+  def testPutTournament_LockStatusLockable(self):
+    self.loginUser()
+    id = self.AddBasicTournament()
+    params = {'name': 'name', 'allow_score_overwrites': False,
+              'no_pairs': 9, 'no_boards': 27}
+    self.testapp.put_json("/api/tournaments/{}".format(id), params)
+    response = self.testapp.get("/api/tournaments/{}".format(id))
+    self.assertEqual(response.status_int, 200)
+    response_dict = json.loads(response.body)
+    self.assertEqual(False, response_dict["allow_score_overwrites"])
+
+  def testPutTournament_LockStatusUnlocked(self):
+    self.loginUser()
+    id = self.AddBasicTournament()
+    params = {'name': 'name', 'allow_score_overwrites': True,
+              'no_pairs': 9, 'no_boards': 27}
+    self.testapp.put_json("/api/tournaments/{}".format(id), params)
+    response = self.testapp.get("/api/tournaments/{}".format(id))
+    self.assertEqual(response.status_int, 200)
+    response_dict = json.loads(response.body)
+    self.assertEqual(True, response_dict["allow_score_overwrites"])
 
   def testDeleteTournament_not_logged_in(self):
     self.loginUser()

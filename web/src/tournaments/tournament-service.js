@@ -453,6 +453,9 @@
       pair.setPlayers(playerLists[index]);
     });
     tournament.hasScoredHands = hasScoredHands;
+    tournament.allow_score_overwrites = 
+        ServiceHelpers.assertType('tournament hand overwrites',
+                                  data['allow_score_overwrites'], 'boolean');
     return tournament;
   };
 
