@@ -97,15 +97,24 @@ class HandHandler(GenericHandler):
     '''
     tourney = GetTourneyWithIdAndMaybeReturnStatus(self.response, id)
     if not tourney:
-      return
+      return      
 
     if not CheckValidHandPlayersCombinationAndMaybeSetStatus(
         self.response, tourney, board_no, ns_pair, ew_pair):
       return
 
+    user_has_access, change_pair_no = self._CheckUserHasAccessMaybeSetStatus(
+        tourney, int(ns_pair), int(ew_pair))
+    if not user_has_access:
+      return
+
+    if not self._CanPutHandAndMaybeSetStatus(tourney, board_no, ns_pair, ew_pair):
+      return
+
     request_dict = self._ParsePutRequestInfoAndMaybeSetStatus()
     if not request_dict:
       return
+
     calls = request_dict.setdefault("calls", {})
     ns_score = request_dict.get("ns_score")
     ew_score = request_dict.get("ew_score")
@@ -116,13 +125,8 @@ class HandHandler(GenericHandler):
                                                   ew_score, calls):
       return
 
-    user_has_access, change_pair_no = self._CheckUserHasAccessMaybeSetStatus(
-        tourney, int(ns_pair), int(ew_pair))
-    if not user_has_access:
-      return
-    else:
-      tourney.PutHandScore(int(board_no), int(ns_pair), int(ew_pair), calls,
-                           ns_score, ew_score, notes, change_pair_no)
+    tourney.PutHandScore(int(board_no), int(ns_pair), int(ew_pair), calls,
+                         ns_score, ew_score, notes, change_pair_no)
     self.response.set_status(204)
 
   def delete(self, id, board_no, ns_pair, ew_pair):
@@ -196,7 +200,7 @@ class HandHandler(GenericHandler):
     is in one of the teams playing the hand. Directors always have access.
 
     Args:
-      tourney. Tournament. Current tournament.
+      tourney: Tournament. Current tournament.
       ns_pair: Integer. Pair number of team playing North/South.
       ew_pair: Integer. Pair number of team playing East/West.
 
@@ -225,6 +229,39 @@ class HandHandler(GenericHandler):
                      "the wrong code for involved pairs")
       return (False, None)
     return (True, next(p.pair_no for p in player_pairs if p.id == pair_id))
+
+
+  def _CanPutHandAndMaybeSetStatus(self, tourney, board_no, ns_pair, ew_pair):
+    ''' Tests whether the tournament lock stats allows this user to write a hand.
+  
+    The owner is always allowed to write a hand. Pair code players can write a hand
+    if the tournament is UNLOCKED or if it is LOCKABLE and no hand is currently 
+    written.
+  
+    Args:
+      tourney: Tournament. Current tournament. 
+      board_no: Integer. Hand number.
+      ns_pair: Integer. Pair number of team playing North/South.  
+      ew_pair: Integer. Pair number of team playing East/West.
+
+    Returns:
+      Boolean. True iff the put call is allowed.
+    '''
+    user = users.get_current_user()
+    if (user and tourney.owner_id == user.user_id()) or tourney.IsUnlocked():
+      return True
+    if tourney.IsLocked():
+      SetErrorStatus(self.response, 405, "Forbidden by Tournament Status",
+                     "This tournament is locked. No hands can be edited by non-directors")
+      return False
+    hand_score = HandScore.GetByHandParams(tourney, board_no, ns_pair, ew_pair)
+    if not hand_score:
+	  return True
+    SetErrorStatus(self.response, 405, "Forbidden by Tournament Status",
+	               ("Hand {} was between teams {} and {} was already scored " + 
+	               "and cannot be overwritten by non-directors.").format(board_no, ns_pair, ew_pair))
+    return False
+
 
   def _ParsePutRequestInfoAndMaybeSetStatus(self):
     ''' Parse the body of the request.

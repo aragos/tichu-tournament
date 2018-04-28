@@ -56,6 +56,7 @@ Creates a new tournament owned by the currently logged in director.
             "name": "Michael the Magnificent",
             "email": "michael@michael.com"
         }]
+        "allow_score_overwrites" : true
     }
 
 * `name`: String. A user-specified and user-readable name suitable for display in a tournament list.
@@ -70,6 +71,10 @@ Creates a new tournament owned by the currently logged in director.
     * `name`: String. User-readable name for the player. Optional.
     * `email`: String. Email for the player that can be used to identify user posting hand
       results. Optional.
+* `allow_score_overwrites`: Whether non-administrator players are allowed to overwrite 
+  existing scores. If false, players can only enter scores for non-scored hands. Optional,
+  defaults to false.
+
 
 #### Status codes
 
@@ -128,7 +133,8 @@ Retrieves the details about a tournament owned by the currently logged in direct
             "ns_score": 150,
             "ew_score": -150,
             "notes": "hahahahahaha what a fool"
-        }]
+        }],
+        "allow_score_overwrites" : true   
     }
 
 * `name`: String. A user-specified and user-readable name suitable for display in a tournament list.
@@ -159,6 +165,8 @@ Retrieves the details about a tournament owned by the currently logged in direct
     * `ew_score`: Integer or string. The score of the east-west pair, including Tichu bonuses and
       penalties. May also be the string "AVG", "AVG+", "AVG++", "AVG-", or "AVG--".
     * `notes`: String. Any additional notes about the hand added by the scorer or the director.
+* `allow_score_overwrites`: Whether non-administrator players are allowed to overwrite 
+  existing scores. If false, players can only enter scores for non-scored hands. Required.
 
 ### Update tournament (PUT /api/tournaments/:id)
 
@@ -179,7 +187,8 @@ Updates the details about a tournament owned by the currently logged in director
             "pair_no": 1,
             "name": "Michael the Magnificent",
             "email": "michael@michael.com"
-        }]
+        }],
+        "allow_score_overwrites" : true
     }
 
 * `name`: String. A user-specified and user-readable name suitable for display in a tournament list.
@@ -197,6 +206,9 @@ Updates the details about a tournament owned by the currently logged in director
     * `name`: String. User-readable name for the player. Optional.
     * `email`: String. Email for the player that can be used to identify user posting hand
       results. Optional.
+* `allow_score_overwrites`: Whether non-administrator players are allowed to overwrite 
+  existing scores. If false, players can only enter scores for non-scored hands. Optional,
+  defaults to false.
 
 #### Status codes
 
@@ -551,8 +563,12 @@ Checks if the given hand was already scored.
 
 ### Submit score for hand (PUT /api/tournaments/:id/hands/:board_no/:ns_pair/:ew_pair)
 
-**Requires that the user is authenticated and owns this tournament or the request
-header contain an appropriate pair id**, Submits a score for the given hand.
+**Requires that the user is authenticated and owns this tournament or that the request
+header contain an appropriate pair id and the lock state of the tournament allows this**,
+Submits a score for the given hand. The tournament can be in three states, LOCKED
+LOCKABLE, and UNLOCKED. The tournament owner is always allowed to issue a put call.
+A pair-id pair can succeed with a PUT request only if the tournament is UNLOCKED or 
+the tournament is LOCKABLE and the hand does not have an existing score recording.
 
 #### Request Header
 Optional. Necessary only for overriding hand scores for non-tournament owners.
@@ -602,10 +618,12 @@ Optional. Necessary only for overriding hand scores for non-tournament owners.
 
 * **204**: The hand has been scored.
 * **400**: Validation failed for one or more of the fields in the score.
-* **403**: The user does not own this tournament is not logged in and the request was not authenticate
+* **403**: The user does not own this tournament is not logged in and the request was not authenticated
   with the right pair id.
 * **404**: The tournament with the given ID does not exist, the board/pair numbers are invalid
   or the pairs are not scheduled to play this board in the tournament movement scheme.
+* **405**: The tournament with this ID exists, but the tournament lock status does not
+  permit overwriting an existing hand.
 * **500**: Server failed to score the hand for any other reason.
 
 ### Delete score for hand (DELETE /api/tournaments/:id/hands/:board_no/:ns_pair/:ew_pair)

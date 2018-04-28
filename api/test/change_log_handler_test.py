@@ -201,7 +201,8 @@ class AppTest(unittest.TestCase):
   def AddBasicTournament(self):
     params = {'name': 'name', 'no_pairs': 8, 'no_boards': 24,
               'players': [{'pair_no': 2, 'name': "My name", 'email': "My email"},
-                          {'pair_no': 7}]}
+                          {'pair_no': 7}],
+              'allow_score_overwrites': True}
     response = self.testapp.post_json("/api/tournaments", params)
     self.assertNotEqual(response.body, '')
     response_dict = json.loads(response.body)

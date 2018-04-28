@@ -309,6 +309,63 @@ class AppTest(unittest.TestCase):
                                      params, expect_errors=True)
     self.assertEqual(response.status_int, 400)
 
+  def testPutLockable_director(self):
+    self.loginUser();
+    params = {'name': 'name', 'no_pairs': 8, 'no_boards': 24,
+              'players': [{'pair_no': 2, 'name': "My name", 'email': "My email"},
+                          {'pair_no': 7}],
+              'allow_score_overwrites': False}
+    response = self.testapp.post_json("/api/tournaments", params)
+    self.assertNotEqual(response.body, '')
+    response_dict = json.loads(response.body)
+    id = response_dict['id']
+    self.assertIsNotNone(id)
+    params = {'calls': { 'north': "T" }, 
+              'ns_score': 75,
+              'ew_score': 125,
+              'notes': 'I am a note'}
+    response = self.testapp.put_json("/api/tournaments/{}/hands/1/2/3".format(id),
+                                     params)
+    self.assertEqual(response.status_int, 204)
+    params = {'calls': { 'north': "GT" }, 
+              'ns_score': 175,
+              'ew_score': 125,
+              'notes': 'I am a different note'}
+    response = self.testapp.put_json("/api/tournaments/{}/hands/1/2/3".format(id),
+                                     params)
+    self.assertEqual(response.status_int, 204)
+
+  def testPutLockable_non_director(self):
+    self.loginUser()
+    params = {'name': 'name', 'no_pairs': 8, 'no_boards': 24,
+              'players': [{'pair_no': 2, 'name': "My name", 'email': "My email"},
+                          {'pair_no': 7}],
+              'allow_score_overwrites': False}
+    response = self.testapp.post_json("/api/tournaments", params)
+    self.assertNotEqual(response.body, '')
+    response_dict = json.loads(response.body)
+    id = response_dict['id']
+    self.assertIsNotNone(id)
+    response = self.testapp.get("/api/tournaments/{}/pairids/2".format(id))
+    opaque_id = json.loads(response.body)['pair_id']
+    self.logoutUser()
+    params = {'calls': { 'north': "T" }, 
+              'ns_score': 75,
+              'ew_score': 125,
+              'notes': 'I am a note'}
+    hand_headers = {'X-tichu-pair-code' : str(opaque_id)}
+    response = self.testapp.put_json("/api/tournaments/{}/hands/1/2/3".format(id),
+                                     params, headers=hand_headers)
+    self.assertEqual(response.status_int, 204)
+    params = {'calls': { 'north': "GT" }, 
+              'ns_score': 175,
+              'ew_score': 125,
+              'notes': 'I am a different note'}
+    response = self.testapp.put_json("/api/tournaments/{}/hands/1/2/3".format(id),
+                                     params, headers=hand_headers, 
+                                     expect_errors=True)
+    self.assertEqual(response.status_int, 405)
+
   def testPut(self):
     self.loginUser()
     id = self.AddBasicTournament()
@@ -500,7 +557,8 @@ class AppTest(unittest.TestCase):
   def AddBasicTournament(self):
     params = {'name': 'name', 'no_pairs': 8, 'no_boards': 24,
               'players': [{'pair_no': 2, 'name': "My name", 'email': "My email"},
-                          {'pair_no': 7}]}
+                          {'pair_no': 7}],
+              'allow_score_overwrites': True}
     response = self.testapp.post_json("/api/tournaments", params)
     self.assertNotEqual(response.body, '')
     response_dict = json.loads(response.body)
