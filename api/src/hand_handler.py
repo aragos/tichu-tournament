@@ -258,7 +258,7 @@ class HandHandler(GenericHandler):
     if not hand_score:
 	  return True
     SetErrorStatus(self.response, 405, "Forbidden by Tournament Status",
-	               ("Hand {} was between teams {} and {} was already scored " + 
+	               ("Hand {} between teams {} and {} was already scored " + 
 	               "and cannot be overwritten by non-directors.").format(board_no, ns_pair, ew_pair))
     return False
 
