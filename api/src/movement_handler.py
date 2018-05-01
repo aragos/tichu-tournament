@@ -62,6 +62,7 @@ class MovementHandler(GenericHandler):
     combined_dict = {
       'name' : tourney.name,
       'players' : player_pair.player_list(),
+      'allow_score_overwrites' : tourney.IsUnlocked(),
       'movement': movement_list
     }
 

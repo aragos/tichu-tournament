@@ -411,6 +411,7 @@ Optional. Necessary only for non-tournament owners.
             "name": "Anna the Amazing",
             "email": "anna@anna.com"
         }]
+        "allow_score_overwrites": true
         "movement": [{
             "round": 1
             "position": "3N"
@@ -470,6 +471,8 @@ Optional. Necessary only for non-tournament owners.
     * `name`: String. User-readable name for the player. Optional.
     * `email`: String. Email for the player that can be used to identify user posting hand
       results. Optional.
+* `allow_score_overwrites`: Whether non-administrator players are allowed to overwrite 
+  existing scores. If false, players can only enter scores for non-scored hands. Required.
 * `movement`: List of objects. The generated movement that records all hands that this team
   plays along with associated opponents and position to be played from. An object for each
   round in the tournament will be included. If the pair requested did not play in the round
@@ -625,6 +628,32 @@ Optional. Necessary only for overriding hand scores for non-tournament owners.
 * **405**: The tournament with this ID exists, but the tournament lock status does not
   permit overwriting an existing hand.
 * **500**: Server failed to score the hand for any other reason.
+
+#### Response
+
+Only set for **403** Status code. Returns current score for this hand.
+
+    {
+       "calls": {
+            "north": "T",
+            "east": "GT",
+            "west": "",
+            "south": ""
+       },
+       "ns_score": 150,
+       "ew_score": -150,
+       "notes": "hahahahahaha what a fool"
+    }
+
+* `calls`: Object. Calls made by players. May have entries for `north`, `east`, `west`, `south`.
+  Each entry may be `"T"`, indicating a call of Tichu, `"GT"`, indicating a call of Grand Tichu,
+  or `""`, indicating no call. If an entry is absent, it is assumed to mean no call.
+* `ns_score`: Integer or string. The score of the north-south pair, including Tichu bonuses and
+   penalties. May also be the string "AVG", "AVG+", "AVG++", "AVG-", or "AVG--".
+* `ew_score`: Integer or string. The score of the east-west pair, including Tichu bonuses and
+   penalties. May also be the string "AVG", "AVG+", "AVG++", "AVG-", or "AVG--".
+* `notes`: String. Any additional notes about the hand added by the scorer or the director.
+
 
 ### Delete score for hand (DELETE /api/tournaments/:id/hands/:board_no/:ns_pair/:ew_pair)
 

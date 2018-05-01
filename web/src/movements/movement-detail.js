@@ -176,7 +176,8 @@
           hand: hand,
           pairCode: this.playerCode,
           position: round.position,
-          tournamentId: this.movement.tournamentId.id
+          tournamentId: this.movement.tournamentId.id,
+          allowScoreOverwrites: this.movement.allowScoreOverwrites
         }
       },
       clickOutsideToClose: false,
@@ -238,7 +239,7 @@
     return movementService.getMovement(tournamentId, pairNo, playerCode).then(function(movement) {
       return {
         pairCode: playerCode,
-        movement: movement
+        movement: movement,
       };
     }).catch(function(failure) {
       return {

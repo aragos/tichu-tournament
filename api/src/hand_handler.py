@@ -108,7 +108,7 @@ class HandHandler(GenericHandler):
     if not user_has_access:
       return
 
-    if not self._CanPutHandAndMaybeSetStatus(tourney, board_no, ns_pair, ew_pair):
+    if not self._CanPutHandAndMaybeSetResponse(tourney, board_no, ns_pair, ew_pair):
       return
 
     request_dict = self._ParsePutRequestInfoAndMaybeSetStatus()
@@ -231,7 +231,7 @@ class HandHandler(GenericHandler):
     return (True, next(p.pair_no for p in player_pairs if p.id == pair_id))
 
 
-  def _CanPutHandAndMaybeSetStatus(self, tourney, board_no, ns_pair, ew_pair):
+  def _CanPutHandAndMaybeSetResponse(self, tourney, board_no, ns_pair, ew_pair):
     ''' Tests whether the tournament lock stats allows this user to write a hand.
   
     The owner is always allowed to write a hand. Pair code players can write a hand
@@ -257,9 +257,15 @@ class HandHandler(GenericHandler):
     hand_score = HandScore.GetByHandParams(tourney, board_no, ns_pair, ew_pair)
     if not hand_score:
 	  return True
-    SetErrorStatus(self.response, 405, "Forbidden by Tournament Status",
-	               ("Hand {} between teams {} and {} was already scored " + 
-	               "and cannot be overwritten by non-directors.").format(board_no, ns_pair, ew_pair))
+    self.response.headers['Content-Type'] = 'application/json'
+    response = {
+        'calls' : hand_score.calls_dict(),
+        'ns_score' : hand_score.get_ns_score(),
+        'ew_score' : hand_score.get_ew_score(),
+        'notes' : hand_score.notes,
+    }
+    self.response.set_status(405)
+    self.response.out.write(json.dumps(response, indent=2))
     return False
 
 

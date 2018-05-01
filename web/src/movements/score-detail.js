@@ -41,7 +41,19 @@
      */
     this.position = loadResults.position;
 
+    /**
+     * The change log for this hand.
+     * @type {tichu.ChangeLog}
+     * @export
+     */ 
     this.changeLog = null;
+
+    /**
+     * Whether non-directors are allowed to overwrite scored hands.
+     * @type {boolean}
+     * @export
+     */
+    this.allowScoreOverwrites = loadResults.allowScoreOverwrites;
 
     /**
      * The tournament ID this dialog is editing a score from.
@@ -85,6 +97,11 @@
      */
     this.saveError = null;
     
+    /**
+     * Whether the change log is currently loading.
+     * @type {boolean}
+     * Export
+     */
     this.loadingChangeLog = false;
 
     /**
@@ -160,7 +177,11 @@
       $mdDialog.hide();
     }).catch(function(rejection) {
       self.saving = false;
-      self.saveError = rejection;
+      if (rejection.updatedState) {
+        self.score = convertScoreToEditable(self.hand.score);
+      } else {
+        self.saveError = rejection;
+      }
     });
   };
 

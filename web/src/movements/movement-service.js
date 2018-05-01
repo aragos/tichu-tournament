@@ -134,14 +134,38 @@
       headers: pairCode ? {'X-tichu-pair-code': pairCode} : {}
     }).then(function onSuccess() {
       self._movementStore.getOrCreateHand(tournamentId, nsPair, ewPair, handNo).score = score;
-      if (self._tournamentStore.hasTournamentStatus(tournamentId)) {
-        var roundStatus = self._tournamentStore.getOrCreateTournamentStatus(tournamentId).roundStatus;
-        roundStatus.forEach(function(round){
-          self._changeHandStatus(handNo, nsPair, ewPair, round.unscoredHands, round.scoredHands);
-        });
+      self._updateTournamentStatus(tournamentId, handNo, nsPair, ewPair);
+    }, function onError(response) {
+      if (response.status == 405) {
+        self._movementStore.getOrCreateHand(tournamentId, nsPair, ewPair, handNo).score = 
+            self._parseHandScore("hand score rejection", response.data);
+        self._updateTournamentStatus(tournamentId, handNo, nsPair, ewPair);
+        var rejection = new tichu.RpcError();
+        rejection.updatedState = true;
+        return $q.reject(rejection);
+      } else {
+        return ServiceHelpers.handleErrorIn($q, $log, path, true)(response)
       }
-    }, ServiceHelpers.handleErrorIn($q, $log, path, true));
+    });
   };
+
+  /**
+   * Updates the tournament status when a hand has been scored.
+   * @param {string} tournamentId The tournament ID for the hand being that was scored.
+   * @param {number} handNo The number of the hand to move.
+   * @param {number} nsPair The number of the pair in North/South position of the hand to move.
+   * @param {number} ewPair The number of the pair in East/West position of the hand to move.
+   * @private
+   */
+  TichuMovementService.prototype._updateTournamentStatus = function _updateTournamentStatus(tournamentId, handNo, nsPair, ewPair) {
+    if (this._tournamentStore.hasTournamentStatus(tournamentId)) {
+      var roundStatus = this._tournamentStore.getOrCreateTournamentStatus(tournamentId).roundStatus;
+      var self = this;
+      roundStatus.forEach(function(round){
+        self._changeHandStatus(handNo, nsPair, ewPair, round.unscoredHands, round.scoredHands);
+      });
+    }
+  }
 
   /**
    * Deletes the score for the given hand.
@@ -325,6 +349,9 @@
       movement.pair.setPlayers(players);
     }
     movement.rounds = data["movement"].map(this._parseMovementRound.bind(this, tournamentId, movement.pair));
+    movement.allow_score_overwrites = 
+        ServiceHelpers.assertType('movement hand overwrites',
+                                  data['allow_score_overwrites'], 'boolean');
     return movement;
   };
 

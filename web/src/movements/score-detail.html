@@ -91,8 +91,9 @@
                      style="padding: 0; margin: 0"
                      layout-align="center center"
                      ng-if="scoreDetailController.hand.score && !scoreDetailController.overwriting">
-                    <h4 style="padding: 0; margin: 0">This hand is already scored.</h4>
-                    <md-button class="md-warn" ng-click="scoreDetailController.overwriting = true">Edit it anyway</md-button>
+                    <h4 style="padding: 0; margin: 0">This hand has already been scored.</h4>
+                    <md-button ng-if="!scoreDetailController.pairCode || scoreDetailController.allowScoreOverwrites"
+                               class="md-warn" ng-click="scoreDetailController.overwriting = true">Edit it anyway</md-button>
                 </div>
                 <div layout="row">
                     <div layout="column" style="width:10em;" flex="50">

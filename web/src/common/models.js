@@ -183,7 +183,7 @@ tichu.Tournament = function Tournament(header) {
    * Whether non administrators are allowed to overwrite scores.
    * @type {boolean}
    */
-  this.allow_score_overwrites = false;
+  this.allowScoreOverwrites = false;
 };
 
 Object.defineProperty(tichu.Tournament.prototype, "id", {
@@ -288,7 +288,7 @@ tichu.TournamentRequest = function TournamentRequest() {
    * Whether non administrators are allowed to overwrite scores.
    * @type {boolean}
    */
-  this.allow_score_overwrites = false;
+  this.allowScoreOverwrites = false;
 };
 
 /** Converts the names of this TournamentRequest into the form the server expects. */
@@ -298,7 +298,7 @@ tichu.TournamentRequest.prototype.toJSON = function toJSON() {
     'no_pairs': this.noPairs,
     'no_boards': this.noBoards,
     'players': this.players,
-    'allow_score_overwrites': this.allow_score_overwrites
+    'allow_score_overwrites': this.allowScoreOverwrites
   }
 };
 
@@ -506,6 +506,12 @@ tichu.Movement = function Movement(tournamentId, pair) {
    * @type {tichu.MovementRound[]}
    */
   this.rounds = [];
+
+  /**
+   * Whether non administrators are allowed to overwrite scores.
+   * @type {boolean}
+   */
+  this.allowScoreOverwrites = false;
 };
 
 /**
@@ -518,6 +524,7 @@ tichu.RpcError = function RpcError() {
    * @type {boolean}
    */
   this.redirectToLogin = false;
+  
   /**
    * The main error text, containing a concise user-readable description of the problem.
    * @type {string}
@@ -527,5 +534,10 @@ tichu.RpcError = function RpcError() {
    * The error detail text, containing a more detailed user-readable description of the problem.
    * @type {string}
    */
-  this.error = "An unexpected error occurred.";
+  this.detail = "An unexpected error occurred.";
+  /**
+   * Whether the action that resulted in this error updated any state.
+   * @type {boolean}
+   */
+  this.updatedState = false;
 };

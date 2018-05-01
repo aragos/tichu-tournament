@@ -365,6 +365,12 @@ class AppTest(unittest.TestCase):
                                      params, headers=hand_headers, 
                                      expect_errors=True)
     self.assertEqual(response.status_int, 405)
+    response_dict = json.loads(response.body)
+    self.assertEqual({'calls': { 'north': "T" }, 
+                      'ns_score': 75,
+                      'ew_score': 125,
+                      'notes': 'I am a note'},
+                     response_dict)
 
   def testPut(self):
     self.loginUser()

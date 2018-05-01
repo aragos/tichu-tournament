@@ -64,9 +64,9 @@
                 <div ng-if="tournamentFormController.original && tournamentFormController.original.hasScoredHands">
                     The parameters of a tournament cannot be edited once hands have been scored.
                 </div>
-                <md-switch ng-model="tournamentFormController.tournament.allow_score_overwrites" 
+                <md-switch ng-model="tournamentFormController.tournament.allowScoreOverwrites" 
                            class="md-warn" md-no-ink>
-                    Score overwriting by players: {{tournamentFormController.tournament.allow_score_overwrites ? "ENABLED" : "DISABLED"}}
+                    Score overwriting by players: {{tournamentFormController.tournament.allowScoreOverwrites ? "ENABLED" : "DISABLED"}}
                 </md-switch>
             </md-card-content>
         </md-card>
