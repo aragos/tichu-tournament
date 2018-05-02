@@ -186,6 +186,8 @@
     }).catch(function(rejection) {
       self.saving = false;
       if (rejection.updatedState) {
+        self.overwriting = false
+        self.allowScoreOverwrites = false;
         self.score = convertScoreToEditable(self.hand.score);
       } else {
         self.saveError = rejection;
