@@ -89,6 +89,13 @@
      * @export
      */
     this.saving = false;
+    
+    /**
+     * Whether we are asking the user to confirm a scoring operation.
+     * @type {boolean}
+     * @export
+     */
+     this.confirmingScore = false;
 
     /**
      * The error resulting from the last save or delete operation.
@@ -153,6 +160,7 @@
         (this.hand.score && !this.deleting && !this.overwriting)) {
       return;
     }
+    this.confirmingScore = false;
     this.saving = true;
     var promise;
     if (this.deleting) {
@@ -189,7 +197,7 @@
    * Loads the changeLog for a hand.
    */
   ScoreDetailController.prototype.loadChangeLog = function loadChangeLog() {
-    if (this.saving || this.loadingChangeLog) {
+    if (this.saving || this.deleting || this.confirmingScore || this.loadingChangeLog) {
       return;
     }
     this.loadingChangeLog = true;

@@ -39,3 +39,7 @@ md-list md-list-item .md-avatar-icon.completed-icon {
   overflow-x: hidden;
   text-overflow: ellipsis;
 }
+
+.players {
+  color: rgba(0, 0, 0, 0.5);
+}

@@ -349,7 +349,7 @@
       movement.pair.setPlayers(players);
     }
     movement.rounds = data["movement"].map(this._parseMovementRound.bind(this, tournamentId, movement.pair));
-    movement.allow_score_overwrites = 
+    movement.allowScoreOverwrites = 
         ServiceHelpers.assertType('movement hand overwrites',
                                   data['allow_score_overwrites'], 'boolean');
     return movement;
