@@ -678,6 +678,75 @@ Deletes the score for the given hand from the server, allowing it to be scored a
 * **404**: The tournament with the given ID does not exist, or the board/pair numbers are invalid.
 * **500**: Server failed to delete the hand for any other reason.
 
+### Get scored results for a hand (GET /api/tournaments/:id/hands/handresults/:board_no/)
+
+**Requires either authentication and ownership of this tournament or that the 
+tournament is locked or lockable, and the request is accompanied by a request
+header with an appropriate pair id for pair_no and that pair to be done with board_no**
+
+Fetches the list of all the registered scores for board_no.
+
+#### Request Header
+Optional. Necessary only for non-tournament owners.
+<!-- time 4 code -->
+    X-tichu-pair-code: MANQ
+
+* `X-tichu-pair-code`: 4 character capitalized identifier of one of the pairs
+  involved in this hand. This ID is the same as returned from 
+  `GET /tournaments/:id/pairid/:pair_no`
+
+#### Request
+
+* `id`: String. An opaque, unique ID returned from `GET /tournaments` or `POST /tournaments`.
+* `board_no`: Integer. The board number for this hand. Must be between 1 and `no_boards`,
+  inclusive.
+
+<!-- time 4 code -->
+
+    {
+        "results": [
+            {
+                "calls": {
+                    "north": "", 
+                    "south": "T", 
+                    "west": "", 
+                    "east": ""
+                }, 
+                "ew_score": 20, 
+                "ns_score": 180
+                "ns_pair": 4,
+                "ew_pair": 6,
+            }
+        ]
+    }
+
+* `results` : List of objects. Every score recorded for this hand sorted in (`ns_score` - `ew_score`)
+  descending order.
+  * `calls`: Object. Calls made by players. May have entries for `north`, `east`, `west`, `south`.
+    Each entry may be `"T"`, indicating a call of Tichu, `"GT"`, indicating a call of Grand Tichu,
+    or `""`, indicating no call. If an entry is absent, it is assumed to mean no call. Must be null
+    or not present for a hand deletion change. Optional.
+  * `ns_score`: Integer or string. The score of the north-south pair, including Tichu bonuses and
+    penalties. May also be the string "AVG", "AVG+", "AVG++", "AVG-", or "AVG--". Must be null or
+    not present for a hand deletion change. Required.
+  * `ew_score`: Integer or string. The score of the east-west pair, including Tichu bonuses and
+    penalties. May also be the string "AVG", "AVG+", "AVG++", "AVG-", or "AVG--". Must be null 
+    or not present for a hand deletion change. Required.
+  * `ns_pair`: Integer. The number of the north-south pair. Must be between 1 and `no_pairs`,
+    inclusive.
+  * `ew_pair`: Integer. The number of the east-west pair. Must be between 1 and `no_pairs`,
+    inclusive.
+
+#### Status codes
+
+* **200**: The hand results were successfully fetched.
+* **403**: The user does not own this tournament, is not logged in, the request was not authenticated
+  with the right pair id, or the user has not yet played the tournament.
+* **404**: The tournament with the given ID does not exist, the board/pair numbers are invalid,
+  or the tournament is not locked/lockable.
+* **500**: Server failed to retrieve the results for the hand for any other reason.
+
+
 ### Get change log for a hand (GET /api/tournaments/:id/hands/changelog/:board_no/:ns_pair/:ew_pair)
 
 **Requires authentication and ownership of the given tournament.**

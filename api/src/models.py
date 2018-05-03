@@ -1,6 +1,7 @@
 import datetime
 import json
 import random
+from movements import Movement
 from python import boardgenerator
 
 from google.appengine.ext import ndb
@@ -143,6 +144,16 @@ class Tournament(ndb.Model):
     hand_score.key = HandScore.CreateKey(self, hand_no, ns_pair, ew_pair)
     hand_score.PutChangeLog(changed_by)
     hand_score.put()
+
+  def GetMovement(self):
+    '''Returns a movement associated with this tournament. 
+
+    Assumes that this is a valid tournament.
+    '''
+    no_hands_per_round, no_rounds = Movement.NumBoardsPerRoundFromTotal(
+      self.no_pairs, self.no_boards)
+    return Movement.CreateMovement(self.no_pairs, no_hands_per_round,
+                                   no_rounds, self.legacy_version_id)
 
   def _TransformAvgScoreToInt(self, score):
     ''' Return the integer representation of an avg score. If score is not legal
@@ -470,6 +481,30 @@ class HandScore(ndb.Model):
     '''
     score = cls.CreateKey(parent_tourney, hand_no, ns_pair, ew_pair).get()
     return score if (score and not score.deleted) else None
+
+  @classmethod
+  @ndb.synctasklet
+  def GetByHandParamsAsync(cls, parent_tourney, hand_no, ns_pair, ew_pair):
+    ''' Same as above, but does so asyncronously via appengines taskelt interface.'''
+    score = yield cls.CreateKey(parent_tourney, hand_no,
+                                ns_pair, ew_pair).get_async()
+    raise ndb.Return(score if (score and not score.deleted) else None)
+
+  @classmethod
+  def GetByMultipleHands(cls, parent_tourney, hands):
+    ''' Gets multiple handscores from a parent_tourney.
+
+    Args:
+      parent_tourney: Tournament. Tournament that we are querying.
+      hands: List of (hand_no, ns_pair, ew_pair) tuples.
+    Returns:
+      List of HandScores for the corresponding hands.    
+    '''
+    all_hands = []
+    for hand_no, ns_pair, ew_pair in hands:
+      all_hands.append(HandScore.GetByHandParamsAsync(
+          parent_tourney, hand_no, ns_pair, ew_pair))
+    return all_hands
 
   def Delete(self):
     ''' Mark this hand as deleted and add to Datastore. Also update changelog.

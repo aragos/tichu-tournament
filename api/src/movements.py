@@ -190,8 +190,17 @@ class Movement:
     return self.suggested_prep.get(pair_no, [])
 
   def GetNumRounds(self):
-    ''' Returns the total number of rounds in this movement.'''
+    '''Returns the total number of rounds in this movement.'''
     return len(self.pair_dict[1])
+
+  def GetListOfPlayersForHand(self, board_no):
+    '''Returns a list of (ns_pair, ew_pair) tuples that play board_no.'''
+    pairs = []
+    for pair_no, rounds in self.pair_dict.items():
+      for round in rounds:
+        if board_no in round.hands and round.is_north:
+          pairs.append((pair_no, round.opponent))
+    return pairs
 
   @staticmethod
   def NumBoardsPerRoundFromTotal(no_pairs, total_boards):
