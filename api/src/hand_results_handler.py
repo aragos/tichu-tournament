@@ -55,8 +55,9 @@ class HandResultsHandler(GenericHandler):
             'ns_pair': all_matchups[i][0],
             'ew_pair': all_matchups[i][1],
         })
-    list_of_results.sort(key=lambda x : x['ns_score'] - x['ew_score'],
-                         reverse=True)
+    list_of_results.sort(
+        key=lambda x : x['ns_score'] - x['ew_score'] if is_int(x['ns_score']) else -500,
+        reverse=True)
     self.response.headers['Content-Type'] = 'application/json'
     self.response.set_status(200)
     self.response.out.write(json.dumps({"results" : list_of_results}, indent=2))

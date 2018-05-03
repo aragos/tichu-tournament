@@ -121,6 +121,29 @@ class AppTest(unittest.TestCase):
                                    'ns_pair': 2,
                                    'ns_score': 25}]}, response_dict)
 
+  def testGet_director_avg(self):
+    self.loginUser();
+    id = self.AddBasicTournament()
+    self.AddBasicHand(id);
+    params = {'calls': {}, 'ns_score': 'AVG+', 'ew_score': 'AVG-'}
+    response = self.testapp.put_json("/api/tournaments/{}/hands/1/7/5".format(id),
+                                     params)
+    self.assertEqual(response.status_int, 204)
+    response = self.testapp.get("/api/tournaments/{}/handresults/1".format(id))
+    self.assertEqual(response.status_int, 200)
+    response_dict = json.loads(response.body)
+    self.assertEqual({"results": [{'calls': {},
+                                   'ew_pair': 3,
+                                   'ew_score': 25,
+                                   'ns_pair': 2,
+                                   'ns_score': 75},
+                                  {'calls': {},
+                                   'ew_pair': 5,
+                                   'ew_score': 'AVG-',
+                                   'ns_pair': 7,
+                                   'ns_score': 'AVG+'}
+                                   ]}, response_dict)
+
   def loginUser(self, email='user@example.com', id='123', is_admin=False):
     self.testbed.setup_env(
       user_email=email,
