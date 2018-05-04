@@ -150,6 +150,72 @@
   };
 
   /**
+   * Makes a request to get the for the scores recorded for a specific hand
+   * so far.
+   * @param {string} tournamentId The tournament ID to get a movement from.
+   * @param {number} boardNo The hand whose scores are to be retrieved.
+   * @param {?string=} pairCode If present, the pair code to authenticate with.
+   * @returns {angular.$q.Promise<tichu.HandResults>}
+   */
+  TichuMovementService.prototype.getHandResults = function getHandResults(tournamentId, boardNo, pairCode) {
+    var $q = this._$q;
+    var $log = this._$log;
+    var path = "/api/tournaments/" + encodeURIComponent(tournamentId)
+        + "/handresults/" + encodeURIComponent(boardNo.toString());
+    var self = this;
+    return this._$http({
+      method: 'GET',
+      url: path,
+      headers: pairCode ? {'X-tichu-pair-code': pairCode} : {}
+    }).then(function onSuccess(response) {
+      return self._parseHandResults(tournamentId, "hand results", response.data,
+                                     boardNo);
+    }, ServiceHelpers.handleErrorIn($q, $log, path, true));
+  };
+
+  /**
+   * Parses hand results from a JSON response. 
+   * @param {string} tournamentId The tournament ID for the hand results.
+   * @param {string} resultContext A string for logging errors in the score parsing.
+   * @param {*} resultsData The JSON data to be parsed.
+   * @param {number} handNo The hand number whose results we are parsing.
+   * @private
+   * @returns {tichu.HandResults}
+   */
+   TichuMovementService.prototype._parseHandResults = function _parseHandResults(tournamentId, resultContext, resultsData, handNo) {
+     var resultsList = ServiceHelpers.assertType(resultContext, resultsData["results"], "array", false);
+     var results = new tichu.HandResults();
+     results.hands = resultsList.map(this._parseHandResult.bind(this, tournamentId, resultContext, handNo));
+     return results;
+   }
+   
+    /**
+   * Translates the given JSON object into a single Hand.
+   * @param {string} tournamentId The ID of the tournament this hand is for.
+   * @param {string} context The string context used for logging errors in
+   *                 parsing the hand.
+   * @param {*} resultData The JSON hand data to be parsed.
+   * @returns {tichu.Hand}
+   * @private
+   */
+  TichuMovementService.prototype._parseHandResult = function _parseHandResult(
+      tournamentId, context, handNo, resultData) {
+    ServiceHelpers.assertType(context, resultData, 'object');
+    ServiceHelpers.assertType(context + " hand number", handNo, "number");
+    if (handNo <= 0 || Math.floor(handNo) !== handNo) {
+      throw new Error(context + " hand number was not a positive integer");
+    }
+    var score = this._parseHandScore(context, resultData);
+    var nsPair = ServiceHelpers.assertType(context + " ns pair",
+                                           resultData['ns_pair'], "number");
+    var ewPair = ServiceHelpers.assertType(context + " ew pair",
+                                           resultData['ew_pair'], "number");
+    var hand = new tichu.Hand(nsPair, ewPair, handNo);
+    hand.score = score;
+    return hand;
+  };
+    
+  /**
    * Updates the tournament status when a hand has been scored.
    * @param {string} tournamentId The tournament ID for the hand being that was scored.
    * @param {number} handNo The number of the hand to move.

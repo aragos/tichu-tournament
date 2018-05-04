@@ -5,6 +5,7 @@
    *
    * @constructor
    * @param {!angular.Scope} $scope
+   * @param {$log} $log
    * @param {$mdDialog} $mdDialog
    * @param {$location} $location
    * @param {$window} $window
@@ -12,7 +13,7 @@
    * @param {{pairCode: ?string, hand: !tichu.Hand, position: tichu.PairPosition, tournamentId: string}} loadResults
    * @ngInject
    */
-  function ScoreDetailController($scope, $mdDialog, $location, $window, TichuMovementService, loadResults) {
+  function ScoreDetailController($scope, $log, $mdDialog, $location, $window, TichuMovementService, loadResults) {
     /**
      * The scope this controller is attached to.
      * @type {angular.Scope}
@@ -47,6 +48,14 @@
      * @export
      */ 
     this.changeLog = null;
+
+    /**
+     * The results of all scored hands for this hand number. If set the results
+     * will be shown.
+     * @type {tichu.HandResults}
+     * @export
+     */
+    this.handResults = null;
 
     /**
      * Whether non-directors are allowed to overwrite scored hands.
@@ -96,6 +105,13 @@
      * @export
      */
      this.confirmingScore = false;
+     
+     /**
+     * Whether a hand result getting operation is in progress.
+     * @type {boolean}
+     * @export
+     */
+     this.gettingHandResults = false;
 
     /**
      * The error resulting from the last save or delete operation.
@@ -138,6 +154,14 @@
      * @private
      */
     this._movementService = TichuMovementService;
+    
+    /**
+     * The log service injected at creation.
+     *
+     * @private
+     * @type {angular.$log}
+     */
+    this._$log = $log;
   }
 
   /**
@@ -157,6 +181,7 @@
    */
   ScoreDetailController.prototype.save = function save() {
     if (this.saving || this.loadingChangeLog || this.saveFailure || 
+        this.gettingHandResults ||
         (this.hand.score && !this.deleting && !this.overwriting)) {
       return;
     }
@@ -199,7 +224,8 @@
    * Loads the changeLog for a hand.
    */
   ScoreDetailController.prototype.loadChangeLog = function loadChangeLog() {
-    if (this.saving || this.deleting || this.confirmingScore || this.loadingChangeLog) {
+    if (this.saving || this.deleting || this.confirmingScore || 
+        this.loadingChangeLog || this.gettingHandResults) {
       return;
     }
     this.loadingChangeLog = true;
@@ -209,16 +235,46 @@
                                        this.hand.northSouthPair.pairNo, 
                                        this.hand.eastWestPair.pairNo)
         .then(function(response) {
+          self.handResults = null;
           self.loadingChangeLog = false;
           self.changeLog = response;
         });
   }
   
   /**
-   * Clears changeLog info for this hand.
+   * Loads the hand results for a hand.
    */
-  ScoreDetailController.prototype.closeChangeLog = function closeChangeLog() {
+  ScoreDetailController.prototype.getHandResults = function getHandResults() {
+    if (this.saving || this.deleting || this.confirmingScore ||
+        this.loadingChangeLog || this.gettingHandResults) {
+      return;
+    }
+    this.gettingHandResults = true;
+    var self = this;
+    this._movementService.getHandResults(this._tournamentId,
+                                         this.hand.handNo,
+                                         this.pairCode)
+        .then(function(response) {
+            self.changeLog = null;
+            self.handResults = response;
+            self.gettingHandResults = false;
+        });
+  }
+  
+  /**
+   * Clears changeLog and hand results info for this hand.
+   */
+  ScoreDetailController.prototype.closeSecondaryInfo = function closeSecondaryInfo() {
     this.changeLog = null;
+    this.handResults = null;
+  }
+  
+  /**
+   * Returns true iff an RPC is in motion through saving, deleting, or
+   * loading change logs and hand results.
+   */
+  ScoreDetailController.prototype.isLoading = function isLoading() {
+    return this.saving || this.loadingChangeLogs || this.gettingHandResults;
   }
 
   /**
@@ -304,5 +360,38 @@
   }
 
   angular.module("tichu-score-detail", ["ng", "ngMaterial"])
-      .controller("ScoreDetailController", ScoreDetailController);
+      .controller("ScoreDetailController", ScoreDetailController)
+      .filter("reverse", function() {
+        return function(items, position) {
+          if (position == "N") {
+            return items;
+          };
+          return items.slice().reverse();
+        };
+      })
+      .filter("formatCalls", function() {
+        return function(calls, position) {
+          if (calls === null || calls.length == 0) {
+            return "(No Calls)";
+          }
+          var stringCalls = "(";
+          for (i = 0; i < calls.length; i++) {
+            var call = calls[i];
+            if (position == "N" && (call.side.toUpperCase() == "EAST" || call.side.toUpperCase() == "WEST")) {
+              continue;
+            }
+            if (position == "E" && (call.side.toUpperCase() == "NORTH" || call.side.toUpperCase() == "SOUTH")) {
+              continue;
+            }
+            if (stringCalls.length > 1) {
+              return stringCalls + ", " + call.call + ")";
+            }
+            stringCalls = stringCalls + call.call;
+          }
+          if (stringCalls.length > 1) {
+            return stringCalls + ")";
+          }
+          return "(No Calls)";
+        }
+      });
 })(angular);

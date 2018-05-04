@@ -35,26 +35,44 @@
         <md-toolbar>
             <div class="md-toolbar-tools">
                 <md-button class="md-icon-button"
-                           ng-if="!scoreDetailController.pairCode && !scoreDetailController.deleting && !scoreDetailController.changeLog"
-                           ng-disabled="scoreDetailController.saving"
-                           ng-click="scoreDetailController.loadChangeLog()">
+                           ng-if="scoreDetailController.changeLog || 
+                                  scoreDetailController.handResults"
+                           ng-disabled="scoreDetailController.isLoading()"
+                           ng-click="scoreDetailController.closeSecondaryInfo()"
+                           style="margin-right:0">
+                    <md-icon>rotate_right</md-icon>
+                </md-button>
+                <md-button class="md-icon-button"
+                           ng-if="!scoreDetailController.pairCode && 
+                                  !scoreDetailController.deleting && 
+                                  !scoreDetailController.confirmingScore && 
+                                  !scoreDetailController.changeLog"
+                           ng-disabled="scoreDetailController.isLoading()"
+                           ng-click="scoreDetailController.loadChangeLog()"
+                           style="margin-right:0"">
                     <md-icon>history</md-icon>
                 </md-button>
                 <md-button class="md-icon-button"
-                           ng-if="!scoreDetailController.pairCode && !scoreDetailController.deleting && scoreDetailController.changeLog"
-                           ng-disabled="scoreDetailController.saving"
-                           ng-click="scoreDetailController.closeChangeLog()">
-                    <md-icon>rotate_right</md-icon>
+                           ng-if="!scoreDetailController.pairCode && 
+                                  !scoreDetailController.deleting && 
+                                  !scoreDetailController.confirmingScore && 
+                                  !scoreDetailController.handResults"
+                           ng-disabled="scoreDetailController.isLoading()"
+                           ng-click="scoreDetailController.getHandResults()"
+                           style="margin-left:0">
+                    <md-icon>list</md-icon>
                 </md-button>
-                <h2 ng-if="!scoreDetailController.confirmingScore">
+                <h2 style="padding-left:3px">
                     Board #{{ scoreDetailController.hand.handNo }}
-                </h2>
-                <h2 ng-if="scoreDetailController.confirmingScore">
-                    Confirm Score
+                    <span ng-if="scoreDetailController.confirmingScore">: Confirm Score</span>
                 </h2>
                 <span flex></span>
                 <md-button class="md-icon-button"
-                           ng-if="!scoreDetailController.pairCode && !scoreDetailController.deleting && scoreDetailController.hand.score && !scoreDetailController.changeLog"
+                           ng-if="!scoreDetailController.pairCode && 
+                                  !scoreDetailController.deleting && 
+                                  scoreDetailController.hand.score && 
+                                  !scoreDetailController.changeLog && 
+                                  !scoreDetailController.handResults"
                            ng-click="scoreDetailController.deleting = true">
                     <md-icon>delete</md-icon>
                 </md-button>
@@ -136,7 +154,33 @@
                  </div>
                </md-list-item>
             </div>
-            <div class="md-dialog-content" layout="column" ng-if="!scoreDetailController.deleting && !scoreDetailController.changeLog && !scoreDetailController.confirmingScore">
+            <div class="md-list"
+                 layout-align="center start" 
+                 flex="150"
+                 stlye="width:40em;"
+                 ng-if="!scoreDetailController.saving && scoreDetailController.handResults">
+              <md-list-item layout="row">
+                  <h3 style="text-align: center;margin-top: 0; margin-bottom: 0; width:10em;">
+                      North / South
+                  </h3>
+                  <h3 style="text-align: center;margin-top: 0; margin-bottom: 0; width:10em;">
+                      East / West
+                  </h3>
+              </md-list-item>
+              <md-list-item layout="row"
+                  ng-repeat="hand in scoreDetailController.handResults.hands | reverse:scoreDetailController.position" 
+                  layout-align="center center"
+                  ng-style="{'background-color': (hand.score.northSouthScore == scoreDetailController.hand.score.northSouthScore && 
+                                                  hand.score.eastWestScore == scoreDetailController.hand.score.eastWestScore) ? '#FFCDD2' : 'inherit'}">
+                  <md-list-item-text style="text-align: center;margin-top: 0; margin-bottom: 0; width:187px;">
+                      {{hand.score.northSouthScore}} {{hand.score.calls | formatCalls:"N"}}
+                  </md-list-item-text>
+                  <md-list-item-text style="text-align: center;margin-top: 0; margin-bottom: 0; width:187px;">
+                      {{hand.score.eastWestScore}} {{hand.score.calls | formatCalls:"E"}}
+                  </md-list-item-text>
+               </md-list-item>
+            </div>
+            <div class="md-dialog-content" layout="column" ng-if="!scoreDetailController.deleting && !scoreDetailController.changeLog && !scoreDetailController.confirmingScore && !scoreDetailController.handResults">
                 <div layout="column"
                      style="padding: 0; margin: 0"
                      layout-align="center center"
@@ -144,6 +188,9 @@
                     <h4 style="padding: 0; margin: 0">This hand has already been scored.</h4>
                     <md-button ng-if="!scoreDetailController.pairCode || scoreDetailController.allowScoreOverwrites"
                                class="md-warn" ng-click="scoreDetailController.overwriting = true">Edit it anyway</md-button>
+                    <md-button ng-if="!!scoreDetailController.pairCode && !scoreDetailController.allowScoreOverwrites"
+                               class="md-warn" 
+                               ng-click="scoreDetailController.getHandResults()">Show All Results</md-button>
                 </div>
                 <div layout="row">
                     <div layout="column" style="width:10em;" flex="50">
@@ -251,9 +298,11 @@
             </div>
         </md-dialog-content>
 
-        <md-dialog-actions layout="row" layout-align="end center" ng-if="!scoreDetailController.changeLog">
+        <md-dialog-actions layout="row" layout-align="end center" ng-if="!scoreDetailController.changeLog && !scoreDetailController.handResults">
             <md-button ng-class="{'md-warn': scoreDetailController.deleting}"
-                       ng-click="(scoreDetailController.allowScoreOverwrites || scoreDetailController.confirmingScore || !scoreDetailController.pairCode) ? scoreDetailController.save() : scoreDetailController.confirmingScore = true"
+                       ng-click="(scoreDetailController.allowScoreOverwrites || 
+                                  scoreDetailController.confirmingScore || 
+                                  !scoreDetailController.pairCode) ? scoreDetailController.save() : scoreDetailController.confirmingScore = true"
                        ng-disabled="scoreForm.$invalid || (!scoreDetailController.deleting && scoreForm.$pristine) || (scoreDetailController.hand.score && !scoreDetailController.overwriting && !scoreDetailController.deleting)">
                 <span ng-if="!scoreDetailController.deleting && scoreDetailController.hand.score">
                     Update Score

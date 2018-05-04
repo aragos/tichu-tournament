@@ -151,6 +151,18 @@ tichu.Change = function Change(handScore, changedBy, timestamp) {
   this.timestamp = timestamp;
 }
 
+/**
+ * All the scored results of a specific hand.
+ * @constructor
+ */
+tichu.HandResults = function HandResults() {
+  /**
+ * Hands sorted in descending northSouthScore - eastWestScore order. Avg hands
+ * are sorted at the end of the array.
+ * @type {tichu.Hand[]} 
+ */
+ this.hands = []
+}
 
 /**
  * The tournament object, containing the full details about the tournament and related objects.

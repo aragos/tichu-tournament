@@ -43,3 +43,7 @@ md-list md-list-item .md-avatar-icon.completed-icon {
 .players {
   color: rgba(0, 0, 0, 0.5);
 }
+
+.md-toolbar-tools > .md-button:nth-child(2) {
+    margin-left: 0;
+}
