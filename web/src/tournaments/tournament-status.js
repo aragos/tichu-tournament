@@ -167,7 +167,8 @@
         locals: {
           loadResults: {
             hand: this_hand,
-            tournamentId: tournamentId
+            tournamentId: tournamentId,
+            position: "N"
           }
         },
         clickOutsideToClose: false,
