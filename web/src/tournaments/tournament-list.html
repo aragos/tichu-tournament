@@ -32,6 +32,7 @@
     </md-list-item>
 </md-list>
 <md-button class="md-fab md-raised md-fab-bottom-right md-icon-button md-primary" 
-            href="/tournaments/new" style="position: fixed; padding: 15px;"> 
-        <md-icon class="material-icons md-avatar-icon" md-font-set="material-icons">add</md-icon>
+           ng-if="!tournamentListController.failure"
+           href="/tournaments/new" style="position: fixed; padding: 15px;"> 
+    <md-icon class="material-icons md-avatar-icon" md-font-set="material-icons">add</md-icon>
 </md-button>
