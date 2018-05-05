@@ -346,7 +346,6 @@ class PlayerPair(ndb.Model):
   players = ndb.JsonProperty()
   pair_no = ndb.IntegerProperty()
   id = ndb.StringProperty()
-  _use_memcache = False
 
   def player_list(self):
     ''' Return a list of players in this pair. '''
@@ -405,7 +404,6 @@ class HandScore(ndb.Model):
   ns_score = ndb.IntegerProperty()
   ew_score = ndb.IntegerProperty()
   deleted = ndb.BooleanProperty()
-  _use_memcache = False
   
   def get_ns_score(self):
     ''' Return the score of the North/South team. If the team has a special
@@ -588,7 +586,6 @@ class ChangeLog(ndb.Model):
   changed_by = ndb.IntegerProperty()
   # The state of the hand the change is made. Encoded as JSON object as:
   change = ndb.JsonProperty()
-  _use_memcache = False
   
   def to_dict(self):
     ''' Returns a dict version of this ChangeLog. See api for format '''
