@@ -83,7 +83,7 @@ class HandHandler(GenericHandler):
     else:
       self.response.set_status(204)
 
-
+  @ndb.toplevel
   def put(self, id, board_no, ns_pair, ew_pair):
     ''' Add a scored hand to the tournament with this id. 
 
@@ -129,6 +129,7 @@ class HandHandler(GenericHandler):
                          ns_score, ew_score, notes, change_pair_no)
     self.response.set_status(204)
 
+  @ndb.toplevel
   def delete(self, id, board_no, ns_pair, ew_pair):
     ''' Delete hand with these hand number and opponents from this tournament.
 

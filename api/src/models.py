@@ -46,7 +46,10 @@ class Tournament(ndb.Model):
   @classmethod
   def CreateAndPersist(cls, boards, **kwargs):
     '''Creates and persists a new tournament with the given properties and
-      populates its boards.
+      populates its boards. 
+    
+    Boards are put asynchronously so a caller of this method should be 
+    decorated with @ndb.toplevel.
 
     Args:
       boards: List of handgenerator board objects to persist with this
@@ -60,22 +63,23 @@ class Tournament(ndb.Model):
       board = Board(board_number=i,
                     board=board.ToJson(),
                     parent=tournament.key)
-      board.put()
-
+      board.put_async()
     return tournament
 
-  def PutPlayers(self, player_list, no_pairs):
-    ''' Create a new PlayerPair Entity corresponding to each player pair for 
-        pair numbers 1 ... no_pairs saving any useful information from 
-        player_list and put it into Datastore as a child of this Tournament.
-        Also, if the no_players has changed, generates a unique 
-        (for this tournament) id associated with each pair.
+  def PutPlayers(self, player_list, old_no_pairs):
+    ''' Create a or update PlayerPair Entities corresponding to each player 
+    pair in this tournament (1 ... no_pairs).
+    
+    This method saves any useful information from player_list and puts it into
+    Datastore as a child of this Tournament. If the no_players has changed,
+    generates a unique (for this tournament) id associated with each new pair,
+    but keeps existing pair coedes the same. Playerpairs are put asynchronously 
+    so a caller of this method should be decorated with @ndb.toplevel.
 
     Args:
       player_list: list of dicts with keys pair_no (req), name (opt), 
-        and email (opt)
-      no_pairs: the total number of pairs in this tournament. Exactly this many
-        PlayerPairs are created.
+        and email (opt) Must have same length as current number of pairs.
+      old_no_pairs: the total number of pairs this tournament used to have.
     '''
     pair_dict = {}
     if player_list:
@@ -86,39 +90,49 @@ class Tournament(ndb.Model):
           pair_dict[pair_no].append(player)
         else:
           pair_dict[pair_no]= [player]
-
-    player_list = PlayerPair.query(ancestor=self.key).fetch()
-
-    old_no_pairs = len(player_list)
+    
+    existing_player_futures = self.GetAllPlayerPairsAsync(old_no_pairs)
+        
     # If the number of players doesn't change, we just override some fields
     # in existing pairs. Otherwise, we delete existing pairs and create new 
     # ones.
-    if (no_pairs > old_no_pairs):
-      random_ids = self._RandomId(no_pairs - old_no_pairs)
-    elif (no_pairs < old_no_pairs):
-      ndb.delete_multi([p.key for p in player_list if p.pair_no > no_pairs])
+    if (self.no_pairs > old_no_pairs):
+      random_ids = self._RandomId(self.no_pairs - old_no_pairs)
+    elif (self.no_pairs < old_no_pairs):
+      ndb.delete_multi_async(
+          [existing_player_futures[i].get_result().key for i in 
+           xrange(self.no_pairs, old_no_pairs)])
 
-    player_list.sort(key = lambda pp : pp.pair_no)
-    
     # The create a PlayerPair and put it into Datastore for each possible
-    # number.
-    for i in range(1, no_pairs + 1):
+    # number. Use reversed to start with new players and give futures more 
+    # time to return.
+    for i in reversed(range(1, self.no_pairs + 1)):
       pair_members = pair_dict.get(i) 
       str_pair_members = json.dumps(pair_members) if pair_members else ''
       if i <= old_no_pairs:
-          player_pair = player_list[i-1]
+          player_pair = existing_player_futures[i-1].get_result()
           player_pair.players = str_pair_members
       else:
         player_pair = PlayerPair(players=str_pair_members,
                                  pair_no=i, id=random_ids[i-1-old_no_pairs],
                                  parent=self.key)
       player_pair.key = PlayerPair.CreateKey(self, i)
-      player_pair.put()
+      player_pair.put_async()
+
+  def GetAllPlayerPairsAsync(self, no_pairs=None):
+    '''Returns a list of futures for the first no_pairs PlayerPairs associated
+       with this tournament in pair number order.
+    '''
+    no_pairs = no_pairs if no_pairs else self.no_pairs
+    return [PlayerPair.CreateKey(self, i + 1).get_async() for i in xrange(no_pairs)]
 
   def PutHandScore(self, hand_no, ns_pair, ew_pair, hand_calls, hand_ns_score,
                    hand_ew_score, hand_notes, changed_by):
     ''' Create a new HandScore Entity corresponding to this hand and put it 
         into datastore.
+    
+    Everything is put asynchronously so a caller of this method should be 
+    decorated with @ndb.toplevel.
 
     Args:
       hand_no: Integer. Number of this hand.
@@ -142,8 +156,8 @@ class Tournament(ndb.Model):
                            ns_score=hand_ns_score, ew_score=hand_ew_score,
                            deleted=False)
     hand_score.key = HandScore.CreateKey(self, hand_no, ns_pair, ew_pair)
+    hand_score.put_async()
     hand_score.PutChangeLog(changed_by)
-    hand_score.put()
 
   def GetMovement(self):
     '''Returns a movement associated with this tournament. 
@@ -175,19 +189,23 @@ class Tournament(ndb.Model):
 
   def _RandomId(self, num_ids):
     ''' Generate a list of num_ids unique random 4 character capitalized ids.
+    
+    Ensures that the ids are not used by any other pair in any other tournament.
     '''
-    seen = set()
     ret = []
-    for i in range(num_ids):
-      id = None
-      player_pairs = []
-      while (not id) or (id in seen) or player_pairs:
+    while (len(ret) < num_ids):
+      futures = []
+      ids = []
+      for i in range(num_ids - len(ret)):
         id = ''.join(
             random.choice('ABCDEFGHIJKLMNOPQRSTUVWXYZ') for j in range(4))
-        player_pairs = PlayerPair._query(ndb.GenericProperty('id') == id).fetch(
-            keys_only=True, limit=1)
-      seen.add(id)
-      ret.append(id)
+        ids.append(id)
+        futures.append(PlayerPair._query(ndb.GenericProperty('id') == id).fetch_async(
+            keys_only=True, limit=1))
+      for i in xrange(len(futures)):
+        player_pairs = futures[i].get_result()
+        if not player_pairs:
+          ret.append(ids[i])
     return ret
 
   def GetScoredHandList(self):
@@ -328,6 +346,7 @@ class PlayerPair(ndb.Model):
   players = ndb.JsonProperty()
   pair_no = ndb.IntegerProperty()
   id = ndb.StringProperty()
+  _use_memcache = False
 
   def player_list(self):
     ''' Return a list of players in this pair. '''
@@ -359,6 +378,11 @@ class PlayerPair(ndb.Model):
       otherwise.
     '''
     return cls.CreateKey(parent_tourney, pair_no).get()
+    
+  @classmethod
+  def GetByPairNoAsync(cls, parent_tourney, pair_no):
+    '''Same as a above but returns a Future that will contain tha PlayerPair.'''
+    return cls.CreateKey(parent_tourney, pair_no).get_async()
 
 class HandScore(ndb.Model):
   ''' Model for all the information about a single hand.
@@ -381,7 +405,8 @@ class HandScore(ndb.Model):
   ns_score = ndb.IntegerProperty()
   ew_score = ndb.IntegerProperty()
   deleted = ndb.BooleanProperty()
-
+  _use_memcache = False
+  
   def get_ns_score(self):
     ''' Return the score of the North/South team. If the team has a special
     director-set score, returns the appropriate string, e.g. 'AVG+', 'AVG--'.
@@ -483,12 +508,12 @@ class HandScore(ndb.Model):
     return score if (score and not score.deleted) else None
 
   @classmethod
-  @ndb.synctasklet
   def GetByHandParamsAsync(cls, parent_tourney, hand_no, ns_pair, ew_pair):
-    ''' Same as above, but does so asyncronously via appengines taskelt interface.'''
-    score = yield cls.CreateKey(parent_tourney, hand_no,
-                                ns_pair, ew_pair).get_async()
-    raise ndb.Return(score if (score and not score.deleted) else None)
+    ''' Same as above, but does so asyncronously returning a Future of HandScore.
+        NOTE one key difference is that this method does not check for deletion 
+        of score. Caller must do that on their own.
+    '''
+    return cls.CreateKey(parent_tourney, hand_no, ns_pair, ew_pair).get_async()
 
   @classmethod
   def GetByMultipleHands(cls, parent_tourney, hands):
@@ -500,15 +525,20 @@ class HandScore(ndb.Model):
     Returns:
       List of HandScores for the corresponding hands.    
     '''
+    futures = map(lambda x : HandScore.GetByHandParamsAsync(
+          parent_tourney, x[0], x[1], x[2]), hands);
     all_hands = []
-    for hand_no, ns_pair, ew_pair in hands:
-      all_hands.append(HandScore.GetByHandParamsAsync(
-          parent_tourney, hand_no, ns_pair, ew_pair))
+    for f in futures:
+      x = f.get_result()
+      all_hands.append(x if (x and not x.deleted) else None)
     return all_hands
 
   def Delete(self):
     ''' Mark this hand as deleted and add to Datastore. Also update changelog.
 
+    The delete is done asynchronosouly, so a caller of this method should have
+    a @ndb.toplevel decoration.
+    
     Assumes this change has been made by the tournament's director.
     '''
     self.calls = None
@@ -516,13 +546,14 @@ class HandScore(ndb.Model):
     self.ns_score = None
     self.ew_score = None
     self.deleted = True
+    self.put_async()
     self.PutChangeLog(0)
-    self.put()
   
   def PutChangeLog(self, changed_by):
     ''' Create a change log for the current state of the hand.
 
-    Uses current timestamp in seconds as key.
+    Uses current timestamp in seconds as key. The put is done asynchronosouly,
+    so a caller of this method should have a @ndb.toplevel decoration.
 
     Args:
         changed_by: Integer. Pair number for the user requesting the change.
@@ -538,7 +569,7 @@ class HandScore(ndb.Model):
     change_log = ChangeLog(changed_by=changed_by, change=json.dumps(change_dict))
     change_log.key = ndb.Key("ChangeLog", str((nowtime - epoch).total_seconds()),
                              parent=self.key)
-    change_log.put()
+    change_log.put_async()
 
 
 class ChangeLog(ndb.Model):
@@ -557,7 +588,8 @@ class ChangeLog(ndb.Model):
   changed_by = ndb.IntegerProperty()
   # The state of the hand the change is made. Encoded as JSON object as:
   change = ndb.JsonProperty()
-
+  _use_memcache = False
+  
   def to_dict(self):
     ''' Returns a dict version of this ChangeLog. See api for format '''
     return { 'changed_by' : self.changed_by,

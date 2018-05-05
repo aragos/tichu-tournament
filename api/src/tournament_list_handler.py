@@ -26,7 +26,7 @@ class TourneyListHandler(GenericHandler):
     self.response.headers['Content-Type'] = 'application/json'
     self.response.out.write(json.dumps({"tournaments": tourney_list}, indent=2))
 
-
+  @ndb.toplevel
   def post(self):
     user = users.get_current_user()
     if not CheckUserLoggedInAndMaybeReturnStatus(self.response, user):
@@ -51,12 +51,12 @@ class TourneyListHandler(GenericHandler):
                                           no_pairs=no_pairs,
                                           no_boards=no_boards,
                                           boards=boardgenerator.GenerateBoards(35))
+    tourney.PutPlayers(player_list, 0)
+
     if allow_score_overwrites:
       tourney.Unlock()
     else:
       tourney.MakeLockable()
-    
-    tourney.PutPlayers(player_list, no_pairs)
     self.response.set_status(201)
     self.response.headers['Content-Type'] = 'application/json'
     self.response.out.write(json.dumps({"id": str(tourney.key.id())}))

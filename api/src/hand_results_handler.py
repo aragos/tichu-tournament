@@ -16,7 +16,6 @@ class HandResultsHandler(GenericHandler):
   ''' Class to handle requests to 
       /api/tournaments/:id/handresults/:hand_no/
   '''
-  @ndb.toplevel
   def get(self, id, board_no):
     '''Gets all the scored results for a particular hand in the tournament.
 

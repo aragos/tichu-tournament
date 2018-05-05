@@ -39,19 +39,20 @@ class TourneyHandler(GenericHandler):
                      'name' : tourney.name,
                      'allow_score_overwrites' : tourney.IsUnlocked(),
                      'hands' : tourney.GetScoredHandList()}
-    player_pairs = PlayerPair.query(ancestor=tourney.key).fetch()
-    player_pairs.sort(key = lambda p : p.pair_no)
-    combined_dict['pair_ids'] = [p.id for p in player_pairs]
-    for player_pair in player_pairs:
-      if player_pair.players:
-        for player in player_pair.player_list():
-          player['pair_no'] = player_pair.pair_no
+    player_futures = tourney.GetAllPlayerPairsAsync();             
+    for player_pair in player_futures:
+      pp = player_pair.get_result()
+      if pp.players:
+        for player in pp.player_list():
+          player['pair_no'] = pp.pair_no
           combined_dict.setdefault('players', []).append(player)
+    combined_dict['pair_ids'] = [p.get_result().id for p in player_futures]
 
     self.response.headers['Content-Type'] = 'application/json'
     self.response.set_status(200)
     self.response.out.write(json.dumps(combined_dict, indent=2))
 
+  @ndb.toplevel
   def put(self, id):
     user = users.get_current_user()
     tourney = GetTourneyWithIdAndMaybeReturnStatus(self.response, id)
@@ -81,7 +82,8 @@ class TourneyHandler(GenericHandler):
       SetErrorStatus(self.response, 400, "Invalid Request",
                      "Tournament already has registered hands")
       return
-    self.response.set_status(204)
+   
+    old_no_pairs = tourney.no_pairs   
     tourney.no_pairs = no_pairs
     tourney.no_boards = no_boards
     tourney.name = name
@@ -89,8 +91,9 @@ class TourneyHandler(GenericHandler):
       tourney.Unlock()
     else:
       tourney.MakeLockable()
-    tourney_key = tourney.put()
-    tourney.PutPlayers(player_list, no_pairs)
+    tourney.PutPlayers(player_list, old_no_pairs)
+    tourney_key = tourney.put_async()
+    self.response.set_status(204)
 
 
   def delete(self, id):
