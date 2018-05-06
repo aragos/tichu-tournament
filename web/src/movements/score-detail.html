@@ -198,7 +198,8 @@
                             Pair #{{scoreDetailController.hand.northSouthPair.pairNo}}
                         </h3>
                         <md-card-header-text class="players no-wrap" style="text-align:center;">
-                            <span>&ensp;<span>
+                            <span ng-if="!scoreDetailController.hand.northSouthPair.players || 
+                                         !scoreDetailController.hand.northSouthPair.players.length">&ensp;</span>
                             <span ng-repeat="player in scoreDetailController.hand.northSouthPair.players">
                                 {{player.name}}<span ng-if="!$last">,&ensp;</span>
                             </span>
@@ -245,7 +246,8 @@
                             Pair #{{scoreDetailController.hand.eastWestPair.pairNo}}
                         </h3>
                         <md-card-header-text class="players no-wrap" style="text-align:center;">
-                            <span>&ensp;<span>
+                            <span ng-if="!scoreDetailController.hand.eastWestPair.players || 
+                                         !scoreDetailController.hand.eastWestPair.players.length">&ensp;</span>
                             <span ng-repeat="player in scoreDetailController.hand.eastWestPair.players">
                                 {{player.name}}<span ng-if="!$last">,&ensp;</span>
                             </span>
