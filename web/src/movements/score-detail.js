@@ -207,11 +207,19 @@
     var $mdDialog = this._$mdDialog;
     var self = this;
     promise.then(function() {
-      $mdDialog.hide();
+      if (self.allowScoreOverwrites || !this.pairCode) {
+        $mdDialog.hide();
+      } else {
+        self.saving = false;
+        self.overwriting = false;
+      }
     }).catch(function(rejection) {
       self.saving = false;
       if (rejection.updatedState) {
         self.overwriting = false
+        // This rejection means we are not allowed to overwrite scores. Set that
+        // to false just in case we this fact changed while we were showing the 
+        // dialog.
         self.allowScoreOverwrites = false;
         self.score = convertScoreToEditable(self.hand.score);
       } else {
