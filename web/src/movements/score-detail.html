@@ -88,11 +88,11 @@
                  style="padding-bottom:0"
                  flex>
                 <div layout="row">
-                    <p style="width:10em"><span style="font-weight:bold">N/S</span>
+                    <p style="width:13em" class="no-wrap"><span style="font-weight:bold">N/S</span>
                         <span ng-repeat="player in scoreDetailController.hand.northSouthPair.players"
-                              class="players no-wrap">
-                            <span ng-if="$first">&ensp;</span>{{player.name}}<span ng-if="!$last">,&thinsp;</span>
-                        </span>:</p>
+                              class="players">{{player.name}}<span ng-if="!$last">,&thinsp;</span>
+                        </span><span>:</span>
+                    </p>
                     <p>{{scoreDetailController.score.northSouthScore}} (</span>
                     </p>
                     <p ng-if="scoreDetailController.score.calls.north">
@@ -108,11 +108,11 @@
                     <p>)</p>
                 </div>
                 <div layout="row">
-                  <p style="width:10em"><span style="font-weight:bold">E/W</span>
+                    <p style="width:13em" class="no-wrap"><span style="font-weight:bold">E/W</span>
                         <span ng-repeat="player in scoreDetailController.hand.eastWestPair.players"
-                              class="players no-wrap">
-                            <span ng-if="$first">&ensp;</span>{{player.name}}<span ng-if="!$last">,&thinsp;</span>
-                        </span>:</p>
+                              class="players">{{player.name}}<span ng-if="!$last">,&thinsp;</span>
+                        </span><span>:</span>
+                    </p>
                     <p>{{scoreDetailController.score.eastWestScore}} (</span>
                     </p>
                     <p ng-if="scoreDetailController.score.calls.east">
@@ -127,7 +127,9 @@
                               !scoreDetailController.score.calls.west">No Calls</p>
                     <p>)</p>
                 </div>
-                <p style="font-weight:bold">Once submitted this score cannot be overwritten.<p>
+                <div layout="row">
+                  <p style="font-weight:bold">Once submitted this score cannot be overwritten.<p>
+                </div>
             </div>
             <div class="md-dialog-content"
                  ng-if="scoreDetailController.deleting"
