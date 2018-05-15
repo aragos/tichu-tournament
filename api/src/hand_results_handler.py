@@ -11,6 +11,11 @@ from handler_utils import is_int
 from handler_utils import SetErrorStatus
 from models import HandScore
 from models import PlayerPair
+from python.calculator import Calls
+from python.calculator import HandResult
+from python.calculator import Board
+
+
 
 class HandResultsHandler(GenericHandler):
   ''' Class to handle requests to 
@@ -39,34 +44,94 @@ class HandResultsHandler(GenericHandler):
     if not has_access:
       return
 
+    position = self.request.headers.get('X-position')
+    if not self._CheckValidPositionAndMaybeSetStatus(position):
+      return
+
     scores = self._GetAllPlayedScores(tourney, int(board_no), all_matchups)
     if not self._CheckPlayerScoredHandsAndMaybeSetStatus(pair_no, all_matchups,
                                                          scores):
       return
 
-    list_of_results = []
-    for i in xrange(len(scores)):
-      if scores[i]:
-        list_of_results.append({
-            'calls' : scores[i].calls_dict(),
-            'ns_score' : scores[i].get_ns_score(),
-            'ew_score' : scores[i].get_ew_score(),
-            'ns_pair': all_matchups[i][0],
-            'ew_pair': all_matchups[i][1],
-        })
-    list_of_results.sort(
-        key=lambda x : x['ns_score'] - x['ew_score'] if is_int(x['ns_score']) else -500,
-        reverse=True)
+    list_of_results = self._ScoresToJson(position, scores, all_matchups)
     self.response.headers['Content-Type'] = 'application/json'
     self.response.set_status(200)
     self.response.out.write(json.dumps({"results" : list_of_results}, indent=2))
+
+
+  def _IsNorth(self, position):
+    ''' Returns true iff position corresponds to "N".
+    
+    Args:
+     position: String. Either "N" or "E". Raises ValueError otherwise.
+    '''
+    if position == "N":
+      return True
+    elif position == "E":
+      return False
+    raise ValueError("Unknown position " + position)
+
+
+  def _ScoresToJson(self, position, scores, all_matchups):
+    ''' Returns a list of JSON objects that correspond to the API response
+        for the get call.
+
+    Args:
+      position: String. "N" or "E". ValueError is raised otherwise.
+      scores: list of HandScores corresponding to a specific hand.
+      all_matchups: List of (Integer, Integer) pairs. All matchups for this
+                    board possible in the tournament.
+      board_no: Integer. This hand's number.
+
+    See api for full response documentation.
+    '''
+    list_of_results = []
+    hr_list = []
+    for i in [k for k in xrange(len(scores)) if scores[k]]:
+      ns_pair = all_matchups[i][0]
+      ew_pair = all_matchups[i][1]
+      calls = scores[i].calls_dict()
+      hr_list.append(HandResult(1, ns_pair, ew_pair,
+                                scores[i].get_ns_score(),
+                                scores[i].get_ew_score(),
+                                Calls.FromDict(calls)))
+    if len(hr_list) == 0:
+      return list_of_results
+    board = Board(1, hr_list)
+    is_north = self._IsNorth(position)
+    for bsl in board.ScoreBoard():
+      list_of_results.append({
+          'calls' : bsl.hr().calls().ToDict(),
+          'ns_score' : bsl.hr().ns_score(),
+          'ew_score' : bsl.hr().ew_score(),
+          'ns_pair': bsl.hr().ns_pair_no(),
+          'ew_pair': bsl.hr().ew_pair_no(),
+          'mps': bsl.ns_mps if is_north else bsl.ew_mps,
+      })
+    list_of_results.sort(key=lambda x : x['mps'], reverse=True)
+    return list_of_results
+
+
+  def _CheckValidPositionAndMaybeSetStatus(self, position):
+    '''Returns true if the position is one of allowed positions.
+
+    If not, set an error in the response.
+
+    Args:
+      position: String. Position returned by the get header.
+    '''
+    if position != "N" and position != "E":
+      SetErrorStatus(self.response, 404, "Invalid Request", 
+                     "Position {} is not valid. Must be one of N or E".format(position))
+      return False
+    return True
 
 
   def _CheckUserHasAccessMaybeSetStatus(self, tourney, hand_no):
     '''Tests if the current user has access to the results of this hand.
 
     Uses the pair id code, if any, set in the request header to see if the user
-    is in one of the teams that is ste to play this hand in this movement. 
+    is in one of the teams that is set to play this hand in this movement. 
     Directors always have access.
 
     Args:
@@ -131,6 +196,7 @@ class HandResultsHandler(GenericHandler):
                      "Pair {} has not yet played this hand.".format(pair))
       return False
     return True
+
 
   def _GetAllPlayedScores(self, tourney, board_no, matchups):
      '''Returns all played scores for given matchups for a board.

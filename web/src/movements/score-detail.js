@@ -261,7 +261,8 @@
     var self = this;
     this._movementService.getHandResults(this._tournamentId,
                                          this.hand.handNo,
-                                         this.pairCode)
+                                         this.pairCode,
+                                         this.position)
         .then(function(response) {
             self.changeLog = null;
             self.handResults = response;
@@ -369,14 +370,6 @@
 
   angular.module("tichu-score-detail", ["ng", "ngMaterial"])
       .controller("ScoreDetailController", ScoreDetailController)
-      .filter("reverse", function() {
-        return function(items, position) {
-          if (position == "N") {
-            return items;
-          };
-          return items.slice().reverse();
-        };
-      })
       .filter("formatCalls", function() {
         return function(calls, position) {
           if (calls === null || calls.length == 0) {

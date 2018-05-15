@@ -687,13 +687,14 @@ header with an appropriate pair id for pair_no and that pair to be done with boa
 Fetches the list of all the registered scores for board_no.
 
 #### Request Header
-Optional. Necessary only for non-tournament owners.
 <!-- time 4 code -->
     X-tichu-pair-code: MANQ
+    X-position: E
 
-* `X-tichu-pair-code`: 4 character capitalized identifier of one of the pairs
-  involved in this hand. This ID is the same as returned from 
-  `GET /tournaments/:id/pairid/:pair_no`
+* `X-tichu-pair-code`: Optional. Necessary only for non-tournament owners. 4 
+  character capitalized identifier of one of the pairs involved in this hand. 
+  This ID is the same as returned from `GET /tournaments/:id/pairid/:pair_no`
+* `X-position`: Required. Point of view from which the hand is sorted. One of "E" or "N"
 
 #### Request
 
@@ -716,11 +717,12 @@ Optional. Necessary only for non-tournament owners.
                 "ns_score": 180
                 "ns_pair": 4,
                 "ew_pair": 6,
+                "mps": 1.5
             }
         ]
     }
 
-* `results` : List of objects. Every score recorded for this hand sorted in (`ns_score` - `ew_score`)
+* `results` : List of objects. Every score recorded for this hand sorted in `mps`
   descending order.
   * `calls`: Object. Calls made by players. May have entries for `north`, `east`, `west`, `south`.
     Each entry may be `"T"`, indicating a call of Tichu, `"GT"`, indicating a call of Grand Tichu,
@@ -736,6 +738,8 @@ Optional. Necessary only for non-tournament owners.
     inclusive.
   * `ew_pair`: Integer. The number of the east-west pair. Must be between 1 and `no_pairs`,
     inclusive.
+  * `mps`: Float. Matchpoints, as seen from the perspective of position indicated by
+    `X-position`. 
 
 #### Status codes
 

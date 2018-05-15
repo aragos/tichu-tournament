@@ -53,6 +53,19 @@ class Calls:
         """ Returns West's call """
         return self._call_dict["W"]
 
+    def ToDict(self):
+        """Converts Dict representation of self."""
+        to_ret = {}
+        if self.n_call():
+          to_ret["north"] = self.n_call();
+        if self.s_call():
+          to_ret["south"] = self.s_call();
+        if self.e_call():
+          to_ret["east"] = self.e_call();
+        if self.w_call():
+          to_ret["west"] = self.w_call();
+        return to_ret
+
     def _ValidCall(self, call, side):
         """ Validates a call. Raises exception if something other than T,
             GT, or an empty string is passed. """
@@ -258,6 +271,8 @@ class Board:
 
     def _get_avg_score_diff(self):
         non_avg_hr = [hr for hr in self._hand_results if hr.diff() != "AVG"]
+        if len(non_avg_hr) == 0:
+          return 0
         return sum([x.diff() for x in non_avg_hr])/len(non_avg_hr)
 
     def _log_rps(self, rps):
@@ -353,14 +368,13 @@ class Board:
             self._board_score.append(bs)
         
         max_rps = self._get_max_rps()
-        avg_ns_mps = sum([x.ns_mps for x in self._board_score])/ len(self._board_score)
-        avg_ew_mps = sum([x.ew_mps for x in self._board_score])/ len(self._board_score)
+        avg_mps = (len(iter) - 1)/ 2.0
         for hr in iter:
           if (hr.diff() != "AVG"):
               continue
           bs = BoardScoreLine(hr)
-          self._set_avg_mps_rps("n", hr.ns_score(), avg_ns_mps, max_rps, bs)
-          self._set_avg_mps_rps("e", hr.ew_score(), avg_ew_mps, max_rps, bs)
+          self._set_avg_mps_rps("n", hr.ns_score(), avg_mps, max_rps, bs)
+          self._set_avg_mps_rps("e", hr.ew_score(), avg_mps, max_rps, bs)
           bs.ns_aps = 0
           bs.ew_aps = 0
           self._board_score.append(bs)

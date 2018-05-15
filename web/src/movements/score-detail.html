@@ -159,26 +159,33 @@
             <div class="md-list"
                  layout-align="center start" 
                  flex="150"
-                 stlye="width:40em;"
                  ng-if="!scoreDetailController.saving && scoreDetailController.handResults">
               <md-list-item layout="row">
-                  <h3 style="text-align: center;margin-top: 0; margin-bottom: 0; width:10em;">
+                  <md-list-item-text class="hand-result-row" style="width:137px;"
+                                     ng-style="{'font-weight': scoreDetailController.position == 'N' ? 900 : 550}">
                       North / South
-                  </h3>
-                  <h3 style="text-align: center;margin-top: 0; margin-bottom: 0; width:10em;">
+                  </md-list-item-text>
+                  <md-list-item-text class="hand-result-row" style="width:137px;"
+                                     ng-style="{'font-weight': scoreDetailController.position == 'E' ? 900 : 550}">
                       East / West
-                  </h3>
+                  </md-list-item-text>
+                  <md-list-item-text class="hand-result-row" style="width:100px; font-weight: 550">
+                      MPs
+                  </md-list-item-text>
               </md-list-item>
               <md-list-item layout="row"
-                  ng-repeat="hand in scoreDetailController.handResults.hands | reverse:scoreDetailController.position" 
+                  ng-repeat="hand in scoreDetailController.handResults.hands" 
                   layout-align="center center"
-                  ng-style="{'background-color': (hand.score.northSouthScore == scoreDetailController.hand.score.northSouthScore && 
-                                                  hand.score.eastWestScore == scoreDetailController.hand.score.eastWestScore) ? '#FFCDD2' : 'inherit'}">
-                  <md-list-item-text style="text-align: center;margin-top: 0; margin-bottom: 0; width:187px;">
-                      {{hand.score.northSouthScore}} {{hand.score.calls | formatCalls:"N"}}
+                  ng-style="{'background-color': (hand.hand.score.northSouthScore == scoreDetailController.hand.score.northSouthScore && 
+                                                  hand.hand.score.eastWestScore == scoreDetailController.hand.score.eastWestScore) ? '#FFCDD2' : 'inherit'}">
+                  <md-list-item-text class="hand-result-row" style="width:137px;">
+                      {{hand.hand.score.northSouthScore}} {{hand.hand.score.calls | formatCalls:"N"}}
                   </md-list-item-text>
-                  <md-list-item-text style="text-align: center;margin-top: 0; margin-bottom: 0; width:187px;">
-                      {{hand.score.eastWestScore}} {{hand.score.calls | formatCalls:"E"}}
+                  <md-list-item-text class="hand-result-row" style="width:137px;">
+                      {{hand.hand.score.eastWestScore}} {{hand.hand.score.calls | formatCalls:"E"}}
+                  </md-list-item-text>
+                  <md-list-item-text class="hand-result-row" style="width:100px;">
+                      {{hand.mps}}
                   </md-list-item-text>
                </md-list-item>
             </div>

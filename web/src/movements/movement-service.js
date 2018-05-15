@@ -155,9 +155,10 @@
    * @param {string} tournamentId The tournament ID to get a movement from.
    * @param {number} boardNo The hand whose scores are to be retrieved.
    * @param {?string=} pairCode If present, the pair code to authenticate with.
+   * @param {string} position The position used to sort and mp-score this hand.
    * @returns {angular.$q.Promise<tichu.HandResults>}
    */
-  TichuMovementService.prototype.getHandResults = function getHandResults(tournamentId, boardNo, pairCode) {
+  TichuMovementService.prototype.getHandResults = function getHandResults(tournamentId, boardNo, pairCode, position) {
     var $q = this._$q;
     var $log = this._$log;
     var path = "/api/tournaments/" + encodeURIComponent(tournamentId)
@@ -166,10 +167,11 @@
     return this._$http({
       method: 'GET',
       url: path,
-      headers: pairCode ? {'X-tichu-pair-code': pairCode} : {}
+      headers: pairCode ? {'X-tichu-pair-code': pairCode, 'X-position': position} 
+                        : {'X-position': position}
     }).then(function onSuccess(response) {
       return self._parseHandResults(tournamentId, "hand results", response.data,
-                                     boardNo);
+                                    boardNo);
     }, ServiceHelpers.handleErrorIn($q, $log, path, true));
   };
 
@@ -182,7 +184,8 @@
    * @private
    * @returns {tichu.HandResults}
    */
-   TichuMovementService.prototype._parseHandResults = function _parseHandResults(tournamentId, resultContext, resultsData, handNo) {
+   TichuMovementService.prototype._parseHandResults = function _parseHandResults(tournamentId,
+       resultContext, resultsData, handNo) {
      var resultsList = ServiceHelpers.assertType(resultContext, resultsData["results"], "array", false);
      var results = new tichu.HandResults();
      results.hands = resultsList.map(this._parseHandResult.bind(this, tournamentId, resultContext, handNo));
@@ -212,7 +215,8 @@
                                            resultData['ew_pair'], "number");
     var hand = new tichu.Hand(nsPair, ewPair, handNo);
     hand.score = score;
-    return hand;
+    var mps = ServiceHelpers.assertType(context + " mps", resultData['mps'], "number");
+    return new tichu.RankedHand(hand, mps);
   };
     
   /**

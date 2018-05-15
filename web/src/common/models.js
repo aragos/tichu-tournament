@@ -156,12 +156,33 @@ tichu.Change = function Change(handScore, changedBy, timestamp) {
  * @constructor
  */
 tichu.HandResults = function HandResults() {
-  /**
- * Hands sorted in descending northSouthScore - eastWestScore order. Avg hands
- * are sorted at the end of the array.
- * @type {tichu.Hand[]} 
- */
+ /**
+  * Hands sorted in descending northSouthScore - eastWestScore order. Avg hands
+  * are sorted at the end of the array.
+  * @type {tichu.RankedHand[]}
+  */
  this.hands = []
+}
+
+/**
+ * A ranked hand consists of information about a specific hand and the
+ * matchpoints assigned to this hand. This means that RankedHand is viewed from
+ * a specific position, North/South or East/West.
+ * @param {tichu.Hand} hand between two opponents.
+ * @param {number} mps mps earned by a pair in this hand
+ * @constructor
+ */
+tichu.RankedHand = function RankedHand(hand, mps) {
+  /**
+   * All information about a hand.
+   * @type {tichu.Hand}
+   */
+  this.hand = hand;
+  /**
+   * Number of matchpoints associated with this hand.
+   * @type {number}
+   */
+  this.mps = mps;
 }
 
 /**

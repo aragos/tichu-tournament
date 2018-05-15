@@ -44,6 +44,12 @@ md-list md-list-item .md-avatar-icon.completed-icon {
   color: rgba(0, 0, 0, 0.5);
 }
 
+.hand-result-row {
+  text-align: center;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
 .md-toolbar-tools > .md-button:nth-child(2) {
     margin-left: 0;
 }
