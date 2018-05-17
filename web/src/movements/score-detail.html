@@ -93,19 +93,20 @@
                               class="players">{{player.name}}<span ng-if="!$last">,&thinsp;</span>
                         </span><span>:</span>
                     </p>
-                    <p>{{scoreDetailController.score.northSouthScore}} (</span>
-                    </p>
-                    <p ng-if="scoreDetailController.score.calls.north">
-                        <span>{{scoreDetailController.score.calls.north}}
-                            <span ng-if="scoreDetailController.score.calls.south">,&ensp;</span>
-                        </span>
-                    </p>
-                    <p ng-if="scoreDetailController.score.calls.south">
-                        <span>{{scoreDetailController.score.calls.south}}</span>
-                    </p>
-                    <p ng-if="!scoreDetailController.score.calls.north && 
-                              !scoreDetailController.score.calls.south">No Calls</p>
-                    <p>)</p>
+                    <div style="justify-content:flex-end; width:10em" layout="row">
+                      <p>{{scoreDetailController.score.northSouthScore}} (</p>
+                      <p ng-if="scoreDetailController.score.calls.north">
+                          <span>{{scoreDetailController.score.calls.north}}
+                              <span ng-if="scoreDetailController.score.calls.south">,&ensp;</span>
+                          </span>
+                      </p>
+                      <p ng-if="scoreDetailController.score.calls.south">
+                          <span>{{scoreDetailController.score.calls.south}}</span>
+                      </p>
+                      <p ng-if="!scoreDetailController.score.calls.north && 
+                                !scoreDetailController.score.calls.south">No Calls</p>
+                      <p>)</p>
+                    </div>
                 </div>
                 <div layout="row">
                     <p style="width:13em" class="no-wrap"><span style="font-weight:bold">E/W</span>
@@ -113,19 +114,20 @@
                               class="players">{{player.name}}<span ng-if="!$last">,&thinsp;</span>
                         </span><span>:</span>
                     </p>
-                    <p>{{scoreDetailController.score.eastWestScore}} (</span>
-                    </p>
-                    <p ng-if="scoreDetailController.score.calls.east">
-                        <span>{{scoreDetailController.score.calls.east}}
-                            <span ng-if="scoreDetailController.score.calls.west">,&ensp;</span>
-                        </span>
-                    </p>
-                    <p ng-if="scoreDetailController.score.calls.west">
-                        <span>{{scoreDetailController.score.calls.west}}</span>
-                    </p>
-                    <p ng-if="!scoreDetailController.score.calls.east && 
-                              !scoreDetailController.score.calls.west">No Calls</p>
-                    <p>)</p>
+                    <div style="justify-content:flex-end; width:10em" layout="row">
+                      <p>{{scoreDetailController.score.eastWestScore}} (</p>
+                      <p ng-if="scoreDetailController.score.calls.east">
+                          <span>{{scoreDetailController.score.calls.east}}
+                              <span ng-if="scoreDetailController.score.calls.west">,&ensp;</span>
+                          </span>
+                      </p>
+                      <p ng-if="scoreDetailController.score.calls.west">
+                          <span>{{scoreDetailController.score.calls.west}}</span>
+                      </p>
+                      <p ng-if="!scoreDetailController.score.calls.east && 
+                                !scoreDetailController.score.calls.west">No Calls</p>
+                      <p>)</p>
+                    </div>
                 </div>
                 <div layout="row">
                   <p style="font-weight:bold">Once submitted this score cannot be overwritten.<p>
