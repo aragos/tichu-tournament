@@ -206,8 +206,9 @@
     }
     var $mdDialog = this._$mdDialog;
     var self = this;
+    var $log = this._$log;
     promise.then(function() {
-      if (self.allowScoreOverwrites || !this.pairCode) {
+      if (self.allowScoreOverwrites || !self.pairCode) {
         $mdDialog.hide();
       } else {
         self.saving = false;

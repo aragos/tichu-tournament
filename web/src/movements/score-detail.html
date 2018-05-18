@@ -163,17 +163,19 @@
                  flex="150"
                  ng-if="!scoreDetailController.saving && scoreDetailController.handResults">
               <md-list-item layout="row">
-                  <md-list-item-text class="hand-result-row" style="width:137px;"
-                                     ng-style="{'font-weight': scoreDetailController.position == 'N' ? 900 : 550}">
+                  <md-header class="hand-result-row" style="width:137px;"
+                             ng-class="[{'column-selected': scoreDetailController.position == 'N'},
+                                        {'column-deselected': scoreDetailController.position == 'E'}]">
                       North / South
-                  </md-list-item-text>
-                  <md-list-item-text class="hand-result-row" style="width:137px;"
-                                     ng-style="{'font-weight': scoreDetailController.position == 'E' ? 900 : 550}">
+                  </md-header>
+                  <md-header class="hand-result-row" style="width:137px;"
+                             ng-class="[{'column-selected': scoreDetailController.position == 'E'},
+                                        {'column-deselected': scoreDetailController.position == 'N'}]">
                       East / West
-                  </md-list-item-text>
-                  <md-list-item-text class="hand-result-row" style="width:100px; font-weight: 550">
+                  </md-header>
+                  <md-header class="hand-result-row column-deselected" style="width:100px;">
                       MPs
-                  </md-list-item-text>
+                  </md-header>
               </md-list-item>
               <md-list-item layout="row"
                   ng-repeat="hand in scoreDetailController.handResults.hands" 

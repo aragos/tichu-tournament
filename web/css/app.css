@@ -44,6 +44,15 @@ md-list md-list-item .md-avatar-icon.completed-icon {
   color: rgba(0, 0, 0, 0.5);
 }
 
+.column-selected {
+  color: rgba(0,0,0,0.87);
+  font-weight: 500;
+}
+
+.column-deselected {
+  color: rgba(0,0,0,0.54);
+}
+
 .hand-result-row {
   text-align: center;
   margin-top: 0;
