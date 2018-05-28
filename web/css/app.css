@@ -60,5 +60,22 @@ md-list md-list-item .md-avatar-icon.completed-icon {
 }
 
 .md-toolbar-tools > .md-button:nth-child(2) {
-    margin-left: 0;
+  margin-left: 0;
+}
+
+md-sidenav md-list.md-dense md-list-item .md-list-item-inner>md-icon:first-child:not(.md-avatar-icon), md-list.md-dense md-list-item>md-icon:first-child:not(.md-avatar-icon) {
+  margin: 10px 10px 10px -7px;
+}
+
+.row-selected {
+  background-color: #BDBDBD;
+}
+
+.sidenav-background {
+  background-color: #E0E0E0;
+}
+
+.sidenav-subheader {
+  color: black; 
+  background-color: #E0E0E0; 
 }

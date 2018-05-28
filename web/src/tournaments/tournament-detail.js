@@ -5,6 +5,8 @@
    *
    * @constructor
    * @param {!angular.Scope} $scope
+   * @param {$mdSidenav} $mdSidenav
+   * @param {$mdMedia} $mdMedia
    * @param {$mdDialog} $mdDialog
    * @param {angular.$window} $window
    * @param {angular.$location} $location
@@ -12,13 +14,18 @@
    * @param {!{failure: ?tichu.RpcError, tournament: ?tichu.Tournament}} loadResults
    * @ngInject
    */
-  function TournamentDetailController($scope, $mdDialog, $window, $location, $route, loadResults) {
+  function TournamentDetailController($scope, $mdSidenav, $mdMedia, $mdDialog, $window, $location, $route, loadResults) {
     $scope.appController.setPageHeader({
       header: loadResults.failure ? "Tournament Error" : loadResults.tournament.name,
-      backPath: "/tournaments",
-      showHeader: true
+      backPath: $mdMedia('gt-sm') ? "/tournaments" : null,
+      showMenu: !$mdMedia('gt-sm'),
+      showHeader: true,
+      openMenu: function() {
+        $mdSidenav('left').toggle();
+      },
     });
 
+     this.$mdMedia = $mdMedia;
 
     /**
      * The tournament being displayed to the user.

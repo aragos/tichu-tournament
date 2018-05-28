@@ -5,6 +5,8 @@
    *
    * @constructor
    * @param {!angular.Scope} $scope
+   * @param {$mdMedia} $mdMedia
+   * @param {$mdSidenav} $mdSidenav
    * @param {$mdDialog} $mdDialog
    * @param {$mdToast} $mdToast
    * @param {TichuMovementService} TichuMovementService
@@ -16,16 +18,31 @@
    * @param {!{pairCode: ?string, failure: (tichu.RpcError|undefined), movement: (tichu.Movement|undefined)}} loadResults
    * @ngInject
    */
-  function MovementDetailController($scope, $mdDialog, $mdToast, TichuMovementService, $q, $log, $window, $location, $route, loadResults) {
+  function MovementDetailController($scope, $mdMedia, $mdSidenav, $mdDialog, $mdToast,
+                                    TichuMovementService, $q, $log, $window, $location,
+                                    $route, loadResults) {
+    var maybeBackPath = null;
+    if ($mdMedia('gt-sm')) {
+      if (!!loadResults.pairCode || loadResults.failure) {
+        maybeBackPath =  "/home";
+      } else {
+        maybeBackPath = "/tournaments/" + loadResults.movement.tournamentId.id + "/view";
+      }
+    }
+
     $scope.appController.setPageHeader({
       header: loadResults.failure
           ? "Movement Error"
           : "Pair #" + loadResults.movement.pair.pairNo + " - " + loadResults.movement.tournamentId.name,
-      backPath: (loadResults.pairCode || loadResults.failure) ? "/home" : "/tournaments/" + loadResults.movement.tournamentId.id + "/view",
+      backPath: maybeBackPath,
       showHeader: true,
-      refresh: loadResults.failure ? null : this._refresh.bind(this)
+      refresh: loadResults.failure ? null : this._refresh.bind(this),
+      showMenu: !$mdMedia('gt-sm'),
+      openMenu: function() {
+        $mdSidenav('left').toggle();
+      },
     });
-    
+
     $scope.$on('$locationChangeStart', 
       function(event) {
         if (angular.element(document.body).hasClass('md-dialog-is-showing')) {

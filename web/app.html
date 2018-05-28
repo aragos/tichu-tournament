@@ -27,12 +27,16 @@
   </div>
   <div ng-cloak flex layout="column" tabIndex="-1" role="main" class="md-whiteframe-z2">
 
+    <md-progress-linear class="md-accent" ng-disabled="!appController.refresher || appController.refreshStatus !== null"></md-progress-linear>
     <md-toolbar ng-if="appController.showHeader && (appController.header || appController.backPath || appController.refresher)"
                 layout="row"
                 class="md-whiteframe-z1">
       <div class="md-toolbar-tools">
         <md-button class="md-icon-button" ng-if="appController.backPath" ng-href="{{appController.backPath}}">
           <md-icon flex="auto">arrow_back</md-icon>
+        </md-button>
+        <md-button class="md-icon-button" ng-if="appController.showMenu" ng-click="appController.openMenu()">
+          <md-icon flex="auto">menu</md-icon>
         </md-button>
         <h2 style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis">{{ appController.header }}</h2>
         <span flex></span>
@@ -44,8 +48,6 @@
         </md-button>
       </div>
     </md-toolbar>
-    <md-progress-linear class="md-accent" ng-disabled="!appController.refresher || appController.refreshStatus !== null"></md-progress-linear>
-
     <md-content flex id="content" layout="column" ng-view>
     </md-content>
 

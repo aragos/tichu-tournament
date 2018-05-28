@@ -54,6 +54,23 @@
      * @type {string}
      */
     this.title = "Tichu Tournament";
+    
+    /**
+     * Whether to show a hamburger menu in the header. To minimize congestion
+     * try to avoid having showMenu - true and backPath != null.
+     *
+     * @export
+     * @type {?boolean}
+     */
+    this.showMenu = false;
+
+    /**
+     * Function to be called when the menu button is clicked.
+     *
+     * @export
+     * @type {?function()}
+     */
+    this.openMenu = null;
   }
 
   /**
@@ -73,6 +90,8 @@
     this.showHeader = options.showHeader !== false;
     this.refreshStatus = true;
     this.refresher = options.refresh || null;
+    this.showMenu = options.showMenu || false;
+    this.openMenu = options.openMenu || null;
   };
 
   /**
