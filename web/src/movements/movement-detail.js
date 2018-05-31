@@ -37,7 +37,7 @@
       backPath: maybeBackPath,
       showHeader: true,
       refresh: loadResults.failure ? null : this._refresh.bind(this),
-      showMenu: !$mdMedia('gt-sm'),
+      showMenu: !$mdMedia('gt-sm') && !loadResults.pairCode,
       openMenu: function() {
         $mdSidenav('left').toggle();
       },
