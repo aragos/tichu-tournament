@@ -218,6 +218,30 @@
         noBoards: 20,
         noHands: 4,
         noRounds: 5
+      },
+      {
+        noPairs: 4,
+        noBoards: 15,
+        noHands: 5,
+        noRounds: 3
+      },
+      {
+        noPairs: 4,
+        noBoards: 18,
+        noHands: 6,
+        noRounds: 3
+      },
+      {
+        noPairs: 4,
+        noBoards: 21,
+        noHands: 7,
+        noRounds: 3
+      },
+      {
+        noPairs: 4,
+        noBoards: 24,
+        noHands: 8,
+        noRounds: 3
       }
     ];
 

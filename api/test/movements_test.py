@@ -200,6 +200,40 @@ class MovementTest(unittest.TestCase):
     self.checkHandsPlayedRightNumberOfTimes(movement, 5, 4)
     self.checkTableConsistency(movement, 5, 4)
     self.checkNumRounds(movement, 5, 5)
+    
+  def testConsistentOpponents_four_five_three(self):
+    movement = movements.Movement.CreateMovement(4, 5, 3)
+    self.checkConsistentSchedule(movement, 4, 5)
+    self.checkConsistentOpponents(movement, 4, 5)
+    self.checkHandsPlayedRightNumberOfTimes(movement, 4, 5)
+    self.checkTableConsistency(movement, 4, 5)
+    self.checkNumRounds(movement, 4, 3)
+
+  def testConsistentOpponents_four_six_three(self):
+    movement = movements.Movement.CreateMovement(4, 6, 3)
+    self.checkConsistentSchedule(movement, 4, 6)
+    self.checkConsistentOpponents(movement, 4, 6)
+    self.checkHandsPlayedRightNumberOfTimes(movement, 4, 6)
+    self.checkTableConsistency(movement, 4, 6)
+    self.checkNumRounds(movement, 4, 3)
+
+
+  def testConsistentOpponents_four_seven_three(self):
+    movement = movements.Movement.CreateMovement(4, 7, 3)
+    self.checkConsistentSchedule(movement, 4, 7)
+    self.checkConsistentOpponents(movement, 4, 7)
+    self.checkHandsPlayedRightNumberOfTimes(movement, 4, 7)
+    self.checkTableConsistency(movement, 4, 7)
+    self.checkNumRounds(movement, 4, 3)
+
+
+  def testConsistentOpponents_four_eight_three(self):
+    movement = movements.Movement.CreateMovement(4, 8, 3)
+    self.checkConsistentSchedule(movement, 4, 8)
+    self.checkConsistentOpponents(movement, 4, 8)
+    self.checkHandsPlayedRightNumberOfTimes(movement, 4, 8)
+    self.checkTableConsistency(movement, 4, 8)
+    self.checkNumRounds(movement, 4, 3)
 
   def checkConsistentSchedule(self, movement, num_pairs, num_hands_per_round):
     for i in range(num_pairs):
