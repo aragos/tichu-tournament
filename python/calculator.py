@@ -156,7 +156,11 @@ class HandResult:
     def _IsValidAvgScore(self):
       avg_scores = ["AVG", "AVG+", "AVG-", "AVG++", "AVG--"]
       return (self._ns_score in avg_scores and
-              self._ew_score in avg_scores)
+              self._ew_score in avg_scores and 
+              self._calls.n_call() == "" and 
+              self._calls.e_call() == "" and 
+              self._calls.w_call() == "" and 
+              self._calls.s_call() == "")
 
     def _TeamBounds(self, team1, team2, first_two):
         if (first_two == team1 or first_two == tuple(reversed(team1))):
@@ -168,6 +172,9 @@ class HandResult:
       
     def _IsScoreValid(self, out_order):
         assert len(out_order) == 4
+        if (not (isinstance(self._ns_score, int) and 
+                 isinstance(self._ew_score, int))):
+          return False
         # Check that trick based score is valid.
         if (((self._ns_score + self._ew_score) % 100) != 0 or 
               self._ns_score % 5 != 0 or 
