@@ -89,6 +89,21 @@ class CalculatorTest(unittest.TestCase):
     self.compareStats(team_summaries[8], 9, 4, .5, -5.42, -225, 4)
     self.compareStats(team_summaries[9], 10, 8, .5, -5.66, -285, 2)
 
+  def testAPs_avg(self):
+    hand_results = []
+    hand_results.append(HandResult(8, 1, 2, 0, 400, Calls("", "", "", "GT")))
+    hand_results.append(HandResult(8, 3, 6, 0, 400, Calls("", "", "", "GT")))
+    hand_results.append(HandResult(8, 4, 5, 'AVG', 'AVG', Calls("", "", "", "")))
+    boards = [Board(8, hand_results)]
+    team_summaries = Calculate(boards, 1)
+    OrderBy(team_summaries, "AP")
+    self.compareStats(team_summaries[0], 1, 1, 1, 0, 0, 0)
+    self.compareStats(team_summaries[1], 2, 2, 1, 0, 0, 0)
+    self.compareStats(team_summaries[2], 3, 3, 1, 0, 0, 0)
+    self.compareStats(team_summaries[3], 4, 4, 1, 0, 0, 0)
+    self.compareStats(team_summaries[4], 5, 5, 1, 0, 0, 0)
+    self.compareStats(team_summaries[5], 6, 6, 1, 0, 0, 0)
+
   def compareStats(self, ts, place, team_no, mps, rps, lps, aps):
     self.assertEqual(place, ts.mp_rank)
     self.assertEqual(team_no, ts.team_no)

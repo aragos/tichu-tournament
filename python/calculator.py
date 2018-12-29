@@ -351,12 +351,13 @@ class Board:
         avg_score = self._get_avg_score_diff()
         # This is n^2. You can do it in O(n) but will be uglier. Since
         # we will have 4/5 entries each time, this is OK.
-        iter = self._hand_results
-        gt_calls_ns = sum([self._called_t(x, "ns", "GT") for x in self._hand_results])
-        t_calls_ns = sum([self._called_t(x, "ns", "T") for x in self._hand_results])
-        gt_calls_ew = sum([self._called_t(x, "ew", "GT") for x in self._hand_results])
-        t_calls_ew = sum([self._called_t(x, "ew", "T") for x in self._hand_results])
-        for hr in iter:
+        hand_results = self._hand_results
+        gt_calls_ns = sum([self._called_t(x, "ns", "GT") for x in hand_results])
+        t_calls_ns = sum([self._called_t(x, "ns", "T") for x in hand_results])
+        gt_calls_ew = sum([self._called_t(x, "ew", "GT") for x in hand_results])
+        t_calls_ew = sum([self._called_t(x, "ew", "T") for x in hand_results])
+        num_non_avg = len([x for x in hand_results if x.diff() != "AVG" ])
+        for hr in hand_results:
             if (hr.diff() == "AVG"):
               continue
             bs = BoardScoreLine(hr)
@@ -372,7 +373,6 @@ class Board:
             bs.ns_lps = hr.diff() - avg_score
             bs.ew_lps = avg_score - hr.diff()
             # Now to calculate aggressiveness
-            num_non_avg = len([x for x in self._hand_results if x.diff() != "AVG" ])
             if self._called_t(hr, "ns", "GT"):
               bs.ns_aps = (num_non_avg - gt_calls_ns) * 2 - t_calls_ns
             elif self._called_t(hr, "ns", "T"):
@@ -386,11 +386,11 @@ class Board:
             else:
               bs.ew_aps = 0
             self._board_score.append(bs)
-        
+
         max_rps = self._get_max_rps()
         max_lps = self._get_max_lps()
-        avg_mps = (len(iter) - 1)/ 2.0
-        for hr in iter:
+        avg_mps = (len(hand_results) - 1)/ 2.0
+        for hr in hand_results:
           if (hr.diff() != "AVG"):
               continue
           bs = BoardScoreLine(hr)
