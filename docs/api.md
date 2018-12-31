@@ -91,6 +91,89 @@ Creates a new tournament owned by the currently logged in director.
 
 * `id`: String. An opaque, unique ID used to access the details about the newly created tournament.
 
+### Add an existing tournament (PUT /api/tournaments/)
+
+**Requires authentication and ownership of the given tournament.**
+Adds an existing possibly partially filled in tournament to the user's tournaments.
+Can be used primarily to inject locally created tournaments to storage.
+
+#### Request
+
+<!-- time 4 code -->
+    {
+        "name": "Tournament Name",
+        "no_pairs": 8,
+        "no_boards": 10,
+        "players": [{
+            "pair_no": 1,
+            "name": "Michael the Magnificent",
+            "email": "michael@michael.com"
+        }],
+        "hands": [{
+            "board_no": 3,
+            "ns_pair": 4,
+            "ew_pair": 6,
+            "calls": {
+                "north": "T",
+                "east": "GT",
+                "west": "",
+                "south": ""
+            },
+            "ns_score": 150,
+            "ew_score": -150,
+            "notes": "hahahahahaha what a fool"
+        }],
+        "allow_score_overwrites" : true   
+    }
+
+* `name`: String. A user-specified and user-readable name suitable for display in a tournament list.
+  Required.
+* `no_pairs`: Integer. The number of pairs (teams) to play in this tournament. Must be greater
+  than 0. Required.
+* `no_boards`: Integer. The number of boards (hands) to be played. Must be greater than 0.
+  Required.
+* `players`: List of objects. More information about the players. There should be at most
+  two players for the same `pair_no`. Optional.
+    * `pair_no`: Integer. The pair this player belongs to. Must be between 0 and `no_pairs`. Required.
+    * `name`: String. User-readable name for the player. Optional.
+    * `email`: String. Email for the player that can be used to identify user posting hand
+      results. Optional.
+* `hands`: List of objects. The records of all hands played so far in this tournament. There will be
+  at most one per combination of `board_no`, `ns_pair`, and `ew_pair`.
+    * `board_no`: Integer. The board number for this hand. Must be between 1 and `no_boards`,
+      inclusive.
+    * `ns_pair`: Integer. The number of the north-south pair. Must be between 1 and `no_pairs`,
+      inclusive, and different from `ew_pair`.
+    * `ew_pair`: Integer. The number of the east-west pair. Must be between 1 and `no_pairs`,
+      inclusive, and different from `ns_pair`.
+    * `calls`: Object. Calls made by players. May have entries for `north`, `east`, `west`, `south`.
+      Each entry may be `"T"`, indicating a call of Tichu, `"GT"`, indicating a call of Grand Tichu,
+      or `""`, indicating no call. If an entry is absent, it is assumed to mean no call.
+    * `ns_score`: Integer or string. The score of the north-south pair, including Tichu bonuses and
+      penalties. May also be the string "AVG", "AVG+", "AVG++", "AVG-", or "AVG--".
+    * `ew_score`: Integer or string. The score of the east-west pair, including Tichu bonuses and
+      penalties. May also be the string "AVG", "AVG+", "AVG++", "AVG-", or "AVG--".
+    * `notes`: String. Any additional notes about the hand added by the scorer or the director.
+* `allow_score_overwrites`: Whether non-administrator players are allowed to overwrite 
+  existing scores. If false, players can only enter scores for non-scored hands. Optional,
+  defaults to false.
+
+#### Status codes
+
+* **201**: The tournament was successfully injected.
+* **400**: One or more required fields were not specified, or failed validation.
+* **401**: User is not logged in.
+* **500**: Server failed to inject the tournament for any other reason.
+
+#### Response
+
+    {
+        "id": "1234567890abcdef"
+    }
+
+* `id`: String. An opaque, unique ID used to access the details about the newly injected tournament.
+
+
 ### Read tournament (GET /api/tournaments/:id)
 
 **Requires authentication and ownership of the given tournament.** 

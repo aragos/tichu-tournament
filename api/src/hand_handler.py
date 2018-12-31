@@ -9,6 +9,8 @@ from handler_utils import CheckValidHandPlayersCombinationAndMaybeSetStatus
 from handler_utils import GetPairIdFromRequest
 from handler_utils import GetTourneyWithIdAndMaybeReturnStatus
 from handler_utils import SetErrorStatus
+from handler_utils import ValidateHandResultMaybeSetStatus
+from handler_utils import AVG_VALUES
 from models import HandScore
 from models import PlayerPair
 from models import Tournament
@@ -16,9 +18,6 @@ from python.calculator import HandResult
 from python.calculator import Calls
 from python.calculator import InvalidCallError
 from python.calculator import InvalidScoreError
-
-
-AVG_VALUES = ["AVG", "AVG+", "AVG++", "AVG-", "AVG--"]
 
 
 class HandHandler(GenericHandler):
@@ -120,9 +119,9 @@ class HandHandler(GenericHandler):
     ew_score = request_dict.get("ew_score")
     notes = request_dict.get("notes")
 
-    if not self._ValidateHandResultMaybeSetStatus(int(board_no), int(ns_pair),
-                                                  int(ew_pair), ns_score,
-                                                  ew_score, calls):
+    if not ValidateHandResultMaybeSetStatus(self.response, int(board_no),
+                                            int(ns_pair), int(ew_pair),
+                                            ns_score, ew_score, calls):
       return
 
     tourney.PutHandScore(int(board_no), int(ns_pair), int(ew_pair), calls,
@@ -161,38 +160,6 @@ class HandHandler(GenericHandler):
       return
     hand_score.Delete()
     self.response.set_status(204) 
-
-  def _ValidateHandResultMaybeSetStatus(self, board_no, ns_pair, ew_pair,
-                                        ns_score, ew_score, calls):
-    ''' Validates the proposed hand results as a real Tichu score.
-
-    Args:
-      board_no: Integer. Hand number.
-      ns_pair: Integer. Pair number of team playing North/South.
-      ew_pair: Integer. Pair number of team playing East/West.
-      ns_score: Integer or String. Score of the North/South team. If string,
-         must be one of AVG, AVG+, AVG++, AVG-, AVG-- allowing for any
-         capitalization.
-      ew_score: Integer or String. Score of the East/West team. If string,
-         must be one of AVG, AVG+, AVG++, AVG-, AVG-- allowing for any
-         capitalization.
-      calls: Dictionary. Holds calls from each team. Can be None.
-    Returns:
-      True iff the proposed score is a valid Tichu score.s
-    '''
-    error =  "Invalid Score"
-    try:
-      HandResult(board_no, ns_pair, ew_pair, ns_score,
-                 ew_score, Calls.FromDict(calls))
-    except InvalidScoreError as err:
-      SetErrorStatus(self.response, 400, error,
-                     "These scores are not a valid Tichu score")
-      return False
-    except InvalidCallError as err:
-      SetErrorStatus(self.response, 400, error,
-                     "{} are not valid Tichu calls".format(calls))
-      return False
-    return True
 
   def _CheckUserHasAccessMaybeSetStatus(self, tourney, ns_pair, ew_pair):
     ''' Tests if the current user has access to a hand with given players.

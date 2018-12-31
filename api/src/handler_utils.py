@@ -3,6 +3,12 @@ import json
 from google.appengine.ext import ndb
 from models import Tournament
 from movements import Movement
+from python.calculator import HandResult
+from python.calculator import Calls
+from python.calculator import InvalidCallError
+from python.calculator import InvalidScoreError
+
+AVG_VALUES = ["AVG", "AVG+", "AVG++", "AVG-", "AVG--"]
 
 
 def is_int(s):
@@ -11,6 +17,39 @@ def is_int(s):
     return True
   except ValueError:
     return False
+
+def ValidateHandResultMaybeSetStatus(response, board_no, ns_pair, ew_pair,
+                                     ns_score, ew_score, calls):
+  ''' Validates the proposed hand results as a real Tichu score.
+
+  Args:
+    response: Response.
+    board_no: Integer. Hand number.
+    ns_pair: Integer. Pair number of team playing North/South.
+    ew_pair: Integer. Pair number of team playing East/West.
+    ns_score: Integer or String. Score of the North/South team. If string,
+       must be one of AVG, AVG+, AVG++, AVG-, AVG-- allowing for any
+       capitalization.
+    ew_score: Integer or String. Score of the East/West team. If string,
+       must be one of AVG, AVG+, AVG++, AVG-, AVG-- allowing for any
+       capitalization.
+    calls: Dictionary. Holds calls from each team. Can be None.
+  Returns:
+    True iff the proposed score is a valid Tichu score.s
+  '''
+  error =  "Invalid Score"
+  try:
+    HandResult(board_no, ns_pair, ew_pair, ns_score,
+               ew_score, Calls.FromDict(calls))
+  except InvalidScoreError as err:
+    SetErrorStatus(response, 400, error,
+                   "These scores are not a valid Tichu score")
+    return False
+  except InvalidCallError as err:
+    SetErrorStatus(response, 400, error,
+                   "{} are not valid Tichu calls".format(calls))
+    return False
+  return True
 
 def CheckValidHandPlayersCombinationAndMaybeSetStatus(response, tourney,
     board_no, ns_pair, ew_pair):
