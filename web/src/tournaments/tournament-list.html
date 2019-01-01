@@ -28,11 +28,32 @@
                     <md-icon>delete</md-icon>
                 </md-button>
             </md-fab-actions>
-        </md-fab-speed-dial>    
+        </md-fab-speed-dial> 
     </md-list-item>
 </md-list>
 <md-button class="md-fab md-raised md-fab-bottom-right md-icon-button md-primary" 
-           ng-if="!tournamentListController.failure"
+           ng-if="!tournamentListController.failure && !tournamentListController._showDelete"
            href="/tournaments/new" style="position: fixed; padding: 15px;"> 
     <md-icon class="material-icons md-avatar-icon" md-font-set="material-icons">add</md-icon>
 </md-button>
+<md-fab-speed-dial md-open="false" md-direction="up" class="custom-fab-upright md-fling md-fab-bottom-right"
+                   ng-if="tournamentListController._showDelete"
+                   style="position: fixed; padding: 15px;">
+    <md-fab-trigger>
+        <md-button class="md-fab md-raised md-icon-button md-primary" 
+                   ng-click="$mdOpenMenu()">
+             <md-icon class="material-icons md-avatar-icon" md-font-set="material-icons">add</md-icon>
+        </md-button>
+     </md-fab-trigger>
+     <md-fab-actions>
+         <md-button class="md-fab md-mini md-raised" href="/tournaments/new">
+              <md-tooltip md-direction="left">Create New</md-tooltip>
+              <md-icon>view_compact</md-icon>
+         </md-button>
+         <label for="input-file-id" class="md-button md-fab md-mini md-raised">
+              <md-tooltip md-direction="left">Upload</md-tooltip>
+              <md-icon>cloud_upload</md-icon>
+         </label>
+     </md-fab-actions>
+</md-fab-speed-dial> 
+<input id="input-file-id" type="file" class="ng-hide" fileupload>

@@ -1,7 +1,8 @@
 <div layout="row" style="height: 100%">
-    <div ng-include="'src/sidebar.html'"
-        ng-init="tournament_id=tournamentFormController.original.id;
-        current='config'; tournament_name='this.original.name'"></div>
+    <div ng-if="tournamentFormController.original"
+         ng-include="'src/sidebar.html'"
+         ng-init="tournament_id=tournamentFormController.original.id;
+         current='config'; tournament_name='this.original.name'"></div>
     <md-content layout="column" ng-if="!tournamentFormController.failure" style="width: 100%">
         <form name="tournamentForm">
             <md-card>

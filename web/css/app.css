@@ -12,6 +12,15 @@ md-list md-list-item .md-avatar-icon.completed-icon {
   background-color: #43A047
 }
 
+
+.custom-fab-upright {
+  justify-content: flex-end; 
+  width: 30px;
+}
+.custom-fab-upright:not(.md-is-open) md-fab-actions {
+  visibility: hidden;
+}
+
 .custom-fab {
   justify-content: flex-end; 
   width: 30px;

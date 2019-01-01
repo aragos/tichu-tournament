@@ -324,6 +324,27 @@ tichu.TournamentRequest = function TournamentRequest() {
   this.allowScoreOverwrites = false;
 };
 
+/** Sets the relevant fields in the request from a JSON file. JSON must follow
+ * the tournaments/PUT API format.
+ */
+tichu.TournamentRequest.prototype.setFromJSON = function setFromJSON(jsonstring) {
+  var parsedJson = JSON.parse(jsonstring);
+  this.name = parsedJson.name;
+  this.noPairs = parsedJson.no_pairs;
+  this.noBoards = parsedJson.no_boards;
+  if (parsedJson.players) {
+    for (i = 0; i < parsedJson.players.length; i++) {
+      var newRequest = new tichu.PlayerRequest();
+      var player = parsedJson.players[i];
+      newRequest.name = player.name || null;
+      newRequest.pairNo = player.pair_no || null;
+      newRequest.email = player.email || null;
+      this.players.push(newRequest);
+    }
+  }
+  this.allowScoreOverwrites = parsedJson.allow_score_overwrites;
+}
+
 /** Converts the names of this TournamentRequest into the form the server expects. */
 tichu.TournamentRequest.prototype.toJSON = function toJSON() {
   return {

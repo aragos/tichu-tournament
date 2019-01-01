@@ -494,6 +494,45 @@
   };
 
   /**
+   * Injects a new tournament on the server with the data in the request. 
+   * Returns a promise for the resulting Tournament object.
+   * @param {text} request raw JSON request to upload a tournament.
+   * @returns {angular.$q.Promise<tichu.Tournament>}
+   */
+  TichuTournamentService.prototype.uploadTournament = function uploadTournament(request) {
+    var path = "/api/tournaments";
+    var $q = this._$q;
+    var $log = this._$log;
+    var $http = this._$http;
+    var self = this;
+    return this._$http({
+      method: 'PUT',
+      url: path,
+      data: request
+    }).then(function onSuccess(response) {
+      try {
+        ServiceHelpers.assertType('injected new tournament data',
+                                  response.data, 'object', false);
+        var id = ServiceHelpers.assertType('created tournament id', 
+                                           response.data['id'], 'string', false);
+        var tournamentRequest = new tichu.TournamentRequest();
+        tournamentRequest.setFromJSON(request);
+        return self._getPairdIdsAndSaveTournament(id, tournamentRequest);
+      } catch (ex) {
+        $log.error(
+            "Malformed response from " + path + " (" + response.status + " " + response.statusText + "):\n"
+            + ex + "\n\n"
+            + JSON.stringify(response.data));
+        var rejection = new tichu.RpcError();
+        rejection.redirectToLogin = false;
+        rejection.error = "Invalid response from server";
+        rejection.detail = "The server sent confusing data for the tournament injection.";
+        return $q.reject(rejection);
+      }
+    }, ServiceHelpers.handleErrorIn($q, $log, path));
+  };
+
+  /**
    * Updates a tournament on the server, and returns a promise for the resulting Tournament object.
    * @param {string} id
    * @param {tichu.TournamentRequest} request
