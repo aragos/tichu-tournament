@@ -60,6 +60,18 @@
                     <p>May be incomplete if not all hands have been scored.</p>
                 </div>
             </md-list-item>
+            <md-list-item class="md-2-line"
+                          ng-disabled="current == 'export'"
+                          style="width: 100%"
+                          ng-class="[{'row-selected': current == 'export'}]"
+                          ng-href="/api/tournaments/{{tournament_id}}"
+                          download="{{tournament_name}} Export.txt"
+                          target="_blank">
+                <md-icon>move_to_inbox</md-icon>
+                <div class="md-list-item-text">
+                    <h3>Export Tournament Data</h3>
+                </div>
+            </md-list-item>
         </md-list>
     </md-content>
 </md-sidenav>
