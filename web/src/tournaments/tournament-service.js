@@ -494,7 +494,7 @@
   };
 
   /**
-   * Injects a new tournament on the server with the data in the request. 
+   * Injects a new tournament on the server with the data in the request.
    * Returns a promise for the resulting Tournament object.
    * @param {text} request raw JSON request to upload a tournament.
    * @returns {angular.$q.Promise<tichu.Tournament>}
@@ -513,7 +513,7 @@
       try {
         ServiceHelpers.assertType('injected new tournament data',
                                   response.data, 'object', false);
-        var id = ServiceHelpers.assertType('created tournament id', 
+        var id = ServiceHelpers.assertType('created tournament id',
                                            response.data['id'], 'string', false);
         var tournamentRequest = new tichu.TournamentRequest();
         tournamentRequest.setFromJSON(request);
