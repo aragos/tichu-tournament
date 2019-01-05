@@ -5,6 +5,7 @@ from generic_handler import GenericHandler
 from google.appengine.api import mail
 from google.appengine.api import users
 from google.appengine.ext import ndb
+from google.appengine.api.app_identity import get_application_id
 from handler_utils import CheckUserOwnsTournamentAndMaybeReturnStatus
 from handler_utils import GetTourneyWithIdAndMaybeReturnStatus
 from handler_utils import SetErrorStatus
@@ -63,11 +64,22 @@ You can use it to view and enter your results on https://tichu-tournament.appspo
 \nGood Luck!
 Your friendly neighborhood tournament director""".format(
                 player_greeting, tourney.name, player_pair.id)
+        email_html = """{}
+<br/>
+<br/>Welcome to Tichu tournament \"{}\". Your pair's ID is <b>{}</b>.
+You can use it to view and enter your results on https://tichu-tournament.appspot.com. 
+<br/>
+<br/>Good Luck!
+<br/>Your friendly neighborhood tournament director
+""".format(player_greeting, tourney.name, player_pair.id)
         mail.send_mail(
-            sender=user.email(),
+            # This will break down if hosted elsewhere.
+            sender="welcome@{}.appspotmail.com".format(get_application_id()),
             to=player["email"],
             subject="Your Tichu Tournament Pair Code",
-            body=email_text)
+            body=email_text,
+            html=email_html,
+            reply_to=user.email())
 
 
   def _ParseRequestAndMaybeSetStatus(self): 
