@@ -59,17 +59,15 @@ class WelcomeHandler(GenericHandler):
         player_greeting = "Dear {},".format(player_name) if player_name else "Greetings!"
         email_text = """{} 
 \nWelcome to Tichu tournament \"{}\". Your pair's ID is {}.
-You can use it to view and enter your results on
-http://tichu-tournament.appspot.com. 
+You can use it to view and enter your results on https://tichu-tournament.appspot.com. 
 \nGood Luck!
-\nYour friendly neighborhood tournament director""".format(
+Your friendly neighborhood tournament director""".format(
                 player_greeting, tourney.name, player_pair.id)
         mail.send_mail(
             sender=user.email(),
             to=player["email"],
             subject="Your Tichu Tournament Pair Code",
-            body=email_text,
-            reply_to=user.email())
+            body=email_text)
 
 
   def _ParseRequestAndMaybeSetStatus(self): 
