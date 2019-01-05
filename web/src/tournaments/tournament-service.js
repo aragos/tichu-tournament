@@ -460,6 +460,25 @@
   };
 
   /**
+   * Sends a welcome email to the input recipients.
+   * @param {tichu.TournamentPlayer[]}
+   * @returns {angular.$q.Promise<>}
+   */
+  TichuTournamentService.prototype.sendWelcomeEmail = function sendWelcomeEmail(request, id) {
+    var path = "/api/tournaments/" + encodeURIComponent(id) + "/welcomeemail";
+    var $q = this._$q;
+    var $log = this._$log;
+    var $http = this._$http;
+    return this._$http({
+      method: 'POST',
+      url: path,
+      data: request
+    }).then(function onSuccess(response) {
+      return;
+    }, ServiceHelpers.handleErrorIn($q, $log, path));
+  }
+
+  /**
    * Creates a new tournament on the server, and returns a promise for the resulting Tournament object.
    * @param {tichu.TournamentRequest} request
    * @returns {angular.$q.Promise<tichu.Tournament>}

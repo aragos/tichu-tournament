@@ -160,6 +160,7 @@
           "ngRoute",
           "ngMaterial",
           "ngMessages",
+          "email-center",
           "tichu-home",
           "tichu-movement-detail",
           "tichu-tournament-detail",

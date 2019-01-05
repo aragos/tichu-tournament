@@ -88,3 +88,11 @@ md-sidenav md-list.md-dense md-list-item .md-list-item-inner>md-icon:first-child
   color: black; 
   background-color: #E0E0E0; 
 }
+
+md-checkbox.dense .md-icon {
+  transform: scale(0.75);
+}
+
+md-checkbox.dense {
+  margin-bottom: 8px;
+}

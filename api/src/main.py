@@ -17,6 +17,7 @@ from result_handler import ResultHandler
 from result_handler import XlxsResultHandler
 from tournament_handler import TourneyHandler
 from tournament_list_handler import TourneyListHandler
+from welcome_handler import WelcomeHandler
 
 app = webapp2.WSGIApplication([
     ('/api/checkAuth', AuthHandler),
@@ -36,4 +37,5 @@ app = webapp2.WSGIApplication([
     ('/api/tournaments/([^/]+)/results/?', ResultHandler),
     ('/api/tournaments/([^/]+)/xlsresults/?', XlxsResultHandler),
     ('/api/tournaments/([^/]+)/pdfboards/?', PdfBoardHandler),
+    ('/api/tournaments/([^/]+)/welcomeemail/?', WelcomeHandler),
 ], debug=True)

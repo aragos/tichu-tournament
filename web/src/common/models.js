@@ -262,6 +262,25 @@ tichu.Tournament.prototype.setNoPairs = function setNoPairs(noPairs, factory) {
 };
 
 /**
+ * An email request used to communicate email addresses.
+ * @constructor
+ */
+tichu.EmailRequest = function EmailRequest() {
+  /**
+   * The e-mail addresses of players to send email to.
+   * @type {string[]}
+   */
+  this.emails = [];
+};
+
+/** Converts the fields to the form the server expects. */
+tichu.EmailRequest.prototype.toJSON = function toJSON() {
+  return {
+    'emails': this.emails
+  }
+}
+
+/**
  * A player request, used as part of a TournamentRequest.
  * @constructor
  */

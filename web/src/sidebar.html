@@ -25,6 +25,16 @@
                 </div>
             </md-list-item>
             <md-list-item class="md-2-line"
+                          ng-disabled="current == 'email'"
+                          style="width: 100%"
+                          ng-class="[{'row-selected': current == 'email'}]"
+                          ng-href="/tournaments/{{tournament_id}}/email">
+                <md-icon>mail</md-icon>
+                <div class="md-list-item-text">
+                    <h3>Email Center</h3>
+                </div>
+            </md-list-item>
+            <md-list-item class="md-2-line"
                           ng-disabled="current == 'status'"
                           ng-class="[{'row-selected': current == 'status'}]"
                           ng-href="/tournaments/{{tournament_id}}/status">

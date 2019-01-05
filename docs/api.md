@@ -1111,3 +1111,28 @@ Each tournament has an associated set of hands. This returns them in pdf format.
 #### Response
 .pdf file with all hands used. Returns 35 hands regardless of the number of
 boards in the tournament. The extra hands may be used as substitutes.
+
+
+#### Send a welcome email (POST /api/tournaments/:id/welcomeemail)
+
+**Requires authentication and ownership of the given tournament.**
+Sends a an email to a subset of players that includes a player code the players
+can use to access their schedule. The sender of the email is the logged in player.
+
+#### Request
+* `id`: String. An opaque, unique ID returned from `GET /tournaments` or `POST /tournaments`.
+
+<!-- time 4 code -->
+    {
+        "emails": ["playa1@playas.com", "player2@playas.com"]
+    }
+* `emails`: List of strings. List of emails of the players whose player code will be sent out.
+
+#### Status codes
+* **201**: The email was successfully sent.
+* **400**: No emails were specified or the emails did not correspond to players in the tournament.
+* **401**: User is not logged in.
+* **403**: The user is logged in, but does not own this tournament.
+* **404**: The tournament with the given ID does not exist.
+* **500**: Server failed to send an email for any other reason.
+
