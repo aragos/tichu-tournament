@@ -73,8 +73,7 @@ You can use it to view and enter your results on https://tichu-tournament.appspo
 <br/>Your friendly neighborhood tournament director
 """.format(player_greeting, tourney.name, player_pair.id)
         mail.send_mail(
-            # This will break down if hosted elsewhere.
-            sender="welcome@{}.appspotmail.com".format(get_application_id()),
+            sender="{} <welcome@{}.appspotmail.com>".format(tourney.name, get_application_id()),
             to=player["email"],
             subject="Your Tichu Tournament Pair Code",
             body=email_text,

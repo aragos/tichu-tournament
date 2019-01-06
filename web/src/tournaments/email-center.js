@@ -211,6 +211,7 @@
     var tournamentId = this.id;
     var tournamentService = this._tournamentService;
     var $mdToast = this._$mdToast;
+    var $mdDialog = this._$mdDialog;
     var confirmation_text = "Send " + this.emailType + " email to " +
                             selectedPlayers.length + " recipient" + 
                             (selectedPlayers.length == 1 ? "" : "s") + "?";
@@ -222,15 +223,17 @@
     this._$mdDialog.show(dialog).then(function () {
       var request = new tichu.EmailRequest();
       request.emails = selectedPlayers.map(function (p) {return p.email;})
-      var promise = tournamentService.sendWelcomeEmail(request, tournamentId);
+      var promise = self.emailType == "WELCOME" ? tournamentService.sendWelcomeEmail(request, tournamentId)
+                                                : tournamentService.sendResultsEmail(request, tournamentId);
       promise.then(function(result) {
         self.sending = false;
         $mdToast.showSimple("Email sent");
       }).catch(function(failure) {
-        var alert = self._$mdDialog.alert()
+        var alert = $mdDialog.alert()
           .title(failure.error)
           .textContent(failure.detail)
           .ok("Try again");
+        $mdDialog.show(alert)
         self.sending = false;
       });
     }, function (autoHidden) {

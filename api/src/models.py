@@ -1,6 +1,8 @@
 import datetime
 import json
 import random
+from model_utils import ListOfScoredHandsToListOfDicts
+from model_utils import ListOfModelBoardsToListOfBoards
 from movements import Movement
 from python import boardgenerator
 
@@ -226,25 +228,21 @@ class Tournament(ndb.Model):
           "notes": "hahahahahaha what a fool"
           "board_no": 1,
           "ns_pair": 2, 
-          "ns_score": 100
-          "ew_score": 0
         }
       calls and notes may be null.
     '''
-    hand_list = []
-    for hand_score in HandScore.query(ancestor=self.key).fetch():
-      if hand_score.deleted:
-        continue
-      split_key = hand_score.key.id().split(":")
-      hand_list.append(
-          {'calls': hand_score.calls_dict(),
-           'board_no': int(split_key[0]),
-           'ns_pair': int(split_key[1]), 
-           'ew_pair': int(split_key[2]),
-           'ns_score': hand_score.get_ns_score(),
-           'ew_score': hand_score.get_ew_score(),
-           'notes': hand_score.notes})
-    return hand_list
+    return ListOfScoredHandsToListOfDicts(
+        HandScore.query(HandScore.deleted == False, ancestor=self.key).fetch())
+
+  def GetScoredHandListAsync(self):
+    ''' Fetch the list of all non deleted scored hands that are associated with
+    this tournament asynchronously.
+
+    Returns:
+      Future that holds a list of HandScores.
+    '''
+    return HandScore.query(HandScore.deleted == False,
+                           ancestor=self.key).fetch_async()
 
   def ScoredHands(self):
     ''' Find all hands already scored in the tournament.
@@ -261,16 +259,20 @@ class Tournament(ndb.Model):
       ret.append(HandScore.DescriptionFromKeyId(hand.id()))
     return ret
 
+
   def GetBoards(self):
     """Returns this tournaments boards.
 
     Returns: List of boardgenerator board objects sorted by id.
     """
-    boards = []
-    for board in Board.query(ancestor=self.key).fetch():
-      boards.append(boardgenerator.Board.FromJson(board))
+    return ListOfModelBoardsToListOfBoards(Board.query(ancestor=self.key).fetch())
+    
+  def GetBoardsAsync(self):
+    """Returns a future that will contain this tournament's boards asynchronously.
 
-    return sorted(boards, key=lambda x: x.id)
+    Returns: A futures with a list of model Board objects. Unsorted.
+    """
+    return Board.query(ancestor=self.key).fetch_async()
 
   def IsLocked(self):
     if self.lock_status == INVALID:
