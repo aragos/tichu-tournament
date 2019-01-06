@@ -175,7 +175,7 @@ For the analytical sort among us, check out the hand record and detailed breakdo
 <br/>Your friendly neighborhood tournament director
 """.format(tourney.name, winner, second_place, third_place)
 
-    attachment_files = [mail.Attachment('results.xls', payloads[0]),
+    attachment_files = [mail.Attachment('results.xlsx', payloads[0]),
                         mail.Attachment('boards.pdf', payloads[1])]
     for player_pair_future in tourney_player_pair_futures:
       player_pair = player_pair_future.get_result()
