@@ -11,7 +11,7 @@
    * @param {!TichuCodeService} TichuCodeService
    * @ngInject
    */
-  function HomeController($scope, $location, $mdDialog, $cookies, TichuCodeService) {
+  function HomeController($scope, $location, $mdDialog, $cookies, $route, TichuCodeService) {
     $scope.appController.setPageHeader({
       showHeader: false
     });
@@ -37,14 +37,15 @@
      */
     this._$cookies = $cookies;
 
-     /**
-     * The code the user has currently entered.
-     *
-     * @export
-     * @type {string}
-     */
-    this.code = "";
-    if (this._$cookies.get("playerCode") != "") {
+    var param_player_code = $route.current.params["playercode"]
+    /**
+    * The code the user has currently entered.
+    *
+    * @export
+    * @type {string}
+    */
+    this.code = (param_player_code != null && param_player_code.length == 4) ? param_player_code : "";
+    if (this._$cookies.get("playerCode") != "" && !this.code) {
       this.code = this._$cookies.get("playerCode");
     }
 
@@ -118,6 +119,11 @@
    */
   function mapRoute($routeProvider) {
     $routeProvider
+        .when("/home/:playercode", {
+          templateUrl: "src/home/home.html",
+          controller: "HomeController",
+          controllerAs: "homeController"
+        })
         .when("/home", {
           templateUrl: "src/home/home.html",
           controller: "HomeController",

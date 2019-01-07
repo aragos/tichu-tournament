@@ -90,11 +90,13 @@ class AppTest(AppTestBase):
     self.assertEqual(response.status_int, 200)
     pair_id = json.loads(response.body)['pair_id'] 
     assert pair_id in email_text
+    assert "https://tichu-tournament.appspot.com/home/{}".format(pair_id) in email_text
     email_text = str(messages[1].body)
     self.assertEqual(messages[1].to, "email2@something.com")
     self.assertEqual(messages[1].reply_to, "user@example.com")
     assert "Dear Name2" in email_text 
     assert pair_id in email_text
+    assert "https://tichu-tournament.appspot.com/home/{}".format(pair_id) in email_text
     email_text = str(messages[2].body)
     self.assertEqual(messages[2].to, "email3@something.com")
     self.assertEqual(messages[2].reply_to, "user@example.com")
@@ -103,6 +105,7 @@ class AppTest(AppTestBase):
           id, 2))
     self.assertEqual(response.status_int, 200)
     pair_id = json.loads(response.body)['pair_id'] 
+    assert "https://tichu-tournament.appspot.com/home/{}".format(pair_id) in email_text
     assert pair_id in email_text
 
 

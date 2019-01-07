@@ -60,18 +60,18 @@ class WelcomeHandler(GenericHandler):
         player_greeting = "Dear {},".format(player_name) if player_name else "Greetings!"
         email_text = """{} 
 \nWelcome to Tichu tournament \"{}\". Your pair's ID is {}.
-You can use it to view and enter your results on https://tichu-tournament.appspot.com. 
+You can use it to view and enter your results on https://tichu-tournament.appspot.com/home/{}. 
 \nGood Luck!
 Your friendly neighborhood tournament director""".format(
-                player_greeting, tourney.name, player_pair.id)
+                player_greeting, tourney.name, player_pair.id, player_pair.id)
         email_html = """{}
 <br/>
 <br/>Welcome to Tichu tournament \"{}\". Your pair's ID is <b>{}</b>.
-You can use it to view and enter your results on https://tichu-tournament.appspot.com. 
+You can use it to view and enter your results on https://tichu-tournament.appspot.com/home/{}. 
 <br/>
 <br/>Good Luck!
 <br/>Your friendly neighborhood tournament director
-""".format(player_greeting, tourney.name, player_pair.id)
+""".format(player_greeting, tourney.name, player_pair.id, player_pair.id)
         mail.send_mail(
             sender="{} <welcome@{}.appspotmail.com>".format(tourney.name, get_application_id()),
             to=player["email"],
