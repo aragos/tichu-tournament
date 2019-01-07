@@ -1130,7 +1130,32 @@ can use to access their schedule. The sender of the email is the logged in playe
 
 #### Status codes
 * **201**: The email was successfully sent.
-* **400**: No emails were specified or the emails did not correspond to players in the tournament.
+* **400**: No emails were specified.
+* **401**: User is not logged in.
+* **403**: The user is logged in, but does not own this tournament.
+* **404**: The tournament with the given ID does not exist.
+* **500**: Server failed to send an email for any other reason.
+
+#### Send a results email (POST /api/tournaments/:id/resultsemail)
+
+**Requires authentication and ownership of the given tournament.**
+Sends a an email to a subset of players that includes the hand record and
+XLX spreadsheet of the results. Will not send an email if all scores have not
+been entered. If the director is not one of the players of the tournament they
+will also get a copy of the email.
+
+#### Request
+* `id`: String. An opaque, unique ID returned from `GET /tournaments` or `POST /tournaments`.
+
+<!-- time 4 code -->
+    {
+        "emails": ["playa1@playas.com", "player2@playas.com"]
+    }
+* `emails`: List of strings. List of emails of the players who will receive the email.
+
+#### Status codes
+* **201**: The email was successfully sent.
+* **400**: No emails were specified or the tournament is not ready for results.
 * **401**: User is not logged in.
 * **403**: The user is logged in, but does not own this tournament.
 * **404**: The tournament with the given ID does not exist.

@@ -244,7 +244,7 @@ def ExtractTeamNames(team_summary, player_pair_future):
     ''' Formats the team number and names from a TeamSummaries object. '''
     team_number = team_summary.team_no
     player_pair = player_pair_future[team_number - 1].get_result()
-    player_list = player_pair.player_list()
+    player_list = filter(lambda x : x.get("name"), player_pair.player_list())
     if len(player_list) == 0:
       team_names = "2 Awesome Players"
     elif len(player_list) == 1:
