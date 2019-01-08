@@ -2,7 +2,7 @@ import datetime
 import json
 import random
 from movements import Movement
-from python import boardgenerator
+from python import board
 
 from google.appengine.ext import ndb
 
@@ -264,11 +264,11 @@ class Tournament(ndb.Model):
   def GetBoards(self):
     """Returns this tournaments boards.
 
-    Returns: List of boardgenerator board objects sorted by id.
+    Returns: List of board objects sorted by id.
     """
     boards = []
     for board in Board.query(ancestor=self.key).fetch():
-      boards.append(boardgenerator.Board.FromJson(board))
+      boards.append(board.Board.FromJson(board))
 
     return sorted(boards, key=lambda x: x.id)
 

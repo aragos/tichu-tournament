@@ -10,7 +10,7 @@ from handler_utils import is_int
 from handler_utils import SetErrorStatus
 from models import Tournament
 from models import PlayerPair
-from python import boardgenerator
+from python import board
 
 class TourneyListHandler(GenericHandler):
   def get(self):
@@ -50,7 +50,7 @@ class TourneyListHandler(GenericHandler):
                                           name = name,
                                           no_pairs=no_pairs,
                                           no_boards=no_boards,
-                                          boards=boardgenerator.GenerateBoards(35))
+                                          boards=board.GenerateBoards(35))
     tourney.PutPlayers(player_list, 0)
 
     if allow_score_overwrites:
