@@ -8,7 +8,6 @@ from google.appengine.ext import testbed
 
 from api.src import main
 
-
 class AppTest(unittest.TestCase):
   def setUp(self):
     os.environ['AUTH_DOMAIN'] = 'testbed'
@@ -26,36 +25,42 @@ class AppTest(unittest.TestCase):
 
   def testCreateTournament_unauthorized(self):
     params = {'name': 'name1', 'no_pairs': 8, 'no_boards': 24}
-    response = self.testapp.post_json("/api/tournaments", params, expect_errors=True)
+    response = self.testapp.post_json("/api/tournaments", params,
+                                      expect_errors=True)
     self.assertEqual(response.status_int, 401)
 
   def testCreateTournament_empty_name(self):
     self.loginUser()
     params = {'name': '', 'no_pairs': 8, 'no_boards': 24}
-    response = self.testapp.post_json("/api/tournaments", params, expect_errors=True)
+    response = self.testapp.post_json("/api/tournaments", params,
+                                      expect_errors=True)
     self.assertEqual(response.status_int, 400)
-    
+
   def testCreateTournament_bad_num_pairs(self):
     self.loginUser()
     params = {'name': 'name1', 'no_pairs': '8a', 'no_boards': 24}
-    response = self.testapp.post_json("/api/tournaments", params, expect_errors=True)
+    response = self.testapp.post_json("/api/tournaments", params,
+                                      expect_errors=True)
     self.assertEqual(response.status_int, 400)
-    
+
   def testCreateTournament_bad_num_boards(self):
     self.loginUser()
     params = {'name': 'name1', 'no_pairs': 8, 'no_boards': '24b'}
-    response = self.testapp.post_json("/api/tournaments", params, expect_errors=True)
+    response = self.testapp.post_json("/api/tournaments", params,
+                                      expect_errors=True)
     self.assertEqual(response.status_int, 400)
-    
+
   def testCreateTournament_invalid_num_boards(self):
     self.loginUser()
     params = {'name': 'name1', 'no_pairs': 8, 'no_boards': '-1'}
-    response = self.testapp.post_json("/api/tournaments", params, expect_errors=True)
+    response = self.testapp.post_json("/api/tournaments", params,
+                                      expect_errors=True)
     self.assertEqual(response.status_int, 400)
     params = {'name': 'name1', 'no_pairs': 8}
-    response = self.testapp.post_json("/api/tournaments", params, expect_errors=True)
+    response = self.testapp.post_json("/api/tournaments", params,
+                                      expect_errors=True)
     self.assertEqual(response.status_int, 400)
-    
+
   def testCreateTournament_invalid_num_pairs(self):
     self.loginUser()
     params = {'name': 'name1', 'no_pairs': -1, 'no_boards': '24'}
@@ -67,7 +72,7 @@ class AppTest(unittest.TestCase):
     params = {'name': 'name1', 'no_boards': 24}
     response = self.testapp.post_json("/api/tournaments", params, expect_errors=True)
     self.assertEqual(response.status_int, 400)
-    
+
   def testCreateTournament_invalid_movement_config(self):
     self.loginUser()
     params = {'name': 'name1', 'no_pairs': 8, 'no_boards': 21}
@@ -82,7 +87,7 @@ class AppTest(unittest.TestCase):
     self.assertNotEqual(response.body, '')
     response_dict = json.loads(response.body)
     id = response_dict['id']
-    
+
   def testCreateTournament_lock_state_unlocked(self):
     self.loginUser()
     params = {'name': 'name', 'no_pairs': 8, 'no_boards': 24, 
@@ -92,13 +97,233 @@ class AppTest(unittest.TestCase):
     response_dict = json.loads(response.body)
     id = response_dict['id']
 
-  def testCreateTournaments_unauthorized(self):
-    response = self.testapp.get("/api/tournaments", expect_errors=True)
+  def testPutTournament_unauthorized(self):
+    params = {'name': 'name', 
+              'no_pairs': 8,
+              'no_boards': 24, 
+              'allow_score_overwrites': True}
+    response = self.testapp.put_json("/api/tournaments", params,
+                                     expect_errors=True)
     self.assertEqual(response.status_int, 401)
+
+  def testPutTournament_empty_name(self):
+    self.loginUser()
+    params = {'name': "", 
+              'no_pairs': 8,
+              'no_boards': 24, 
+              'allow_score_overwrites': True}
+    response = self.testapp.put_json("/api/tournaments", params,
+                                     expect_errors=True)
+    self.assertEqual(response.status_int, 400)
+
+  def testPutTournament_bad_num_pairs(self):
+    self.loginUser()
+    params = {'name': "Name", 
+              'no_pairs': '8a',
+              'no_boards': 24, 
+              'allow_score_overwrites': True}
+    response = self.testapp.put_json("/api/tournaments", params,
+                                     expect_errors=True)
+    self.assertEqual(response.status_int, 400)
+
+  def testPutTournament_bad_num_boards(self):
+    self.loginUser()
+    params = {'name': "Name", 
+              'no_pairs': 8,
+              'no_boards': '24a', 
+              'allow_score_overwrites': True}
+    response = self.testapp.put_json("/api/tournaments", params,
+                                     expect_errors=True)
+    self.assertEqual(response.status_int, 400)
+
+  def testPutTournament_invalid_num_boards(self):
+    self.loginUser()
+    params = {'name': "Name", 
+              'no_pairs': 8,
+              'no_boards': -1, 
+              'allow_score_overwrites': True}
+    response = self.testapp.put_json("/api/tournaments", params,
+                                     expect_errors=True)
+    self.assertEqual(response.status_int, 400)
+    params = {'name': "Name", 
+              'no_pairs': 8,
+              'allow_score_overwrites': True}
+    response = self.testapp.put_json("/api/tournaments", params,
+                                     expect_errors=True)
+    self.assertEqual(response.status_int, 400)
+    params = {'name': "Name", 
+              'no_pairs': 8,
+              'no_boards': '-1', 
+              'allow_score_overwrites': True}
+    response = self.testapp.put_json("/api/tournaments", params,
+                                     expect_errors=True)
+    self.assertEqual(response.status_int, 400)
+
+  def testPutTournament_invalid_num_pairs(self):
+    self.loginUser()
+    params = {'name': "Name", 
+              'no_pairs': -1,
+              'no_boards': 24, 
+              'allow_score_overwrites': True}
+    response = self.testapp.put_json("/api/tournaments", params,
+                                     expect_errors=True)
+    self.assertEqual(response.status_int, 400)
+    params = {'name': "Name", 
+              'no_boards': 24,
+              'allow_score_overwrites': True}
+    response = self.testapp.put_json("/api/tournaments", params,
+                                     expect_errors=True)
+    self.assertEqual(response.status_int, 400)
+    params = {'name': "Name", 
+              'no_boards': 24,
+              'no_pairs': '-1', 
+              'allow_score_overwrites': True}
+    response = self.testapp.put_json("/api/tournaments", params,
+                                     expect_errors=True)
+    self.assertEqual(response.status_int, 400)
+
+  def testPutTournament_invalid_config(self):
+    self.loginUser()
+    params = {'name': "Name", 
+              'no_pairs': 8,
+              'no_boards': 21, 
+              'allow_score_overwrites': True}
+    response = self.testapp.put_json("/api/tournaments", params,
+                                     expect_errors=True)
+    self.assertEqual(response.status_int, 400)
+
+  def testPutTournamnet_invalid_scoring(self):
+    self.loginUser()
+    hand = {"board_no": 1,
+            "ns_pair": 2,
+            "ew_pair": 3,
+            "calls": {
+              "north": "T",
+              "east": "GT",
+              "west": "",
+              "south": ""},
+            "ns_score": 20,
+            "ew_score": 75,
+            "notes": "hahahahahaha what a fool"}
+    params = {'name': "Name", 
+              'no_pairs': 8,
+              'no_boards': 24, 
+              'allow_score_overwrites': True,
+              'hands': [hand]}
+    response = self.testapp.put_json("/api/tournaments",
+                                     params, expect_errors=True)
+    self.assertEqual(response.status_int, 400)
+    params["hands"][0]["ew_score"] = 80
+    params["hands"][0]["calls"]["north"] = "G"
+    response = self.testapp.put_json("/api/tournaments",
+                                     params, expect_errors=True)
+    self.assertEqual(response.status_int, 400)
+
+  def testPutTournament_null_calls(self):
+    self.loginUser()
+    hand = {"board_no": 1,
+            "ns_pair": 2,
+            "ew_pair": 3,
+            "ns_score": 25,
+            "ew_score": 75,
+            "notes": "hahahahahaha what a fool"}
+    params = {'name': "Name", 
+              'no_pairs': 8,
+              'no_boards': 24, 
+              'allow_score_overwrites': True,
+              'hands': [hand]}
+    response = self.testapp.put_json("/api/tournaments", params)
+    self.assertEqual(response.status_int, 201)
+
+  def testPutTournament_no_hands(self):
+    self.loginUser()
+    params = {'name': "Name", 
+              'no_pairs': 8,
+              'no_boards': 24, 
+              'allow_score_overwrites': True}
+    response = self.testapp.put_json("/api/tournaments", params)
+    self.assertEqual(response.status_int, 201)
+
+  def testPutTournament_avg_calls(self):
+    self.loginUser()
+    hand = {"board_no": 1,
+            "ns_pair": 2,
+            "ew_pair": 3,
+            "ns_score": "Avg+",
+            "ew_score": "aVg",
+            'calls': { 'north': "T" },
+            "notes": "hahahahahaha what a fool"}
+    params = {'name': "Name", 
+              'no_pairs': 8,
+              'no_boards': 24, 
+              'allow_score_overwrites': True,
+              'hands': [hand]}
+    response = self.testapp.put_json("/api/tournaments/",
+                                     params, expect_errors=True)
+    self.assertEqual(response.status_int, 400)
+    params["hands"][0]["calls"]["north"] = ""
+    response = self.testapp.put_json("/api/tournaments", params)
+    self.assertEqual(response.status_int, 201)
+
+  def testPutTournament_simple(self):
+    self.loginUser()
+    params = {'name': 'name', 
+              'no_pairs': 8,
+              'no_boards': 24, 
+              'players': [{
+                'pair_no': 1,
+                'name': "Michael the Magnificent",
+               }],
+              "pair_ids": ["ABCD", "DEFG", "HIJK"],
+              'hands': [{
+                'board_no': 1,
+                'ns_pair': 2,
+                'ew_pair': 3,
+                'calls': {
+                  'north': "T",
+                  'east': "GT",
+                  'west': "",
+                  'south': ""
+                },
+                'ns_score': 150,
+                'ew_score': -150,
+                'notes': "hahahahahaha what a fool"
+              }],
+            'allow_score_overwrites': True}
+    response = self.testapp.put_json("/api/tournaments", params)
+    self.assertNotEqual(response.body, '')
+    response_dict = json.loads(response.body)
+    self.assertEqual(response.status_int, 201)
+    id = response_dict['id']
+    response = self.testapp.get("/api/tournaments/{}".format(id))
+    self.assertEqual(response.status_int, 200)
+    response_dict = json.loads(response.body)
+    params['pair_ids'] = None
+    response_dict['pair_ids'] = None
+    self.assertEqual(response_dict, params)
+
+  def testPutTournament_full(self):
+    self.loginUser()
+    params = json.loads(open(os.path.join(os.getcwd(), 
+                        'api/test/example_tournament.txt')).read())
+    params["allow_score_overwrites"] = False
+    response = self.testapp.put_json("/api/tournaments", params)
+    self.assertNotEqual(response.body, '')
+    response_dict = json.loads(response.body)
+    self.assertEqual(response.status_int, 201)
+    id = response_dict['id']
+    response = self.testapp.get("/api/tournaments/{}".format(id))
+    self.assertEqual(response.status_int, 200)
+    response_dict = json.loads(response.body)
+    params['pair_ids'] = None
+    response_dict['pair_ids'] = None
+    self.assertEqual(len(response_dict['hands']), len(params['hands']))
+    self.assertEqual(response_dict['no_boards'], 21)
+    self.assertEqual(response_dict['no_pairs'], 7)
+    self.assertEqual(response_dict['name'], 'Tournament Name')
 
   def testSimpleListTournaments(self):
     self.loginUser()
-
     params = {'name': 'name1', 'no_pairs': 8, 'no_boards': 24}
     response = self.testapp.post_json("/api/tournaments", params)
     self.assertNotEqual(response.body, '')

@@ -196,6 +196,7 @@ TEAM_TEXT = "Team"
 BOARD_NO_TEXT = "Board No"
 MPS_TEXT = "MPs"
 RPS_TEXT = "RPs"
+LPS_TEXT = "LPs"
 APS_TEXT = "APs"
 SIT_OUT_BONUS_TEXT = "Sit-out Bonus"
   
@@ -291,7 +292,7 @@ def WriteXlsxTeamSummaries(max_rounds, scores, sheet):
 
   sheet.title = 'Summary by Team'
 
-  headers = [BOARD_NO_TEXT, MPS_TEXT, RPS_TEXT]
+  headers = [BOARD_NO_TEXT, MPS_TEXT, RPS_TEXT, LPS_TEXT]
   sheet.append(headers)
   SetSheetHeaders(sheet)  
 
@@ -301,14 +302,14 @@ def WriteXlsxTeamSummaries(max_rounds, scores, sheet):
     row_no += 1
     SetSectionHeaderStyleAndText(
         sheet, row_no, 1, len(headers),
-        ["Place {1}. Team {0}: MPs {2:.1f} RPs {3:.2f}".format(
-            s.team_no, s.mp_rank, s.mps, s.rps)])
+        ["Place {1}. Team {0}: MPs {2:.1f} RPs {3:.2f} LPs {4:.2f}".format(
+            s.team_no, s.mp_rank, s.mps, s.rps, s.lps)])
     start_row = row_no + 1
     keys = sorted(s.board_mps.keys())
     for key in keys:
       row_no+= 1
       row_dict = {BOARD_NO_TEXT: key, MPS_TEXT: s.board_mps[key],
-                  RPS_TEXT: s.board_rps[key]}
+                  RPS_TEXT: s.board_rps[key], LPS_TEXT: s.board_lps[key]}
       for col_no in xrange(1, len(headers) + 1):
         sheet.cell(column=col_no, row=row_no, value=row_dict[headers[col_no - 1]])
 
@@ -316,7 +317,8 @@ def WriteXlsxTeamSummaries(max_rounds, scores, sheet):
       row_no += 1
       row_dict = {BOARD_NO_TEXT : SIT_OUT_BONUS_TEXT,
                   MPS_TEXT: s.mps - s.mps * len(keys) / max_rounds,
-                  RPS_TEXT: s.rps - s.rps * len(keys) / max_rounds}
+                  RPS_TEXT: s.rps - s.rps * len(keys) / max_rounds,
+                  LPS_TEXT: s.lps - s.lps * len(keys) / max_rounds}
       for col_no in xrange(1, len(headers) + 1):
         sheet.cell(column=col_no, row=row_no,
                    value=row_dict[headers[col_no - 1]])
@@ -329,7 +331,7 @@ def WriteXlsxTeamSummaries(max_rounds, scores, sheet):
     sheet.append([])
   
   # Write a summary table with just the total scores.
-  summary_header = [RANK_TEXT, TEAM_TEXT, MPS_TEXT, RPS_TEXT]
+  summary_header = [RANK_TEXT, TEAM_TEXT, MPS_TEXT, RPS_TEXT, LPS_TEXT]
   SetSectionHeaderStyleAndText(sheet, 2, len(headers) + SUMMARY_TABLE_OFFSET,
                                len(summary_header), summary_header)
   for i in range(len(scores)):
@@ -341,18 +343,24 @@ def WriteXlsxTeamSummaries(max_rounds, scores, sheet):
        value = scores[i].mps)
     sheet.cell(column=len(headers) + SUMMARY_TABLE_OFFSET + 3, row=3 + i,
        value = scores[i].rps)
+    sheet.cell(column=len(headers) + SUMMARY_TABLE_OFFSET + 4, row=3 + i,
+       value = scores[i].lps)
   SetDataTableStyle(sheet, 3, len(headers) + SUMMARY_TABLE_OFFSET, len(scores),
                     len(summary_header), SUMMARY_TABLE_COLOR)
 
   # Stylistic things to make floats fit into columns.
-  SetColumnStyle(sheet, 'H', lambda x: SetNumberFormat(x, '0.00')) 
-  SetColumnStyle(sheet, 'I', lambda x: SetNumberFormat(x, '0.00')) 
-  SetColumnStyle(sheet, 'C', lambda x: SetNumberFormat(x, '0.00'))
-  SetColumnStyle(sheet, 'B', lambda x: SetNumberFormat(x, '0.0'))  
   SetColumnStyle(sheet, 'A', lambda x: SetNumberFormat(x, '0')) 
+  SetColumnStyle(sheet, 'B', lambda x: SetNumberFormat(x, '0.0'))  
+  SetColumnStyle(sheet, 'C', lambda x: SetNumberFormat(x, '0.00'))
+  SetColumnStyle(sheet, 'D', lambda x: SetNumberFormat(x, '0'))
+  SetColumnStyle(sheet, 'H', lambda x: SetNumberFormat(x, '0'))
+  SetColumnStyle(sheet, 'I', lambda x: SetNumberFormat(x, '0.0')) 
+  SetColumnStyle(sheet, 'J', lambda x: SetNumberFormat(x, '0.00')) 
+  SetColumnStyle(sheet, 'K', lambda x: SetNumberFormat(x, '0')) 
   sheet.column_dimensions['A'].width = 13 
   sheet.column_dimensions['B'].width = 10 
   sheet.column_dimensions['C'].width = 10 
+  sheet.column_dimensions['D'].width = 10 
   sheet.row_dimensions[1].height = 15
 
 
@@ -375,12 +383,14 @@ def WriteXlsxBoardSummaries(board_list, sheet):
   EW_MPS_TEXT = 'EW MPs'
   NS_RPS_TEXT = 'NS RPs'
   EW_RPS_TEXT = 'EW RPs'
+  NS_LPS_TEXT = 'NS LPs'
+  EW_LPS_TEXT = 'EW LPs'
   NS_APS_TEXT = 'NS APs'
   EW_APS_TEXT = 'EW APs'
   
   headers = [NS_TEAM_TEXT, EW_TEAM_TEXT, CALLS_TEXT, NS_SCORE_TEXT,
              EW_SCORE_TEXT, NS_MPS_TEXT, EW_MPS_TEXT, NS_RPS_TEXT, 
-             EW_RPS_TEXT, NS_APS_TEXT, EW_APS_TEXT]
+             EW_RPS_TEXT, NS_LPS_TEXT, EW_LPS_TEXT, NS_APS_TEXT, EW_APS_TEXT]
   sheet.append(headers)
   SetSheetHeaders(sheet)
 
@@ -401,6 +411,8 @@ def WriteXlsxBoardSummaries(board_list, sheet):
                    EW_MPS_TEXT: "{0:.1f}".format(bs.ew_mps),
                    NS_RPS_TEXT: "{0:.2f}".format(bs.ns_rps),
                    EW_RPS_TEXT: "{0:.2f}".format(bs.ew_rps),
+                   NS_LPS_TEXT: "{0:.2f}".format(bs.ns_lps),
+                   EW_LPS_TEXT: "{0:.2f}".format(bs.ew_lps),
                    NS_APS_TEXT: "{0}".format(bs.ns_aps),
                    EW_APS_TEXT: "{0}".format(bs.ew_aps),}
       for col_no in range(1, len(headers)+1):

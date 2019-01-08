@@ -1,0 +1,87 @@
+<md-sidenav class="md-sidenav-left sidenav-background"
+            md-component-id="left"
+            style="height:100%; width: 280px"
+            md-is-locked-open="$mdMedia('gt-sm')">
+    <md-content class="sidenav-background">
+        <md-list class="md-dense" flex="noshrink" style="padding: 0">
+            <md-subheader class="sidenav-subheader">Tournament Details</md-subheader>
+            <md-list-item class="md-2-line"
+                          ng-disabled="current == 'pairs'"
+                          style="width: 100%"
+                          ng-class="[{'row-selected': current == 'pairs'}]"
+                          ng-href="/tournaments/{{tournament_id}}/view">
+                <md-icon>people</md-icon>
+                <div class="md-list-item-text">
+                    <h3>Pairs</h3>
+                </div>
+            </md-list-item>
+            <md-list-item class="md-2-line"
+                          ng-disabled="current == 'config'"
+                          ng-class="[{'row-selected': current == 'config'}]"
+                          ng-href="/tournaments/{{tournament_id}}/edit">
+                <md-icon>settings</md-icon>
+                <div class="md-list-item-text">
+                    <h3>Configuration</h3>
+                </div>
+            </md-list-item>
+            <md-list-item class="md-2-line"
+                          ng-disabled="current == 'email'"
+                          style="width: 100%"
+                          ng-class="[{'row-selected': current == 'email'}]"
+                          ng-href="/tournaments/{{tournament_id}}/email">
+                <md-icon>mail</md-icon>
+                <div class="md-list-item-text">
+                    <h3>Email Center</h3>
+                </div>
+            </md-list-item>
+            <md-list-item class="md-2-line"
+                          ng-disabled="current == 'status'"
+                          ng-class="[{'row-selected': current == 'status'}]"
+                          ng-href="/tournaments/{{tournament_id}}/status">
+                <md-icon>explore</md-icon>
+                <div class="md-list-item-text">
+                    <h3>Status</h3>
+                </div>
+            </md-list-item>
+            <md-divider></md-divider>
+            <md-subheader class="sidenav-subheader">Actions</md-subheader>
+            <md-list-item class="md-2-line"
+                          ng-disabled="current == 'handlist'"
+                          style="width: 100%"
+                          ng-class="[{'row-selected': current == 'handlist'}]"
+                          ng-href="/api/tournaments/{{tournament_id}}/pdfboards"
+                          download="{{tournament_name}} Boards.pdf"
+                          target="_blank">
+                <md-icon>get_app</md-icon>
+                <div class="md-list-item-text">
+                    <h3>Download Hands</h3>
+                </div>
+            </md-list-item>
+            <md-list-item class="md-2-line"
+                          ng-disabled="current == 'score'"
+                          style="width: 100%"
+                          ng-class="[{'row-selected': current == 'score'}]"
+                          ng-href="/api/tournaments/{{tournament_id}}/xlsresults"
+                          download="{{tournament_name}} Results.xlsx"
+                          target="_blank">
+                <md-icon>assessment</md-icon>
+                <div class="md-list-item-text">
+                    <h3>Calculate & Download Scores</h3>
+                    <p>May be incomplete if not all hands have been scored.</p>
+                </div>
+            </md-list-item>
+            <md-list-item class="md-2-line"
+                          ng-disabled="current == 'export'"
+                          style="width: 100%"
+                          ng-class="[{'row-selected': current == 'export'}]"
+                          ng-href="/api/tournaments/{{tournament_id}}"
+                          download="{{tournament_name}} Export.txt"
+                          target="_blank">
+                <md-icon>move_to_inbox</md-icon>
+                <div class="md-list-item-text">
+                    <h3>Export Tournament Data</h3>
+                </div>
+            </md-list-item>
+        </md-list>
+    </md-content>
+</md-sidenav>

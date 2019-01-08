@@ -5,6 +5,8 @@
    *
    * @constructor
    * @param {!angular.Scope} $scope
+   * @param {$mdSidenav} $mdSidenav
+   * @param {$mdMedia} $mdMedia
    * @param {$mdToast} $mdToast
    * @param {TichuTournamentService} TichuTournamentService
    * @param {$mdDialog} $mdDialog
@@ -14,14 +16,18 @@
    * @param {!{failure: ?tichu.RpcError, id: ?string, tournamentStatus: ?tichu.TournamentStatus}} loadResults
    * @ngInject
    */
-  function TournamentStatusController($scope, $mdToast, TichuTournamentService, $mdDialog, $log, $window, $location, $route, loadResults) {
+  function TournamentStatusController($scope, $mdSidenav, $mdMedia, $mdToast, TichuTournamentService, $mdDialog, $log, $window, $location, $route, loadResults) {
     var backPath = "/tournaments" + (loadResults.id ? "/" + loadResults.id + "/view" : "");
     $scope.appController.setPageHeader({
       header: loadResults.failure
           ? "Tournament Error"
           : (loadResults.tournament ? "Editing " + loadResults.id : "Tournament Status"),
-      backPath: backPath,
+      backPath: $mdMedia('gt-sm') ? backPath : null,
       showHeader: true,
+      showMenu: !$mdMedia('gt-sm'),
+      openMenu: function() {
+        $mdSidenav('left').toggle();
+      },
       refresh: loadResults.failure ? null : this._refresh.bind(this)
     });
 

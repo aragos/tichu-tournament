@@ -133,6 +133,7 @@
     });
   }
 
+
   /**
    * Asynchronously loads the list of tournaments.
    *
@@ -171,7 +172,48 @@
         });
   }
 
+
+
+ /*
+  * Directive that handles upload of tournament files in JSON format.
+  * @param {!$log} $log
+  * @param {!$location} $location
+  * @param {!$mdDialog} $mdDialog
+  * @param {!$route} $route
+  * @param {!TichuTournamentService} $TichuTournamentService
+  */
+  function fileuploadDirective($log, $location, $mdDialog, $route, TichuTournamentService) {
+    return {
+      link: function(scope, element, attrs) {
+        element.bind('change', function(e) {
+          var reader = new FileReader();
+          reader.onload = function (le) {
+            var tournamentService = TichuTournamentService;
+            var promise = tournamentService.uploadTournament(
+                le.target.result);
+            promise.then(function(result) {
+              $location.path("/tournaments/" + encodeURIComponent(result.id) + "/view");
+            }).catch(function(failure) {
+              var dialog = $mdDialog.alert()
+                  .title(failure.error)
+                  .textContent(failure.detail)
+                  .ok("OK");
+              $mdDialog.show(dialog).then(function() {},
+                  function(autoHidden) {
+                    if (!autoHidden) {
+                      $route.reload();
+                    }
+                  });
+            });
+          }
+          reader.readAsText(e.target.files[0]);
+        })
+      }
+    };
+  }
+
   angular.module("tichu-tournament-list", ["ng", "ngRoute", "ngMaterial", "tichu-tournament-service"])
       .controller("TournamentListController", TournamentListController)
+      .directive("fileupload", fileuploadDirective)
       .config(mapRoute);
 })(angular);

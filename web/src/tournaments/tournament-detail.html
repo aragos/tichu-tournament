@@ -1,52 +1,22 @@
-<md-list class="md-dense" flex="noshrink" ng-if="!tournamentDetailController.failure">
-    <md-list-item class="md-2-line"
-                  ng-href="/tournaments/{{tournamentDetailController.tournament.id}}/edit">
-        <md-icon class="md-avatar-icon" md-font-set="material-icons">settings</md-icon>
-        <div class="md-list-item-text">
-            <h3>Tournament Configuration</h3>
-            <p>
-                {{tournamentDetailController.tournament.noPairs}} Pairs
-                playing {{tournamentDetailController.tournament.noBoards}} Boards
-            </p>
-        </div>
-    </md-list-item>
-    <md-list-item class="md-2-line"
-                  ng-href="/tournaments/{{tournamentDetailController.tournament.id}}/status">
-        <md-icon class="md-avatar-icon" md-font-set="material-icons">explore</md-icon>
-        <div class="md-list-item-text">
-            <h3>Tournament Hand Status</h3>
-        </div>
-    </md-list-item>
-    <md-subheader>Pairs</md-subheader>
-    <md-list-item class="md-2-line"
-                  ng-href="/tournaments/{{tournamentDetailController.tournament.id}}/movement/{{pair.pairNo}}"
-                  ng-repeat="pair in tournamentDetailController.tournament.pairs">
-        <md-icon class="md-avatar-icon" md-font-set="material-icons">people</md-icon>
-        <div class="md-list-item-text">
-            <h3>Pair #{{ pair.pairNo }}&ensp;[{{ pair.pairId }}]</h3>
-            <p>
-                <span ng-repeat="player in pair.players">
-                    {{player.name}}<span ng-if="!$last">,&ensp;</span>
-                </span>
-            </p>
-        </div>
-    </md-list-item>
-    <md-subheader>Master Hand List</md-subheader>
-    <div style="padding-left: 0.7em">
-        <md-button class="md-raised "
-                   ng-href="/api/tournaments/{{tournamentDetailController.tournament.id}}/pdfboards"
-                   download="{{tournamentDetailController.tournament.name}} Boards.pdf"
-                   target="_blank">
-            Download
-        </md-button>
-    </div>
-    <md-subheader>Results</md-subheader>
-    <md-list-item class="md-2-line"
-                  ng-href="/tournaments/{{tournamentDetailController.tournament.id}}/results">
-        <md-icon class="md-avatar-icon" md-font-set="material-icons">assessment</md-icon>
-        <div class="md-list-item-text">
-            <h3>Calculate Results</h3>
-            <p>May be incomplete if not all hands have been scored.</p>
-        </div>
-    </md-list-item>
-</md-list>
+<div layout="row" style="height: 100%">
+    <div ng-include="'src/sidebar.html'"
+         ng-init="tournament_id=tournamentDetailController.tournament.id; 
+                  current='pairs'; tournament_name='this.tournament.name'"></div>
+    <md-content style="width: 100%">
+        <md-list class="md-dense" flex="noshrink" ng-if="!tournamentDetailController.failure">
+            <md-list-item class="md-2-line"
+                          ng-href="/tournaments/{{tournamentDetailController.tournament.id}}/movement/{{pair.pairNo}}"
+                          ng-repeat="pair in tournamentDetailController.tournament.pairs">
+                <md-icon class="md-avatar-icon" md-font-set="material-icons">people</md-icon>
+                <div class="md-list-item-text">
+                    <h3>Pair #{{ pair.pairNo }}&ensp;[{{ pair.pairId }}]</h3>
+                    <p>
+                        <span ng-repeat="player in pair.players">
+                             {{player.name}}<span ng-if="!$last">,&ensp;</span>
+                        </span>
+                    </p>
+                </div>
+            </md-list-item>
+        </md-list>
+    </md-content>
+</div>

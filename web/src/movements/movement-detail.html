@@ -1,10 +1,16 @@
-<div layout="column" layout-align="start center">
-    <div style="width: 30em; padding: 0.5em" ng-if="movementDetailController.movement.pair.players">
-        <md-icon md-font-set="material-icons">people</md-icon>
-        &ensp;
-        <span ng-repeat="player in movementDetailController.movement.pair.players">
-            {{player.name}}<span ng-if="!$last">,&ensp;</span>
-        </span>
+<div layout="row" style="height: 100%">
+    <div ng-if="!movementDetailController.playerCode"
+         ng-include="'src/sidebar.html'" 
+         ng-init="tournament_id=movementDetailController.movement.tournamentId.id;
+                 current='movement'; tournament_name='this.movement.tournamentId.name'">
+    </div>
+    <md-content layout="column" layout-align="start center" style="width:100%">
+        <div style="width: 30em; padding: 0.5em" ng-if="movementDetailController.movement.pair.players">
+            <md-icon md-font-set="material-icons">people</md-icon>
+            &ensp;
+            <span ng-repeat="player in movementDetailController.movement.pair.players">
+                {{player.name}}<span ng-if="!$last">,&ensp;</span>
+            </span>
     </div>
     <div style="width: 30em" layout="column">
         <md-card flex="noshrink" ng-repeat="round in movementDetailController.movement.rounds">
@@ -62,11 +68,12 @@
                             <p ng-if="hand.score && !hand.score.calls.length">
                                 No calls
                             </p>
-                        </div>
-                        <md-icon ng-if="hand.score && hand.score.notes" class="md-secondary">comment</md-icon>
-                    </md-list-item>
-                </md-list>
-            </md-card-content>
-        </md-card>
-    </div>
+                            </div>
+                            <md-icon ng-if="hand.score && hand.score.notes" class="md-secondary">comment</md-icon>
+                        </md-list-item>
+                    </md-list>
+                </md-card-content>
+            </md-card>
+        </div>
+    </md-content>
 </div>

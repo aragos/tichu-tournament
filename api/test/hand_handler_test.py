@@ -287,6 +287,12 @@ class AppTest(unittest.TestCase):
               'ns_score' : '    aVg ',
               'ew_score' : '  Avg+ '}
     response = self.testapp.put_json("/api/tournaments/{}/hands/1/2/3".format(id),
+                                     params, expect_errors=True)
+    self.assertEqual(response.status_int, 400)
+    params = {'calls': { 'north': "" },
+              'ns_score' : '    aVg ',
+              'ew_score' : '  Avg+ '}
+    response = self.testapp.put_json("/api/tournaments/{}/hands/1/2/3".format(id),
                                      params)
     self.assertEqual(response.status_int, 204)
     params = {'ns_score' : 'avG++',

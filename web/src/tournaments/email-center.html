@@ -1,0 +1,62 @@
+<div layout="row" style="height: 100%">
+<div ng-include="'src/sidebar.html'"
+     ng-init="tournament_id=emailCenterController.id;
+     current='email'; tournament_name='emailCenterController.name'"></div>
+<md-content layout="column" layout-align="start center" style="width: 100%">
+  <div style="width: 80em" layout="column">
+  <md-card flex="noshrink" layout="column" style="width:100%">
+    <md-card-header style="padding-bottom: 0">
+       <md-card-header-text>
+         <span class="md-title">Email Participants</span>
+       </md-card-header-text>
+    </md-card-header>
+    <md-input-container>
+      <md-select id="emailType"
+                 placeholder="Email Type"
+                 ng-model="emailCenterController.emailType"
+                 ng-disabled="emailCenterController.sending"
+                 flex="noshrink"
+                 style="width: 40%; padding: 0.5em 0.5em 0 0.5em; min-width: 150px">
+        <md-option value="WELCOME">Welcome</md-option>
+        <md-option value="RESULTS">Results</md-option>
+      </md-select>
+    </md-input-container>
+    <div style="padding: 0.5em 0.5em 0 0.5em; font-weight:bold" class="md-body-1">
+      <md-checkbox ng-checked="emailCenterController.isSelectAllChecked()"
+                   md-indeterminate="emailCenterController.isSelectAllIndeterminate()"
+                   ng-disabled="emailCenterController.sending"
+                   class="dense"
+                   ng-click="emailCenterController.selectAll()">
+           <span ng-if="emailCenterController.isSelectAllChecked()">Clear All</span>
+           <span ng-if="!emailCenterController.isSelectAllChecked()">Select All</span>
+      </md-checkbox>
+    </div>
+    <div layout-wrap flex layout="row" layout-sm="column">
+      <div ng-repeat="player in emailCenterController.playersWithEmail"
+           flex="noshrink"
+           style="padding: 0.25em 0.5em 0 0.5em; width: 350px" class="md-body-1">
+        <md-checkbox ng-checked="emailCenterController.isSelected(player)"
+                     ng-disabled="emailCenterController.sending"
+                     class="dense"
+                     ng-click = "emailCenterController.toggle(player)">
+           <span class="no-wrap" style="width: 280px; display:block">{{ player.name }} ({{ player.email }})</span>
+        </md-checkbox>
+      </div>
+    </div>
+    <div class="md-body-1" style="padding: 0.5em 0.5em 0 0.5em" ng-if="emailCenterController.numMissingEmails">
+      Email addresses for
+      <span ng-repeat="pair in emailCenterController.missingEmailsPerPair track by $index"
+            ng-if="pair!=0"><span ng-if="$last && $index > 0">and </span><span class="players" style="font-weight:bold">Team {{$index + 1}}({{pair}})</span><span ng-if="!$last">, </span></span>
+      &thinsp;are not available.
+    </div>
+    <div layout="column" layout-align="center center"
+         style="padding-top: 1.3em; padding-bottom: 1.3em">
+      <md-button class="md-raised md-primary"
+                 ng-disabled="emailCenterController.isButtonDisabled()"
+                 ng-click="emailCenterController.sendEmail()">
+                      <span>Send Email</span>
+    </md-button>
+    </div>
+  </md-card>
+  </div>
+</md-content>

@@ -1,147 +1,150 @@
-<div layout="column" ng-if="!tournamentFormController.failure">
-    <form name="tournamentForm">
-        <md-card>
-            <md-card-header style="padding-bottom: 0">
-                <md-card-header-text>
-                    <span class="md-title">Tournament Setup</span>
-                </md-card-header-text>
-            </md-card-header>
-            <md-card-content layout="column" style="padding-top: 0" >
-                <md-input-container style="margin-bottom: 0">
-                    <label for="tournamentName">Name</label>
-                    <input id="tournamentName"
-                           autocomplete="off"
-                           name="tournamentName"
-                           ng-model="tournamentFormController.tournament.name"
-                           ng-disabled="tournamentFormController.saving"
-                           required />
-                    <div ng-messages="tournamentForm.tournamentName.$error" role="alert">
-                        <div ng-message-exp="['required']">
-                            Enter a name for this tournament.
-                        </div>
-                    </div>
-                </md-input-container>
-                <div layout="column" layout-gt-xs="row">
-                    <md-input-container flex="50" style="margin-bottom: 0">
-                        <label for="noPairs"># of Pairs</label>
-                        <md-select id="noPairs"
+<div layout="row" style="height: 100%">
+    <div ng-if="tournamentFormController.original"
+         ng-include="'src/sidebar.html'"
+         ng-init="tournament_id=tournamentFormController.original.id;
+         current='config'; tournament_name='this.original.name'"></div>
+    <md-content layout="column" ng-if="!tournamentFormController.failure" style="width: 100%">
+        <form name="tournamentForm">
+            <md-card>
+                <md-card-header style="padding-bottom: 0">
+                    <md-card-header-text>
+                        <span class="md-title">Tournament Setup</span>
+                    </md-card-header-text>
+                </md-card-header>
+                <md-card-content layout="column" style="padding-top: 0" >
+                    <md-input-container style="margin-bottom: 0">
+                        <label for="tournamentName">Name</label>
+                        <input id="tournamentName"
                                autocomplete="off"
-                               name="noPairs"
-                               ng-change="tournamentFormController.checkNoBoards()"
-                               ng-model="tournamentFormController.tournament.noPairs"
-                               ng-disabled="tournamentFormController.saving || (tournamentFormController.original && tournamentFormController.original.hasScoredHands)"
-                               required>
-                            <md-option ng-value="pairCount"
-                                       ng-repeat="pairCount in tournamentFormController.boardPresets | tichuUnique:'noPairs'">
-                                {{pairCount}} Pairs
-                            </md-option>
-                        </md-select>
-                        <div ng-messages="tournamentForm.noPairs.$error" role="alert">
+                               name="tournamentName"
+                               ng-model="tournamentFormController.tournament.name"
+                               ng-disabled="tournamentFormController.saving"
+                               required />
+                        <div ng-messages="tournamentForm.tournamentName.$error" role="alert">
                             <div ng-message-exp="['required']">
-                                Select the number of pairs who will play in this tournament.
+                                Enter a name for this tournament.
                             </div>
                         </div>
                     </md-input-container>
-                    <md-input-container flex="50" style="margin-bottom: 0">
-                        <label for="noBoards"># of Boards</label>
-                        <md-select id="noBoards"
-                                   name="noBoards"
-                                   ng-model="tournamentFormController.tournament.noBoards"
-                                   ng-disabled="!tournamentFormController.tournament.noPairs || tournamentFormController.saving || (tournamentFormController.original && tournamentFormController.original.hasScoredHands)"
-                                   required>
-                            <md-option ng-value="preset.noBoards"
-                                       ng-repeat="preset in tournamentFormController.boardPresets | filter:{noPairs: tournamentFormController.tournament.noPairs}">
-                                {{preset.noBoards}} ({{preset.noRounds}} rounds / {{preset.noHands}} hands)
-                            </md-option>
-                        </md-select>
-                        <div ng-messages="tournamentForm.noBoards.$error" role="alert">
-                            <div ng-message-exp="['required']">
-                                Select the number of boards to be played in this tournament.
+                    <div layout="column" layout-gt-xs="row">
+                        <md-input-container flex="50" style="margin-bottom: 0">
+                            <label for="noPairs"># of Pairs</label>
+                            <md-select id="noPairs"
+                                       autocomplete="off"
+                                       name="noPairs"
+                                       ng-change="tournamentFormController.checkNoBoards()"
+                                       ng-model="tournamentFormController.tournament.noPairs"
+                                       ng-disabled="tournamentFormController.saving || (tournamentFormController.original && tournamentFormController.original.hasScoredHands)"
+                                       required>
+                                 <md-option ng-value="pairCount"
+                                            ng-repeat="pairCount in tournamentFormController.boardPresets | tichuUnique:'noPairs'">
+                                    {{pairCount}} Pairs
+                                 </md-option>
+                             </md-select>
+                             <div ng-messages="tournamentForm.noPairs.$error" role="alert">
+                                 <div ng-message-exp="['required']">
+                                    Select the number of pairs who will play in this tournament.
+                                 </div>
+                             </div>
+                        </md-input-container>
+                        <md-input-container flex="50" style="margin-bottom: 0">
+                            <label for="noBoards"># of Boards</label>
+                            <md-select id="noBoards"
+                                       name="noBoards"
+                                       ng-model="tournamentFormController.tournament.noBoards"
+                                       ng-disabled="!tournamentFormController.tournament.noPairs || tournamentFormController.saving || (tournamentFormController.original && tournamentFormController.original.hasScoredHands)"
+                                       required>
+                                <md-option ng-value="preset.noBoards"
+                                           ng-repeat="preset in tournamentFormController.boardPresets | filter:{noPairs: tournamentFormController.tournament.noPairs}">
+                                     {{preset.noBoards}} ({{preset.noRounds}} rounds / {{preset.noHands}} hands)
+                                </md-option>
+                            </md-select>
+                            <div ng-messages="tournamentForm.noBoards.$error" role="alert">
+                                 <div ng-message-exp="['required']">
+                                     Select the number of boards to be played in this tournament.
+                                 </div>
                             </div>
+                        </md-input-container>
+                    </div>
+                    <div ng-if="tournamentFormController.original && tournamentFormController.original.hasScoredHands">
+                         The parameters of a tournament cannot be edited once hands have been scored.
+                    </div>
+                    <md-switch ng-model="tournamentFormController.tournament.allowScoreOverwrites" 
+                               class="md-warn" md-no-ink>
+                        Score overwriting by players: {{tournamentFormController.tournament.allowScoreOverwrites ? "ENABLED" : "DISABLED"}}
+                    </md-switch>
+                </md-card-content>
+            </md-card>
+            <md-card>
+                <md-card-header style="padding-bottom: 0">
+                    <md-card-header-text>
+                        <span class="md-title">Player Setup</span>
+                    </md-card-header-text>
+                </md-card-header>
+                <md-card-content layout="column" style="padding-top: 0" >
+                    <div layout="column" layout-gt-xs="row"
+                         layout-align-gt-xs="space-around center"
+                         ng-style="{'background-color': $odd ? '#eeeeee' : 'inherit' }"
+                         ng-repeat="player in tournamentFormController.tournament.players">
+                        <div layout="row" flex-gt-xs>
+                            <md-input-container class="md-no-asterisk no-error-spacer" style="margin-bottom: 0">
+                                <label for="player{{$index}}Pair">Pair</label>
+                                <input ng-model="player.pairNo"
+                                       id="player{{$index}}Pair"
+                                       name="player{{$index}}Pair"
+                                       type="number"
+                                       min="1"
+                                       max="{{tournamentFormController.tournament.noPairs || 1}}"
+                                       step="1"
+                                       style="width: 2.5em"
+                                       ng-disabled="tournamentFormController.saving"
+                                       required />
+                            </md-input-container>
+                            <md-input-container class="no-error-spacer" flex style="margin-bottom: 0">
+                                <label for="player{{$index}}Name">Name</label>
+                                <input type="text"
+                                       autocomplete="off"
+                                       ng-model="player.name"
+                                       ng-disabled="tournamentFormController.saving"
+                                       id="player{{$index}}Name"
+                                       name="player{{$index}}Name"
+                                       required />
+                            </md-input-container>
                         </div>
-                    </md-input-container>
-                </div>
-                <div ng-if="tournamentFormController.original && tournamentFormController.original.hasScoredHands">
-                    The parameters of a tournament cannot be edited once hands have been scored.
-                </div>
-                <md-switch ng-model="tournamentFormController.tournament.allowScoreOverwrites" 
-                           class="md-warn" md-no-ink>
-                    Score overwriting by players: {{tournamentFormController.tournament.allowScoreOverwrites ? "ENABLED" : "DISABLED"}}
-                </md-switch>
-            </md-card-content>
-        </md-card>
-        <md-card>
-            <md-card-header style="padding-bottom: 0">
-                <md-card-header-text>
-                    <span class="md-title">Player Setup</span>
-                </md-card-header-text>
-            </md-card-header>
-            <md-card-content layout="column" style="padding-top: 0" >
-                <div layout="column" layout-gt-xs="row"
-                     layout-align-gt-xs="space-around center"
-                     ng-style="{'background-color': $odd ? '#eeeeee' : 'inherit' }"
-                     ng-repeat="player in tournamentFormController.tournament.players">
-                    <div layout="row" flex-gt-xs>
-                        <md-input-container class="md-no-asterisk no-error-spacer" style="margin-bottom: 0">
-                            <label for="player{{$index}}Pair">Pair</label>
-                            <input
-                                ng-model="player.pairNo"
-                                id="player{{$index}}Pair"
-                                name="player{{$index}}Pair"
-                                type="number"
-                                min="1"
-                                max="{{tournamentFormController.tournament.noPairs || 1}}"
-                                step="1"
-                                style="width: 2.5em"
-                                ng-disabled="tournamentFormController.saving"
-                                required />
-                        </md-input-container>
-                        <md-input-container class="no-error-spacer" flex style="margin-bottom: 0">
-                            <label for="player{{$index}}Name">Name</label>
-                            <input
-                                    type="text"
-                                    autocomplete="off"
-                                    ng-model="player.name"
-                                    ng-disabled="tournamentFormController.saving"
-                                    id="player{{$index}}Name"
-                                    name="player{{$index}}Name"
-                                    required />
-                        </md-input-container>
-                    </div>
-                    <div layout="row" flex-gt-xs layout-align="space-around center">
-                        <md-input-container class="no-error-spacer" flex style="margin-bottom: 0">
-                            <label for="player{{$index}}Email">Email</label>
-                            <input
-                                    type="email"
-                                    autocomplete="off"
-                                    ng-model="player.email"
-                                    ng-disabled="tournamentFormController.saving"
-                                    id="player{{$index}}Email"
-                                    name="player{{$index}}Email" />
-                        </md-input-container>
-                        <md-button ng-click="tournamentFormController.removePlayer($index)"
-                                   ng-disabled="tournamentFormController.saving"
-                                   class="md-icon-button md-warn md-raised">
-                            <md-icon>delete</md-icon>
-                        </md-button>
-                    </div>
+                        <div layout="row" flex-gt-xs layout-align="space-around center">
+                            <md-input-container class="no-error-spacer" flex style="margin-bottom: 0">
+                                <label for="player{{$index}}Email">Email</label>
+                                <input type="email"
+                                       autocomplete="off"
+                                       ng-model="player.email"
+                                       ng-disabled="tournamentFormController.saving"
+                                       id="player{{$index}}Email"
+                                       name="player{{$index}}Email" />
+                            </md-input-container>
+                            <md-button ng-click="tournamentFormController.removePlayer($index)"
+                                       ng-disabled="tournamentFormController.saving"
+                                       class="md-icon-button md-warn md-raised">
+                                <md-icon>delete</md-icon>
+                            </md-button>
+                       </div>
                 </div>
                 <div layout="column" layout-align="center center">
                     <md-button class="md-raised md-accent"
                                ng-disabled="tournamentFormController.saving || tournamentFormController.tournament.players.length >= 2 * tournamentFormController.tournament.noPairs"
                                ng-click="tournamentFormController.addPlayer()">Add Player</md-button>
-                </div>
-            </md-card-content>
-        </md-card>
-        <div layout="column" layout-align="center center">
-            <md-button class="md-raised md-primary"
-                       ng-disabled="tournamentForm.$invalid"
-                       ng-if="!tournamentFormController.saving"
-                       ng-click="tournamentFormController.save()">
-                <span ng-if="!tournamentFormController.original">Create Tournament</span>
-                <span ng-if="tournamentFormController.original">Update Tournament</span>
-            </md-button>
-            <md-progress-circular ng-if="tournamentFormController.saving"></md-progress-circular>
-        </div>
-    </form>
+                    </div>
+                </md-card-content>
+            </md-card>
+            <div layout="column" layout-align="center center">
+                <md-button class="md-raised md-primary"
+                           ng-disabled="tournamentForm.$invalid"
+                           ng-if="!tournamentFormController.saving"
+                           ng-click="tournamentFormController.save()">
+                    <span ng-if="!tournamentFormController.original">Create Tournament</span>
+                    <span ng-if="tournamentFormController.original">Update Tournament</span>
+                </md-button>
+                <md-progress-circular ng-if="tournamentFormController.saving"></md-progress-circular>
+            </div>
+        </form>
+    </md-content>
 </div>
