@@ -16,7 +16,7 @@ from models import Tournament
 from models import PlayerPair
 from model_utils import ListOfModelBoardsToListOfBoards
 from model_utils import ListOfScoredHandsToListOfDicts
-from python import boardgenerator
+from python import pdfrenderer
 from python.calculator import Calculate
 from python.calculator import GetMaxRounds
 from python.calculator import OrderBy
@@ -112,7 +112,7 @@ class ResultsEmailHandler(GenericHandler):
     '''
     outputStream = StringIO.StringIO()
     boards = ListOfModelBoardsToListOfBoards(boards_future.get_result())
-    boardgenerator.RenderToIo(boards, outputStream)
+    pdfrenderer.RenderToIo(boards, outputStream)
     return outputStream.getvalue()
 
 

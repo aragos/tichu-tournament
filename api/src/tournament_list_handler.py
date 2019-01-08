@@ -47,7 +47,7 @@ class TourneyListHandler(GenericHandler):
                                           name=name,
                                           no_pairs=no_pairs,
                                           no_boards=no_boards,
-                                          boards=boardgenerator.GenerateBoards(35))
+                                          boards=board.GenerateBoards(35))
     tourney.PutPlayers(player_list, 0)
 
     if allow_score_overwrites:
