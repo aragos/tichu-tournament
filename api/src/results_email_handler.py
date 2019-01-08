@@ -1,19 +1,17 @@
 import StringIO
-import webapp2
 import json
-
 from collections import defaultdict
-from generic_handler import GenericHandler
+
 from google.appengine.api import mail
 from google.appengine.api import users
-from google.appengine.ext import ndb
 from google.appengine.api.app_identity import get_application_id
+from google.appengine.ext import ndb
+
+from generic_handler import GenericHandler
 from handler_utils import BuildMovementAndMaybeSetStatus
 from handler_utils import CheckUserOwnsTournamentAndMaybeReturnStatus
 from handler_utils import GetTourneyWithIdAndMaybeReturnStatus
 from handler_utils import SetErrorStatus
-from models import Tournament
-from models import PlayerPair
 from model_utils import ListOfModelBoardsToListOfBoards
 from model_utils import ListOfScoredHandsToListOfDicts
 from python import pdfrenderer
@@ -21,18 +19,18 @@ from python.calculator import Calculate
 from python.calculator import GetMaxRounds
 from python.calculator import OrderBy
 from python.jsonio import ReadJSONInput
-from python.xlsxio import WriteResultsToXlsx
 from python.xlsxio import OutputWorkbookAsBytesIO
+from python.xlsxio import WriteResultsToXlsx
 
 
 class ResultsEmailHandler(GenericHandler):
-  ''' Handles reuqests to /api/tournament/:id/resultsemail. Responsible for
+  """ Handles reuqests to /api/tournament/:id/resultsemail. Responsible for
   emailing players with the tournament results.
-  '''
+  """
 
   @ndb.toplevel
   def post(self, id):
-    ''' Sends an email with results to all email addresses in the request.
+    """ Sends an email with results to all email addresses in the request.
     Also cc's the director if the director is not in the list.
     Checks that emails belong to players in the tournament and sends the email
     only to valid addresses.
@@ -40,7 +38,7 @@ class ResultsEmailHandler(GenericHandler):
     Args: 
       id: tournament ID to look up. Tournament must already have been
           created.
-    '''
+    """
     user = users.get_current_user()
     tourney = GetTourneyWithIdAndMaybeReturnStatus(self.response, id)
     if not tourney:
@@ -53,15 +51,15 @@ class ResultsEmailHandler(GenericHandler):
     if not request_dict:
       return
 
-    scored_hands_future = tourney.GetScoredHandListAsync();
-    player_futures = tourney.GetAllPlayerPairsAsync();
+    scored_hands_future = tourney.GetScoredHandListAsync()
+    player_futures = tourney.GetAllPlayerPairsAsync()
     boards_future = tourney.GetBoardsAsync()
 
     if not self._CheckIfAllHandsScoredAndMaybeSetStatus(tourney, scored_hands_future):
       return
     
     summaries, xls_results  = self._ScoreTournament(tourney, scored_hands_future, player_futures)
-    payloads = [xls_results, self._GetBoardPDFs(tourney, boards_future)]
+    payloads = [xls_results, self._GetBoardPDFs(boards_future)]
     
     self._SendEmails(request_dict, user, tourney, player_futures, summaries, payloads)
     self.response.headers['Content-Type'] = 'application/json'
@@ -69,7 +67,7 @@ class ResultsEmailHandler(GenericHandler):
 
 
   def _CheckIfAllHandsScoredAndMaybeSetStatus(self, tourney, scored_hands_future):
-    ''' Checks if all the hands in the tournament have been scored. If not, sets
+    """ Checks if all the hands in the tournament have been scored. If not, sets
     the appropriate status.
     
     Args:
@@ -77,7 +75,7 @@ class ResultsEmailHandler(GenericHandler):
       scored_hands_future: Future of a list of ScoredHand obects.
 
     Returns: True iff all hands are scored for this tournament.
-    '''
+    """
     movement = BuildMovementAndMaybeSetStatus(
         self.response, tourney.no_pairs, tourney.no_boards,
         tourney.legacy_version_id)
@@ -103,29 +101,28 @@ class ResultsEmailHandler(GenericHandler):
     return True
 
 
-  def _GetBoardPDFs(self, tourney, boards_future): 
-    ''' Returns an attachment payload of board pdfs.
+  def _GetBoardPDFs(self, boards_future):
+    """ Returns an attachment payload of board pdfs.
 
     Args:
-      tourney: Tournament obect.
       boards_future: Future object containing a list of model Board objects.
-    '''
+    """
     outputStream = StringIO.StringIO()
     boards = ListOfModelBoardsToListOfBoards(boards_future.get_result())
-    pdfrenderer.RenderToIo(boards, outputStream)
+    pdfrenderer.RenderBoardsToIo(boards, outputStream)
     return outputStream.getvalue()
 
 
   def _ScoreTournament(self, tourney, scored_hand_list_future, player_futures):
-    ''' Returns an attachment payload of the results xls workbook.
+    """ Returns an attachment payload of the results xls workbook.
 
     Args:
       tourney: Tournament obect.
       scored_hand_list_future: Future object containing a list of ScoredHand
         objects.
       player_futures: List of futures for PlayerPair objects.
-    '''
-    hand_list = ListOfScoredHandsToListOfDicts(scored_hand_list_future.get_result());
+    """
+    hand_list = ListOfScoredHandsToListOfDicts(scored_hand_list_future.get_result())
     boards = ReadJSONInput(hand_list)
     max_rounds = GetMaxRounds(boards)
     summaries = Calculate(boards, max_rounds)
@@ -137,14 +134,14 @@ class ResultsEmailHandler(GenericHandler):
 
   def _SendEmails(self, request_dict, user, tourney, tourney_player_pair_futures,
                   summaries, payloads):
-    '''Sends a welcome email for all email addresses in the request_dict. Also
+    """Sends a welcome email for all email addresses in the request_dict. Also
     cc's the tournament director if the director is not also a player.
 
     Args: 
       request_dict: Parsed JSON dict.
       user: The ndb.User owning this tournament.
       tourney: The tournament model object. 
-    ''' 
+    """ 
     assert len(summaries) > 3
     requested_emails = request_dict["emails"]
     OrderBy(summaries, "MP")
@@ -196,7 +193,7 @@ For the analytical sort among us, check out the hand record and detailed breakdo
 
 
   def _SendEmailToAddress(self, user, sender_address, player_email, unnamed_email_text, unnamed_email_html, player_greeting, attachment_files):
-    ''' Sends an email to the specifie address.
+    """ Sends an email to the specifie address.
 
     Args:
       user: Tournament director, currently logged in user.
@@ -207,7 +204,7 @@ For the analytical sort among us, check out the hand record and detailed breakdo
         greeting.
       player_greeting: String. How to address the player.
       attachment_files: List of Attachment payloads to include.
-    '''
+    """
     email_text = "{}{}".format(player_greeting, unnamed_email_text)
     email_html = "{}<br/><br/>{}".format(player_greeting, unnamed_email_html)
     mail.send_mail(
@@ -221,11 +218,11 @@ For the analytical sort among us, check out the hand record and detailed breakdo
 
 
   def _ParseRequestAndMaybeSetStatus(self): 
-    ''' Parses the client request for email sents an error status if the
+    """ Parses the client request for email sents an error status if the
         request is unreadable or the email list is empty. 
 
     Returns: dict corresponding to the parsed request.s
-    ''' 
+    """ 
     try:
       request_dict = json.loads(self.request.body)
     except ValueError:
@@ -241,7 +238,7 @@ For the analytical sort among us, check out the hand record and detailed breakdo
 
 
 def ExtractTeamNames(team_summary, player_pair_future):
-    ''' Formats the team number and names from a TeamSummaries object. '''
+    """ Formats the team number and names from a TeamSummaries object. """
     team_number = team_summary.team_no
     player_pair = player_pair_future[team_number - 1].get_result()
     player_list = filter(lambda x : x.get("name"), player_pair.player_list())
@@ -256,9 +253,9 @@ def ExtractTeamNames(team_summary, player_pair_future):
 
 
 def GetNamePairList(tourney, player_futures):
-    ''' Returns a list of tuples of names for every pair. If a name is not 
+    """ Returns a list of tuples of names for every pair. If a name is not 
     available, returns None for that player.
-    '''
+    """
     name_list = range(1, tourney.no_pairs + 1)
     for player_pair_future in player_futures:
       player_pair = player_pair_future.get_result()
