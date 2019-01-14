@@ -1,7 +1,8 @@
 <div layout="row" style="height: 100%">
     <div ng-include="'src/sidebar.html'"
          ng-init="tournament_id=tournamentDetailController.tournament.id; 
-                  current='pairs'; tournament_name='this.tournament.name'"></div>
+                  current='pairs';
+                  tournament_name=tournamentDetailController.tournament.name"></div>
     <md-content style="width: 100%">
         <md-list class="md-dense" flex="noshrink" ng-if="!tournamentDetailController.failure">
             <md-list-item class="md-2-line"

@@ -2,7 +2,7 @@
 <div ng-include="'src/sidebar.html'"
      ng-init="tournament_id=tournamentStatusController.tournamentId; 
               current='status';
-              tournament_name='tournamentDetailController.tournament.name'"></div>
+              tournament_name=tournamentStatusController.tournamentName"></div>
 <md-content layout="column" layout-align="start center" style="width: 100%">
     <div style="width: 30em" layout="column">
         <md-card flex="noshrink" ng-repeat="round in tournamentStatusController.tournamentStatus.roundStatus">
