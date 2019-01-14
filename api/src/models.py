@@ -4,7 +4,6 @@ import random
 from model_utils import ListOfScoredHandsToListOfDicts
 from model_utils import ListOfModelBoardsToListOfBoards
 from movements import Movement
-from python import boardgenerator
 
 from google.appengine.ext import ndb
 
@@ -227,7 +226,7 @@ class Tournament(ndb.Model):
           "ew_score": -150,
           "notes": "hahahahahaha what a fool"
           "board_no": 1,
-          "ns_pair": 2, 
+          "ns_pair": 2,
         }
       calls and notes may be null.
     '''
@@ -263,10 +262,10 @@ class Tournament(ndb.Model):
   def GetBoards(self):
     """Returns this tournaments boards.
 
-    Returns: List of boardgenerator board objects sorted by id.
+    Returns: List of board objects sorted by id.
     """
     return ListOfModelBoardsToListOfBoards(Board.query(ancestor=self.key).fetch())
-    
+
   def GetBoardsAsync(self):
     """Returns a future that will contain this tournament's boards asynchronously.
 

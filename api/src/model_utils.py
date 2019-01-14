@@ -1,12 +1,12 @@
-from python import boardgenerator
+from python import board
 
 def ListOfModelBoardsToListOfBoards(model_boards):
   ''' Transforms a list of Board objects to a list of Boards and returns the
   list sorted by board number.
   '''
   boards = []
-  for board in model_boards:
-    boards.append(boardgenerator.Board.FromJson(board))
+  for model_board in model_boards:
+    boards.append(board.Board.FromJson(model_board))
   return sorted(boards, key=lambda x: x.id)
 
 def ListOfScoredHandsToListOfDicts(all_hand_scores):

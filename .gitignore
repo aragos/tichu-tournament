@@ -181,3 +181,6 @@ crashlytics-build.properties
 /web/coverage/
 
 !/web/bower_components/**
+
+# Virtual clean environments
+/venv/

@@ -6,7 +6,7 @@ import webapp2
 from api.src.handler_utils import GetTourneyWithIdAndMaybeReturnStatus, \
   CheckUserOwnsTournamentAndMaybeReturnStatus
 from google.appengine.api import users
-from python import boardgenerator
+from python import pdfrenderer
 
 class PdfBoardHandler(webapp2.RequestHandler):
   def get(self, id):
@@ -22,7 +22,7 @@ class PdfBoardHandler(webapp2.RequestHandler):
 
     boards = tourney.GetBoards()
 
-    boardgenerator.RenderToIo(boards, self.response.out)
+    pdfrenderer.RenderBoardsToIo(boards, self.response.out)
 
     self.response.headers['Content-Type'] = 'application/pdf'
     self.response.headers['Content-Disposition'] = (
