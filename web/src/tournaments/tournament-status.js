@@ -61,6 +61,13 @@
     this.tournamentId = loadResults.id;
     
     /**
+     * The name of the tournament we're looking up.
+     * TODO: Implement this. Need to get tournament name. Maybe add to
+     * status call.
+     */
+     this.tournamentName = "Tournament" 
+    
+    /**
      * The status of all hands in the tournament.
      *
      * @type {tichu.TournamentStatus}
