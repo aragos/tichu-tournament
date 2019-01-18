@@ -184,3 +184,6 @@ crashlytics-build.properties
 
 # Virtual clean environments
 /venv/
+
+# File auto generated on run
+app.yaml
