@@ -66,6 +66,10 @@ class Calls:
           to_ret["west"] = self.w_call();
         return to_ret
 
+    def call_for_short_position(self, position):
+      """Returns the call for the given single-letter position (N, S, E, W)."""
+      return self._call_dict[position]
+
     def _ValidCall(self, call, side):
         """ Validates a call. Raises exception if something other than T,
             GT, or an empty string is passed. """

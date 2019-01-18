@@ -65,6 +65,46 @@ class ResultsEmailHandler(GenericHandler):
     self.response.headers['Content-Type'] = 'application/json'
     self.response.set_status(201)
 
+  @ndb.toplevel
+  def get(self, id):
+    user = users.get_current_user()
+    tourney = GetTourneyWithIdAndMaybeReturnStatus(self.response, id)
+    if not tourney:
+      return
+    if not CheckUserOwnsTournamentAndMaybeReturnStatus(self.response, user,
+                                                       tourney):
+      return
+
+    # request_dict = self._ParseRequestAndMaybeSetStatus()
+    # if not request_dict:
+    #   return
+
+    scored_hands_future = tourney.GetScoredHandListAsync()
+    player_futures = tourney.GetAllPlayerPairsAsync()
+    boards_future = tourney.GetBoardsAsync()
+
+    if not self._CheckIfAllHandsScoredAndMaybeSetStatus(tourney, scored_hands_future):
+      return
+
+    # summaries, xls_results  = self._ScoreTournament(tourney, scored_hands_future, player_futures)
+
+    # payloads = [xls_results, self._GetBoardPDFs(boards_future, self.response.out)]
+    # self._SendEmails(request_dict, user, tourney, player_futures, summaries, payloads)
+    # self.response.headers['Content-Type'] = 'application/json'
+    # self.response.set_status(201)
+
+    hand_list = ListOfScoredHandsToListOfDicts(scored_hands_future.get_result())
+    hand_results = ReadJSONInput(hand_list)
+    max_rounds = GetMaxRounds(hand_results)
+    summaries = Calculate(hand_results, max_rounds)
+    boards = ListOfModelBoardsToListOfBoards(boards_future.get_result())
+
+    pdfrenderer.RenderResultsToIo(tourney.name, boards, hand_results, summaries, player_futures, self.response.out)
+
+    self.response.headers['Content-Type'] = 'application/pdf'
+    self.response.headers['Content-Disposition'] = 'attachment; filename=testResults.pdf'
+    self.response.set_status(200)
+
 
   def _CheckIfAllHandsScoredAndMaybeSetStatus(self, tourney, scored_hands_future):
     """ Checks if all the hands in the tournament have been scored. If not, sets
