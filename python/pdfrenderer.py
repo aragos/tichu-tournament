@@ -6,7 +6,7 @@ import os
 
 from board import *
 from teams import ExtractTeamNames
-from python.calculator import OrderBy
+from calculator import OrderBy
 from reportlab.lib.pagesizes import LETTER
 from reportlab.pdfgen import canvas
 from reportlab.platypus import Table, TableStyle
@@ -208,8 +208,8 @@ _NORTH = _PdfPosition(
 _EAST = _PdfPosition(
   EAST,
   (_FIRST_2_X, _FIRST_1_Y),
-  (-_CENTER_MARGIN, _FULL_2_Y),
-  -1,
+  (_CENTER_WIDTH + _CENTER_MARGIN, _FULL_2_Y),
+  0,
   (_CENTER_WIDTH - _CENTER_LABEL_MARGIN, _CENTER_HEIGHT / 2)
 )
 _SOUTH = _PdfPosition(
@@ -222,8 +222,8 @@ _SOUTH = _PdfPosition(
 _WEST = _PdfPosition(
   WEST,
   (_FIRST_2_X, _FIRST_2_Y),
-  (_CENTER_WIDTH + _CENTER_MARGIN, _FULL_2_Y),
-  0,
+  (-_CENTER_MARGIN, _FULL_2_Y),
+  -1,
   (_CENTER_LABEL_MARGIN, _CENTER_HEIGHT / 2)
 )
 _POSITIONS = [_NORTH, _EAST, _SOUTH, _WEST]
